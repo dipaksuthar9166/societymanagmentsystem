@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=Righteous&display=swap');
+@import "tailwindcss";
+
+html {
+    scroll-behavior: smooth;
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+    font-family: 'Outfit', sans-serif;
+
+    /* --- DYNAMIC THEME ENGINE --- */
+    /* Main Brand Color (Default: Indigo-600 #4f46e5) */
+    --theme-primary: #4f46e5;
+    --theme-secondary: #000000;
+    --theme-accent: #c7d2fe;
+
+    /* Auto-Generated Palette using CSS color-mix() */
+    /* This creates lighter and darker shades automatically from the primary color */
+    --theme-50: color-mix(in srgb, var(--theme-primary) 5%, white);
+    --theme-100: color-mix(in srgb, var(--theme-primary) 10%, white);
+    --theme-200: color-mix(in srgb, var(--theme-primary) 20%, white);
+    --theme-300: color-mix(in srgb, var(--theme-primary) 30%, white);
+    --theme-400: color-mix(in srgb, var(--theme-primary) 50%, white);
+    --theme-500: color-mix(in srgb, var(--theme-primary) 80%, white);
+    /* Slightly lighter than pure */
+    --theme-600: var(--theme-primary);
+    /* The Pure Color */
+    --theme-700: color-mix(in srgb, var(--theme-primary), black 10%);
+    --theme-800: color-mix(in srgb, var(--theme-primary), black 20%);
+    --theme-900: color-mix(in srgb, var(--theme-primary), black 30%);
+}
+
+/* Hide scrollbar globally but allow scrolling */
+* {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f3f4f6;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* --- FESTIVE MODE GLOBAL OVERRIDES --- */
+body.festive-mode {
+    /* Global flag for other components to use if needed */
+}
+
+/* Make headers pop in festive mode */
+body.festive-mode h1,
+body.festive-mode h2,
+body.festive-mode h3 {
+    /* Optional: Tinge headers with primary color if they are slate-900 */
+    /* color: var(--theme-900); */
+}
+
+/* Custom Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+@keyframes bounce-slow {
+
+    0%,
+    100% {
+        transform: translateY(-5%);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+        transform: translateY(0);
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 3s infinite;
+}
+
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(0%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes marquee2 {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(0%);
+    }
+}
+
+.animate-marquee {
+    animation: marquee 25s linear infinite;
+}
+
+@keyframes gradient-slow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-gradient-slow {
+    animation: gradient-slow 8s ease infinite;
+}
+
+@keyframes pulse-soft {
+
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 4s ease-in-out infinite;
+}
+
+.text-glow {
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+}
+
+.bg-grid-white {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+.bg-grid-emerald-500 {
+    background-image: radial-gradient(rgba(16, 185, 129, 0.2) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
