@@ -127,6 +127,7 @@ const AnimatedRoutes = () => {
 
 import { EventThemeProvider } from './context/EventThemeContext';
 import DynamicEventBackground from './components/DynamicEventBackground';
+import { App as CapApp } from '@capacitor/app'; // <--- Capacitor App Plugin
 
 function App() {
   useEffect(() => {
@@ -138,8 +139,30 @@ function App() {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
 
+    // --- CAPACITOR MOBILE BACK BUTTON HANDLER ---
+    const setupBackButton = async () => {
+      try {
+        await CapApp.addListener('backButton', ({ canGoBack }) => {
+          if (!canGoBack) {
+            // At the root page, exit the app
+            CapApp.exitApp();
+          } else {
+            // Traverse history backward (instead of exiting)
+            window.history.back();
+          }
+        });
+      } catch (e) {
+        console.log("Capacitor App plugin not running natively. Ignored.", e);
+      }
+    };
+
+    setupBackButton();
+
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      try {
+        CapApp.removeAllListeners();
+      } catch (e) { }
     };
   }, []);
 
