@@ -87,7 +87,7 @@ const CommunicationTab = () => {
         setStatus(null);
 
         try {
-            const res = await fetch(`http://localhost:5001/api/verification/test-email`, {
+            const res = await fetch(`${API_BASE_URL}/verification/test-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: testEmail })

@@ -2,16 +2,8 @@
 // Automatically detects if running on mobile or laptop
 
 const getAPIBaseURL = () => {
-    // Check if running on mobile (different hostname)
-    const hostname = window.location.hostname;
-
-    // If accessing via IP address (mobile), use that IP
-    if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-        return `http://${hostname}:5001/api`;
-    }
-
-    // Default to localhost for laptop/desktop
-    return 'http://localhost:5001/api';
+    // Return live backend URL for all environments
+    return 'https://societymanagmentsystem.onrender.com/api';
 };
 
 export const API_BASE_URL = getAPIBaseURL();
@@ -33,12 +25,9 @@ export const resolveImageURL = (url) => {
         return `${BACKEND_URL}/${url}`;
     }
 
-    // If it's an absolute URL pointing to localhost, fix it for mobile
-    if (url.includes('localhost:5001') || url.includes('127.0.0.1:5001')) {
-        const hostname = window.location.hostname;
-        if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-            return url.replace(/localhost:5001|127.0.0.1:5001/, `${hostname}:5001`);
-        }
+    // If it's an absolute URL pointing to localhost, fix it for live backend
+    if (url.includes('localhost:5001') || url.includes('127.0.0.1:5001') || url.includes('192.168.')) {
+        return url.replace(/http:\/\/[^/]+/g, BACKEND_URL);
     }
 
     return url;

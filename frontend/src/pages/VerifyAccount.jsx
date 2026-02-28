@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, Mail } from 'lucide-react';
 
+import { API_BASE_URL } from '../config';
+
 const VerifyAccount = () => {
     const { token } = useParams();
     const navigate = useNavigate();
@@ -15,7 +17,7 @@ const VerifyAccount = () => {
 
     const verifyEmail = async () => {
         try {
-            const res = await fetch(`http://localhost:5001/api/verification/verify-account/${token}`);
+            const res = await fetch(`${API_BASE_URL}/verification/verify-account/${token}`);
             const data = await res.json();
 
             if (data.success) {

@@ -103,7 +103,7 @@ const CommitteeDashboard = () => {
 
     // Socket.io for SOS Alerts
     useEffect(() => {
-        const socket = io('http://localhost:5001');
+        const socket = io(API_BASE_URL.replace('/api', ''));
         socket.on('connect', () => {
             console.log("Committee connected to socket");
             socket.emit('join_room', 'committee');

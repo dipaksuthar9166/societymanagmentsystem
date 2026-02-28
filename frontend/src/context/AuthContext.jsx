@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { io } from 'socket.io-client';
+import { BACKEND_URL } from '../config';
 
 const AuthContext = createContext();
 
@@ -14,11 +15,7 @@ export const AuthProvider = ({ children }) => {
 
     // Determine Socket URL based on window location (same logic as config.js roughly)
     const getSocketURL = () => {
-        const hostname = window.location.hostname;
-        if (hostname !== 'localhost' && hostname !== '127.0.0.1') {
-            return `http://${hostname}:5001`;
-        }
-        return 'http://localhost:5001';
+        return BACKEND_URL;
     };
 
     useEffect(() => {

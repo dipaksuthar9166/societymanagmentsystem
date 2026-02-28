@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, ArrowRight, Check, Clock, RefreshCw } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 const OTPRegistration = () => {
     const navigate = useNavigate();
@@ -65,7 +66,7 @@ const OTPRegistration = () => {
 
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5001/api/otp/send', {
+            const res = await fetch(`${API_BASE_URL}/otp/send`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -110,7 +111,7 @@ const OTPRegistration = () => {
 
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5001/api/otp/verify', {
+            const res = await fetch(`${API_BASE_URL}/otp/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -151,7 +152,7 @@ const OTPRegistration = () => {
 
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5001/api/auth/register', {
+            const res = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -199,8 +200,8 @@ const OTPRegistration = () => {
                             {[1, 2, 3].map((s) => (
                                 <div key={s} className="flex items-center">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${step >= s
-                                            ? 'bg-teal-600 text-white'
-                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                                        ? 'bg-teal-600 text-white'
+                                        : 'bg-slate-200 dark:bg-slate-700 text-slate-400'
                                         }`}>
                                         {step > s ? <Check size={20} /> : s}
                                     </div>

@@ -95,217 +95,219 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/billing_app
             { $set: { role: 'guard' } }
         ).then(res => {
             if (res.modifiedCount > 0) console.log(`[System]: Auto-fixed ${res.modifiedCount} Guard Accounts with wrong roles.`);
-            // SELF-REPAIR: Ensure at least one Superadmin exists
-            User.findOne({ role: 'superadmin' }).then(async (admin) => {
-                if (!admin) {
-                    console.log('[System]: No Superadmin found! Creating default Superadmin...');
-                    const bcrypt = require('bcryptjs');
-                    const salt = await bcrypt.genSalt(10);
-                    const hashedPassword = await bcrypt.hash('12345678', salt);
+        }).catch(err => console.error("Auto-repair failed:", err));
 
-                    await User.create({
-                        name: 'System Superadmin',
-                        email: 'super@gmail.com',
-                        password: hashedPassword,
-                        role: 'superadmin',
-                        status: 'active',
-                        isVerified: true
-                    });
-                    console.log('[System]: Default Superadmin created successfully! (Email: super@gmail.com | Pass: 12345678)');
-                }
-            });
-        })
-            .catch(err => console.log(err));
+        // SELF-REPAIR: Ensure at least one Superadmin exists
+        User.findOne({ role: 'superadmin' }).then(async (admin) => {
+            if (!admin) {
+                console.log('[System]: No Superadmin found! Creating default Superadmin...');
+                const bcrypt = require('bcryptjs');
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash('12345678', salt);
 
-        const { Server } = require('socket.io');
-        const os = require('os');
-
-        // Get local IP address
-        function getLocalIP() {
-            const interfaces = os.networkInterfaces();
-            for (const name of Object.keys(interfaces)) {
-                for (const iface of interfaces[name]) {
-                    if (iface.family === 'IPv4' && !iface.internal) {
-                        return iface.address;
-                    }
-                }
+                await User.create({
+                    name: 'System Superadmin',
+                    email: 'super@gmail.com',
+                    password: hashedPassword,
+                    role: 'superadmin',
+                    status: 'active',
+                    isVerified: true
+                });
+                console.log('[System]: Default Superadmin created successfully! (Email: super@gmail.com | Pass: 12345678)');
             }
-            return 'localhost';
+        });
+    })
+    .catch(err => console.log(err));
+
+const { Server } = require('socket.io');
+const os = require('os');
+
+// Get local IP address
+function getLocalIP() {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                return iface.address;
+            }
         }
+    }
+    return 'localhost';
+}
 
-        const server = app.listen(PORT, '0.0.0.0', () => {
-            const localIP = getLocalIP();
-            console.log(`Server running on port ${PORT}`);
-            console.log(`📱 Mobile Access: http://${localIP}:${PORT}`);
-            console.log(`💻 Laptop Access: http://localhost:${PORT}`);
-            console.log(`🌐 Network Access: http://${localIP}:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+    const localIP = getLocalIP();
+    console.log(`Server running on port ${PORT}`);
+    console.log(`📱 Mobile Access: http://${localIP}:${PORT}`);
+    console.log(`💻 Laptop Access: http://localhost:${PORT}`);
+    console.log(`🌐 Network Access: http://${localIP}:${PORT}`);
+});
+
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+    }
+});
+
+app.set('io', io);
+global.io = io; // Make io globally available for activity logging
+
+io.on('connection', (socket) => {
+    console.log('Socket Connected:', socket.id);
+
+    // Join society room for activity feed
+    socket.on('joinSociety', (societyId) => {
+        socket.join(`society_${societyId}`);
+        console.log(`Socket ${socket.id} joined society_${societyId}`);
+    });
+
+    // ... Inside io.on('connection')
+    socket.on('join_society', (societyId) => {
+        socket.join(societyId);
+        socket.societyId = societyId; // Store for disconnect handling
+        // console.log(`Socket ${socket.id} joined society ${societyId}`);
+    });
+
+    socket.on('join_room', (userId) => {
+        socket.join(userId);
+        console.log(`Socket ${socket.id} joined personal room: ${userId}`);
+
+        // Track online status
+        if (!global.onlineUsers) global.onlineUsers = new Map();
+        global.onlineUsers.set(userId, socket.id);
+
+        // Broadcast that user is online to their society
+        const userSocietyId = socket.societyId;
+        if (userSocietyId) {
+            io.to(userSocietyId).emit('user_status_change', { userId, status: 'online' });
+        }
+    });
+
+    socket.on('typing_status', (data) => {
+        // data: { receiverId, conversationId, isTyping }
+        io.to(data.receiverId).emit('typing_status', {
+            senderId: socket.id, // Not really needed, but okay
+            conversationId: data.conversationId,
+            isTyping: data.isTyping
         });
+    });
 
-        const io = new Server(server, {
-            cors: {
-                origin: "*",
-            }
-        });
-
-        app.set('io', io);
-        global.io = io; // Make io globally available for activity logging
-
-        io.on('connection', (socket) => {
-            console.log('Socket Connected:', socket.id);
-
-            // Join society room for activity feed
-            socket.on('joinSociety', (societyId) => {
-                socket.join(`society_${societyId}`);
-                console.log(`Socket ${socket.id} joined society_${societyId}`);
-            });
-
-            // ... Inside io.on('connection')
-            socket.on('join_society', (societyId) => {
-                socket.join(societyId);
-                socket.societyId = societyId; // Store for disconnect handling
-                // console.log(`Socket ${socket.id} joined society ${societyId}`);
-            });
-
-            socket.on('join_room', (userId) => {
-                socket.join(userId);
-                console.log(`Socket ${socket.id} joined personal room: ${userId}`);
-
-                // Track online status
-                if (!global.onlineUsers) global.onlineUsers = new Map();
-                global.onlineUsers.set(userId, socket.id);
-
-                // Broadcast that user is online to their society
-                const userSocietyId = socket.societyId;
-                if (userSocietyId) {
-                    io.to(userSocietyId).emit('user_status_change', { userId, status: 'online' });
-                }
-            });
-
-            socket.on('typing_status', (data) => {
-                // data: { receiverId, conversationId, isTyping }
-                io.to(data.receiverId).emit('typing_status', {
-                    senderId: socket.id, // Not really needed, but okay
-                    conversationId: data.conversationId,
-                    isTyping: data.isTyping
-                });
-            });
-
-            socket.on('send_sos', async (data) => {
-                console.log("🆘 SOS RECEIVED:", data);
+    socket.on('send_sos', async (data) => {
+        console.log("🆘 SOS RECEIVED:", data);
+        try {
+            // Validate/Fetch Society ID first
+            let targetSocietyId = data.societyId;
+            if (!targetSocietyId && data.userId) {
                 try {
-                    // Validate/Fetch Society ID first
-                    let targetSocietyId = data.societyId;
-                    if (!targetSocietyId && data.userId) {
-                        try {
-                            const User = require('./models/User');
-                            const u = await User.findById(data.userId);
-                            if (u) targetSocietyId = u.company;
-                        } catch (err) {
-                            console.error("Failed to fetch user for SOS societyId fallback", err);
-                        }
-                    }
-
-                    // Save to DB
-                    const alert = new Alert({
-                        userId: data.userId,
-                        userName: data.user || 'Unknown',
-                        type: data.type,
-                        location: data.location || { lat: 0, lng: 0 },
-                        status: 'Active',
-                        societyId: targetSocietyId // Use resolved ID
-                    });
-                    await alert.save();
-                    console.log("✅ SOS Saved:", alert._id, "Society:", targetSocietyId);
-
-                    // Broadcast with persisted ID and correct societyId
-                    // Use targetSocietyId for routing the room event
-                    if (targetSocietyId) {
-                        io.to(targetSocietyId).emit('receive_sos', { ...data, _id: alert._id, societyId: targetSocietyId });
-                    } else {
-                        io.emit('receive_sos', { ...data, _id: alert._id }); // Fallback
-                    }
-
-                    // ✅ LOG ACTIVITY FOR LIVE FEED (Control Room)
-                    try {
-                        const { logActivity } = require('./utils/activityLogger');
-                        if (targetSocietyId) {
-                            await logActivity({
-                                userId: data.userId,
-                                societyId: targetSocietyId,
-                                action: 'SOS_TRIGGERED',
-                                category: 'CRITICAL',
-                                description: `SOS Emergency Alert from ${data.user || 'Unknown User'}`,
-                                metadata: {
-                                    alertId: alert._id,
-                                    location: data.location,
-                                    type: data.type
-                                }
-                            });
-                        }
-                    } catch (loggingErr) {
-                        console.error("Failed to log SOS activity:", loggingErr);
-                    }
-
-                } catch (e) {
-                    console.error("SOS Save Error", e);
-                    io.emit('receive_sos', data); // Fallback
+                    const User = require('./models/User');
+                    const u = await User.findById(data.userId);
+                    if (u) targetSocietyId = u.company;
+                } catch (err) {
+                    console.error("Failed to fetch user for SOS societyId fallback", err);
                 }
-            });
-
-            // WebRTC Signaling for calls
-            socket.on('webrtc_offer', (data) => {
-                io.to(data.to).emit('webrtc_offer', {
-                    from: data.from,
-                    offer: data.offer,
-                    callId: data.callId
-                });
-            });
-
-            socket.on('webrtc_answer', (data) => {
-                io.to(data.to).emit('webrtc_answer', {
-                    from: data.from,
-                    answer: data.answer,
-                    callId: data.callId
-                });
-            });
-
-            socket.on('webrtc_ice_candidate', (data) => {
-                io.to(data.to).emit('webrtc_ice_candidate', {
-                    from: data.from,
-                    candidate: data.candidate,
-                    callId: data.callId
-                });
-            });
-
-            socket.on('get_online_users', () => {
-                if (global.onlineUsers) {
-                    const onlineList = Array.from(global.onlineUsers.keys());
-                    socket.emit('online_users_list', onlineList);
-                }
-            });
-
-            socket.on('disconnect', () => {
-                if (global.onlineUsers) {
-                    for (let [userId, socketId] of global.onlineUsers.entries()) {
-                        if (socketId === socket.id) {
-                            global.onlineUsers.delete(userId);
-                            const userSocietyId = socket.societyId;
-                            if (userSocietyId) {
-                                io.to(userSocietyId).emit('user_status_change', { userId, status: 'offline' });
-                            }
-                            console.log(`User ${userId} went offline`);
-                            break;
-                        }
-                    }
-                }
-            });
-        });
-
-        server.on('error', (err) => {
-            if (err.code === 'EADDRINUSE') {
-                console.error(`❌ Port ${PORT} is already in use. Choose a different PORT in .env or stop the other process.`);
-            } else {
-                console.error('❌ Server error:', err);
             }
-            process.exit(1);
+
+            // Save to DB
+            const alert = new Alert({
+                userId: data.userId,
+                userName: data.user || 'Unknown',
+                type: data.type,
+                location: data.location || { lat: 0, lng: 0 },
+                status: 'Active',
+                societyId: targetSocietyId // Use resolved ID
+            });
+            await alert.save();
+            console.log("✅ SOS Saved:", alert._id, "Society:", targetSocietyId);
+
+            // Broadcast with persisted ID and correct societyId
+            // Use targetSocietyId for routing the room event
+            if (targetSocietyId) {
+                io.to(targetSocietyId).emit('receive_sos', { ...data, _id: alert._id, societyId: targetSocietyId });
+            } else {
+                io.emit('receive_sos', { ...data, _id: alert._id }); // Fallback
+            }
+
+            // ✅ LOG ACTIVITY FOR LIVE FEED (Control Room)
+            try {
+                const { logActivity } = require('./utils/activityLogger');
+                if (targetSocietyId) {
+                    await logActivity({
+                        userId: data.userId,
+                        societyId: targetSocietyId,
+                        action: 'SOS_TRIGGERED',
+                        category: 'CRITICAL',
+                        description: `SOS Emergency Alert from ${data.user || 'Unknown User'}`,
+                        metadata: {
+                            alertId: alert._id,
+                            location: data.location,
+                            type: data.type
+                        }
+                    });
+                }
+            } catch (loggingErr) {
+                console.error("Failed to log SOS activity:", loggingErr);
+            }
+
+        } catch (e) {
+            console.error("SOS Save Error", e);
+            io.emit('receive_sos', data); // Fallback
+        }
+    });
+
+    // WebRTC Signaling for calls
+    socket.on('webrtc_offer', (data) => {
+        io.to(data.to).emit('webrtc_offer', {
+            from: data.from,
+            offer: data.offer,
+            callId: data.callId
         });
+    });
+
+    socket.on('webrtc_answer', (data) => {
+        io.to(data.to).emit('webrtc_answer', {
+            from: data.from,
+            answer: data.answer,
+            callId: data.callId
+        });
+    });
+
+    socket.on('webrtc_ice_candidate', (data) => {
+        io.to(data.to).emit('webrtc_ice_candidate', {
+            from: data.from,
+            candidate: data.candidate,
+            callId: data.callId
+        });
+    });
+
+    socket.on('get_online_users', () => {
+        if (global.onlineUsers) {
+            const onlineList = Array.from(global.onlineUsers.keys());
+            socket.emit('online_users_list', onlineList);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        if (global.onlineUsers) {
+            for (let [userId, socketId] of global.onlineUsers.entries()) {
+                if (socketId === socket.id) {
+                    global.onlineUsers.delete(userId);
+                    const userSocietyId = socket.societyId;
+                    if (userSocietyId) {
+                        io.to(userSocietyId).emit('user_status_change', { userId, status: 'offline' });
+                    }
+                    console.log(`User ${userId} went offline`);
+                    break;
+                }
+            }
+        }
+    });
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use. Choose a different PORT in .env or stop the other process.`);
+    } else {
+        console.error('❌ Server error:', err);
+    }
+    process.exit(1);
+});

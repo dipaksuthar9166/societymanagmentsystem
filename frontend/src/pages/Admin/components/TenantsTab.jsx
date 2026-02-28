@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { UserPlus } from 'lucide-react';
 import { useAlert } from '../../../context/AlertContext'; // Updated import path
+import { API_BASE_URL } from '../../../config';
 
 const TenantsTab = ({ tenants, refresh, token }) => {
     const { showAlert, showConfirm } = useAlert(); // Hook
@@ -9,7 +10,7 @@ const TenantsTab = ({ tenants, refresh, token }) => {
 
     const handleAdd = async () => {
         try {
-            const res = await fetch('http://localhost:5001/api/admin/customers', {
+            const res = await fetch(`${API_BASE_URL}/admin/customers`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify(newTenant)
@@ -32,7 +33,7 @@ const TenantsTab = ({ tenants, refresh, token }) => {
         if (!confirmed) return;
 
         try {
-            const res = await fetch(`http://localhost:5001/api/admin/customers/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/admin/customers/${id}`, {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -135,7 +136,7 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                             <button
                                                 onClick={async () => {
                                                     try {
-                                                        const res = await fetch('http://localhost:5001/api/verification/resend-verification', {
+                                                        const res = await fetch(`${API_BASE_URL}/verification/resend-verification`, {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json',
