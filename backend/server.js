@@ -7,6 +7,9 @@ const Alert = require('./models/Alert');
 dotenv.config();
 
 const app = express();
+const expressWs = require('express-ws')(app);
+const { proxy, scriptUrl } = require('rtsp-relay')(app);
+
 // Hardcode port 5001 if env fails, but prefer env
 const PORT = process.env.PORT || 5001;
 
@@ -62,6 +65,30 @@ app.get('/', (req, res) => {
 
 // Analytics Routes (Moved here to ensure it's registered)
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
+
+// Camera RTSP Stream Relay (WebSocket)
+const Camera = require('./models/Camera');
+app.ws('/api/stream/:cameraId', async (ws, req) => {
+    try {
+        const camera = await Camera.findById(req.params.cameraId);
+        // Only trigger relay if it's an RTSP URL. Normal URLs (HTTP HLS/MP4) are handled directly by the frontend video tag.
+        if (!camera || !camera.streamUrl.startsWith('rtsp://')) {
+            console.log(`[Stream] Client requested non-RTSP or invalid camera: ${req.params.cameraId}`);
+            ws.close();
+            return;
+        }
+
+        console.log(`[Stream] Client connected to live RTSP feed for ${camera.name}`);
+
+        proxy({
+            url: camera.streamUrl,
+            verbose: false // Set to true for ffmpeg logs
+        })(ws);
+    } catch (err) {
+        console.error('[Stream] Camera fetch error:', err);
+        ws.close();
+    }
+});
 
 app.use('/api/public', require('./routes/publicRoutes')); // Landing Page API
 

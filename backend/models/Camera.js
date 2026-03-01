@@ -38,6 +38,20 @@ const cameraSchema = new mongoose.Schema({
         type: String,
         enum: ['Online', 'Offline', 'Maintenance'],
         default: 'Online'
+    },
+    anprEnabled: {
+        type: Boolean,
+        default: false,
+        comment: 'AI Number Plate Recognition'
+    },
+    motionDetection: {
+        type: Boolean,
+        default: false,
+        comment: 'Motion Detection / Night Alerts'
+    },
+    healthLastPing: {
+        type: Date,
+        default: Date.now
     }
 }, {
     timestamps: true
