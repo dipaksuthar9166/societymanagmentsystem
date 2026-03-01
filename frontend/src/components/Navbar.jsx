@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { API_BASE_URL, resolveImageURL } from '../config';
 
-const Navbar = ({ title, showSearch = true, notifications = 0, onMenuClick, onTabChange, onLogout }) => {
+const Navbar = ({ title, showSearch = true, notifications = 0, onMenuClick, onTabChange, onLogout, rightComponent }) => {
     const { user, logout } = useAuth();
     const { isDark, toggleTheme } = useTheme();
     const [showNotifications, setShowNotifications] = useState(false);
@@ -39,38 +39,44 @@ const Navbar = ({ title, showSearch = true, notifications = 0, onMenuClick, onTa
     };
 
     return (
-        <nav className="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 shadow-sm transition-colors">
+        <nav className="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-20 shadow-sm transition-colors w-full">
             <div className="h-full px-4 md:px-6 flex items-center justify-between">
                 {/* Left Section */}
                 <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                     <button
                         onClick={onMenuClick}
-                        className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                        className="lg:hidden p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors shrink-0"
                     >
                         <Menu size={24} className="text-slate-600 dark:text-slate-300" />
                     </button>
 
-                    <div className="hidden md:block">
+                    <div className="hidden md:block min-w-0">
                         <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">{getGreeting()}</p>
-                        <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-none">{title}</h1>
+                        <h1 className="text-lg font-bold text-slate-800 dark:text-white leading-none truncate">{title}</h1>
                     </div>
                     {/* Mobile Only Title */}
-                    <h1 className="md:hidden text-base sm:text-lg font-bold text-slate-800 dark:text-white truncate pr-2">{title}</h1>
+                    <h1 className="md:hidden text-base sm:text-lg font-bold text-slate-800 dark:text-white truncate pr-2 leading-tight">{title}</h1>
                 </div>
 
                 {/* Center Section - Real-time Clock (Desktop) */}
-                <div className="hidden lg:flex flex-col items-center">
+                <div className="hidden lg:flex flex-col items-center flex-shrink-0 px-4">
                     <div className="flex items-center gap-2 text-slate-800 dark:text-white font-mono font-bold text-xl">
                         <Clock size={16} className="text-indigo-500 animate-pulse" />
                         {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </div>
-                    <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">
+                    <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase truncate">
                         {currentTime.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })}
                     </p>
                 </div>
 
                 {/* Right Section */}
-                <div className="flex items-center gap-3 flex-1 justify-end">
+                <div className="flex items-center gap-2 md:gap-3 flex-1 justify-end">
+                    {/* Optional Right Component (e.g. Activity Feed) */}
+                    {rightComponent && (
+                        <div className="shrink-0 flex items-center">
+                            {rightComponent}
+                        </div>
+                    )}
 
                     {/* Search - Compact */}
                     {showSearch && (

@@ -16,21 +16,26 @@ export const BACKEND_URL = API_BASE_URL.replace('/api', '');
 export const resolveImageURL = (url) => {
     if (!url) return null;
 
+    let finalUrl = url;
+
     // If it's a relative path, prepend backend URL
     if (url.startsWith('/uploads')) {
-        return `${BACKEND_URL}${url}`;
+        finalUrl = `${BACKEND_URL}${url}`;
+    } else if (url.startsWith('uploads')) {
+        finalUrl = `${BACKEND_URL}/${url}`;
     }
 
-    if (url.startsWith('uploads')) {
-        return `${BACKEND_URL}/${url}`;
+    // Force HTTPS for Render links (fixes Mixed Content 404 blocked images)
+    if (typeof finalUrl === 'string' && finalUrl.includes('societymanagmentsystem.onrender.com')) {
+        finalUrl = finalUrl.replace('http://', 'https://');
     }
 
     // If it's an absolute URL pointing to localhost, fix it for live backend
-    if (url.includes('localhost:5001') || url.includes('127.0.0.1:5001') || url.includes('192.168.')) {
-        return url.replace(/http:\/\/[^/]+/g, BACKEND_URL);
+    if (finalUrl.includes('localhost:5001') || finalUrl.includes('127.0.0.1:5001') || finalUrl.includes('192.168.')) {
+        return finalUrl.replace(/http:\/\/[^/]+/g, BACKEND_URL);
     }
 
-    return url;
+    return finalUrl;
 };
 
 // Manual override for development (uncomment if needed)

@@ -299,32 +299,25 @@ const AdminDashboard = () => {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-                {/* Header with Navbar and Activity Feed */}
-                <div className="flex items-center justify-between bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-3">
-                    <div className="flex-1">
-                        <Navbar
-                            title={activeTab === 'overview' ? 'Dashboard Overview' : activeTab.replace('-', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                            showSearch={true}
-                            notifications={complaints?.filter(c => c.status === 'Pending').map(c => ({
-                                title: `New Complaint: ${c.category}`,
-                                time: new Date(c.createdAt).toLocaleDateString(),
-                                type: 'Complaint',
-                                onClick: () => {
-                                    setActiveTab('complaints');
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }
-                            })) || []}
-                            onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                            onTabChange={setActiveTab}
-                            onLogout={() => setShowLogoutConfirm(true)}
-                        />
-                    </div>
-
-                    {/* Live Activity Feed - Admin Only */}
-                    <div className="ml-4">
-                        <LiveActivityFeed token={user?.token} user={user} />
-                    </div>
-                </div>
+                {/* Header with Navbar and Activity Feed injected as rightComponent */}
+                <Navbar
+                    title={activeTab === 'overview' ? 'Dashboard Overview' : activeTab.replace('-', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                    showSearch={true}
+                    notifications={complaints?.filter(c => c.status === 'Pending').map(c => ({
+                        title: `New Complaint: ${c.category}`,
+                        time: new Date(c.createdAt).toLocaleDateString(),
+                        type: 'Complaint',
+                        onClick: () => {
+                            setActiveTab('complaints');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                    })) || []}
+                    onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    onTabChange={setActiveTab}
+                    onLogout={() => setShowLogoutConfirm(true)}
+                    // Pass LiveActivityFeed directly into the Navbar to prevent overlap
+                    rightComponent={<LiveActivityFeed token={user?.token} user={user} />}
+                />
 
                 {/* Content Area */}
                 <div className="flex-1 overflow-y-auto p-6">
