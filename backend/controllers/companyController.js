@@ -26,7 +26,7 @@ const createCompany = async (req, res) => {
         // 1. Create Company
         let logoPath = 'https://cdn-icons-png.flaticon.com/512/270/270014.png';
         if (req.file) {
-            logoPath = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            logoPath = `/uploads/${req.file.filename}`;
         }
 
         const company = await Company.create({
@@ -221,7 +221,7 @@ const updateCompany = async (req, res) => {
         }
 
         if (req.file) {
-            company.logo = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            company.logo = `/uploads/${req.file.filename}`;
         }
 
         await company.save();
@@ -300,7 +300,7 @@ const updateMyCompany = async (req, res) => {
         }
 
         if (req.file) {
-            company.logo = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+            company.logo = `/uploads/${req.file.filename}`;
         }
 
         await company.save();
