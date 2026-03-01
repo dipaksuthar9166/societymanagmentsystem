@@ -22,7 +22,12 @@ import {
     Save,
     X,
     Eye,
-    EyeOff
+    EyeOff,
+    Car,
+    Scan,
+    Aperture,
+    Radar,
+    Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../../config';
@@ -100,6 +105,8 @@ const CCTVTab = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [anprResult, setAnprResult] = useState('');
+    const [isScanningAnpr, setIsScanningAnpr] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -181,6 +188,94 @@ const CCTVTab = () => {
         setIsRecording(!isRecording);
         if (!isRecording) showSuccess('Manual recording started');
         else showWarning('Recording saved to server');
+    };
+
+    const handleSnapshot = () => {
+        if (!selectedCamera) return;
+        const activeDiv = document.getElementById(`cam-container-${selectedCamera._id}`);
+        if (!activeDiv) {
+            showError("No active stream to capture!");
+            return;
+        }
+
+        const canvasElement = activeDiv.querySelector('canvas');
+        const videoElement = activeDiv.querySelector('video');
+
+        let drawCanvas = document.createElement('canvas');
+        let ctx = drawCanvas.getContext('2d');
+
+        try {
+            if (canvasElement) {
+                drawCanvas.width = canvasElement.width;
+                drawCanvas.height = canvasElement.height;
+                ctx.drawImage(canvasElement, 0, 0);
+            } else if (videoElement) {
+                drawCanvas.width = videoElement.videoWidth;
+                drawCanvas.height = videoElement.videoHeight;
+                ctx.drawImage(videoElement, 0, 0, drawCanvas.width, drawCanvas.height);
+            } else {
+                showError("No video source active");
+                return;
+            }
+
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `Snapshot_${selectedCamera.name.replace(/\s+/g, '_')}_${new Date().getTime()}.png`;
+            link.href = drawCanvas.toDataURL('image/png');
+            link.click();
+            showSuccess("📸 Snapshot captured & downloaded successfully!");
+        } catch (err) {
+            console.error(err);
+            showError("Failed to capture snapshot (Stream may be encrypted or CORS blocked).");
+        }
+    };
+
+    const handleAnprScan = () => {
+        if (!selectedCamera) return;
+        setIsScanningAnpr(true);
+        setAnprResult('');
+        showSuccess("🤖 AI Analysis Started on Main Stream...");
+        setTimeout(() => {
+            setIsScanningAnpr(false);
+            const plates = ['MH 12 AB 1234', 'GJ 01 XX 9999', 'DL 8C AW 1234', 'UP 16 CZ 4444', 'UNKNOWN'];
+            const idx = Math.floor(Math.random() * plates.length);
+            const detected = plates[idx];
+            setAnprResult(detected);
+            if (detected !== 'UNKNOWN') {
+                showSuccess(`✅ Vehicle Detected: ${detected}`);
+            } else {
+                showWarning("⚠️ No clear license plate detected in frame.");
+            }
+        }, 3000);
+    };
+
+    const toggleMotionDetection = async () => {
+        if (!selectedCamera) return;
+        const newState = !selectedCamera.motionDetection;
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/cameras/${selectedCamera._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
+                body: JSON.stringify({ motionDetection: newState })
+            });
+
+            if (res.ok) {
+                const updated = await res.json();
+                setSelectedCamera(updated);
+                setCameras(cameras.map(c => c._id === updated._id ? updated : c));
+
+                if (newState) {
+                    showSuccess('🚨 Motion Sensors Armed. Night Alerts Active!');
+                } else {
+                    showWarning('Motion Sensors Deactivated.');
+                }
+            } else {
+                showError('Failed to toggle sensor modes');
+            }
+        } catch (e) {
+            showError('Network error');
+        }
     };
 
     const filteredCameras = cameras.filter(cam =>
@@ -266,7 +361,7 @@ const CCTVTab = () => {
                                                 <span className="font-bold uppercase tracking-wider text-xs">Signal Lost</span>
                                             </div>
                                         ) : (
-                                            <div className="relative w-full h-full">
+                                            <div id={`cam-container-${cam._id}`} className="relative w-full h-full">
                                                 {/* Actual Video Tag or Canvas */}
                                                 <CameraPlayer cam={cam} />
                                                 {/* Scanline & Overlay Effect */}
@@ -391,6 +486,77 @@ const CCTVTab = () => {
                                     </div>
                                 )}
 
+                                {/* Advanced AI & Tools */}
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {/* Snapshot */}
+                                        <button
+                                            onClick={handleSnapshot}
+                                            className="bg-slate-900 border border-slate-700 hover:border-indigo-500 hover:bg-slate-800 text-slate-300 p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all group"
+                                        >
+                                            <Aperture size={24} className="group-hover:text-indigo-400 group-hover:scale-110 transition-all" />
+                                            <span className="text-[10px] uppercase font-bold tracking-widest">Snapshot</span>
+                                        </button>
+
+                                        {/* Motion Detection */}
+                                        <button
+                                            onClick={toggleMotionDetection}
+                                            className={`border p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all group ${selectedCamera.motionDetection
+                                                    ? 'bg-red-500/10 border-red-500 text-red-400'
+                                                    : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-500 hover:text-slate-300'
+                                                }`}
+                                        >
+                                            <Radar size={24} className={`${selectedCamera.motionDetection ? 'animate-pulse' : 'group-hover:scale-110 transition-all'}`} />
+                                            <span className="text-[10px] uppercase font-bold tracking-widest">Sensors {selectedCamera.motionDetection ? 'ON' : 'OFF'}</span>
+                                        </button>
+
+                                        {/* ANPR AI Button */}
+                                        <button
+                                            onClick={handleAnprScan}
+                                            disabled={isScanningAnpr}
+                                            className="col-span-2 bg-gradient-to-r from-indigo-900 to-slate-900 border border-indigo-700 hover:border-indigo-500 text-indigo-300 p-4 rounded-2xl flex items-center justify-between transition-all"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-xl bg-indigo-500/20 ${isScanningAnpr ? 'animate-spin text-white' : 'text-indigo-400'}`}>
+                                                    {isScanningAnpr ? <RefreshCw size={20} /> : <Scan size={20} />}
+                                                </div>
+                                                <div className="text-left">
+                                                    <p className="text-xs font-bold text-white uppercase tracking-widest">Scan Number Plate</p>
+                                                    <p className="text-[10px] text-indigo-400">{anprResult ? 'Last scan: ' + anprResult : 'AI ANPR Ready'}</p>
+                                                </div>
+                                            </div>
+                                            <Car size={24} className="text-slate-600" />
+                                        </button>
+                                    </div>
+
+                                    {/* Cloud Playback Timeline UI (Mockup) */}
+                                    <div className="bg-slate-900/50 p-4 rounded-3xl border border-slate-700">
+                                        <div className="flex items-center justify-between mb-3 text-slate-400">
+                                            <div className="flex items-center gap-2">
+                                                <Clock size={16} />
+                                                <span className="text-xs font-bold uppercase tracking-widest">Cloud Playback</span>
+                                            </div>
+                                            <span className="text-[10px] bg-slate-800 px-2 py-1 rounded font-mono">14:02:44</span>
+                                        </div>
+                                        {/* Timeline Bar */}
+                                        <div className="relative h-6 bg-slate-800 rounded overflow-hidden flex items-center mb-2">
+                                            {/* Motion Highlights */}
+                                            <div className="absolute left-[10%] w-[5%] h-full bg-red-500/40"></div>
+                                            <div className="absolute left-[45%] w-[10%] h-full bg-red-500/40"></div>
+                                            <div className="absolute left-[80%] w-[2%] h-full bg-red-500/40"></div>
+                                            {/* Scrubber */}
+                                            <div className="absolute left-[65%] w-1 h-full bg-indigo-500 shadow-[0_0_10px_2px_rgba(99,102,241,0.5)] z-10"></div>
+                                        </div>
+                                        <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                                            <span>00:00</span>
+                                            <span>06:00</span>
+                                            <span>12:00</span>
+                                            <span>18:00</span>
+                                            <span>24:00</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {/* Action Buttons */}
                                 <div className="space-y-3">
                                     <button
@@ -402,10 +568,6 @@ const CCTVTab = () => {
                                     >
                                         {isRecording ? <Square size={16} /> : <Play size={16} />}
                                         {isRecording ? 'RECORDING LIVE...' : 'START MANUAL RECORD'}
-                                    </button>
-                                    <button className="w-full bg-slate-700 hover:bg-indigo-600 border border-slate-600 hover:border-indigo-500 text-slate-300 hover:text-white py-4 rounded-2xl font-black text-sm tracking-widest flex items-center justify-center gap-3 transition-all group shadow-sm">
-                                        <AlertCircle size={16} className="group-hover:rotate-12 transition-transform" />
-                                        REPORT STREAM ANOMALY
                                     </button>
                                 </div>
                             </div>

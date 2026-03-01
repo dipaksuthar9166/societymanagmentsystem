@@ -3,6 +3,67 @@ import { Video, Maximize2, RefreshCw, ShieldCheck, VideoOff } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../../config';
 import { useAuth } from '../../../context/AuthContext';
+import { BACKEND_URL } from '../../../config';
+
+const CameraPlayer = ({ cam }) => {
+    const canvasRef = React.useRef(null);
+    const videoRef = React.useRef(null);
+    const playerRef = React.useRef(null);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        const isRTSP = cam.streamUrl?.startsWith('rtsp://');
+
+        if (isRTSP && window.JSMpeg) {
+            // Deduce WS URL based on BACKEND_URL
+            const wsUrl = BACKEND_URL.replace(/^http/, 'ws') + `/api/stream/${cam._id}`;
+
+            playerRef.current = new window.JSMpeg.Player(wsUrl, {
+                canvas: canvasRef.current,
+                autoplay: true,
+                audio: false,
+                onVideoDecode: () => setHasError(false), // successful frame render
+            });
+
+            return () => {
+                if (playerRef.current) playerRef.current.destroy();
+            };
+        }
+    }, [cam._id, cam.streamUrl]);
+
+    if (hasError) {
+        return (
+            <div className="flex flex-col items-center justify-center text-slate-500 w-full h-full">
+                <VideoOff size={48} className="mb-2" />
+                <span className="text-xs uppercase tracking-wider font-bold">Stream Failed</span>
+            </div>
+        );
+    }
+
+    const isRTSP = cam.streamUrl?.startsWith('rtsp://');
+
+    return (
+        <div className="w-full h-full">
+            {isRTSP ? (
+                <canvas
+                    ref={canvasRef}
+                    className="w-full h-full object-cover"
+                />
+            ) : (
+                <video
+                    ref={videoRef}
+                    src={cam.streamUrl}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                    onError={() => setHasError(true)}
+                />
+            )}
+        </div>
+    );
+};
 
 const ResidentCCTV = () => {
     const { user } = useAuth();
@@ -61,14 +122,7 @@ const ResidentCCTV = () => {
                             </div>
                         ) : selected ? (
                             <div className="relative w-full h-full">
-                                <video
-                                    src={selected.streamUrl}
-                                    autoPlay
-                                    muted
-                                    loop
-                                    playsInline
-                                    className="w-full h-full object-cover"
-                                />
+                                <CameraPlayer cam={selected} />
                                 <div className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
                                     <div className="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
                                     <span className="text-[10px] font-bold text-white uppercase tracking-tighter">Live Feed</span>
@@ -109,8 +163,8 @@ const ResidentCCTV = () => {
                                     key={cam._id}
                                     onClick={() => setSelected(cam)}
                                     className={`px-4 py-3 rounded-2xl text-xs font-bold transition-all border flex items-center gap-3 ${selected?._id === cam._id
-                                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20'
-                                            : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20'
+                                        : 'bg-slate-50 dark:bg-slate-700/50 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     <div className={`p-1.5 rounded-lg ${selected?._id === cam._id ? 'bg-white/20' : 'bg-slate-200 dark:bg-slate-600'}`}>
