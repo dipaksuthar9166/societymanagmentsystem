@@ -17,56 +17,76 @@ const getUserAnalytics = async (req, res) => {
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - days);
 
-        // Get all users in society
-        const users = await User.find({ company: societyId }).select('name email flatNo');
+        // Get all users in society with minimal fields
+        const users = await User.find({ company: societyId }).select('name email flatNo _id').lean();
+        const userIds = users.map(u => u._id);
 
-        // Get payment data for each user
-        const userPayments = await Promise.all(
-            users.map(async (user) => {
-                const paid = await Transaction.aggregate([
-                    {
-                        $match: {
-                            userId: new mongoose.Types.ObjectId(user._id),
-                            status: 'Success',
-                            createdAt: { $gte: startDate }
-                        }
-                    },
-                    { $group: { _id: null, total: { $sum: '$amount' } } }
-                ]);
+        // Fetch all transactions, pending invoices, complaints, and last activities in bulk
+        const [transactions, pendingInvoices, complaints, lastActivities] = await Promise.all([
+            Transaction.aggregate([
+                {
+                    $match: {
+                        userId: { $in: userIds },
+                        status: 'Success',
+                        createdAt: { $gte: startDate }
+                    }
+                },
+                { $group: { _id: '$userId', totalPaid: { $sum: '$amount' } } }
+            ]),
+            Invoice.aggregate([
+                {
+                    $match: {
+                        customerId: { $in: userIds },
+                        status: 'Pending'
+                    }
+                },
+                { $group: { _id: '$customerId', totalPending: { $sum: '$totalAmount' } } }
+            ]),
+            Complaint.aggregate([
+                {
+                    $match: {
+                        raisedBy: { $in: userIds },
+                        createdAt: { $gte: startDate }
+                    }
+                },
+                { $group: { _id: '$raisedBy', count: { $sum: 1 } } }
+            ]),
+            ActivityLog.aggregate([
+                {
+                    $match: {
+                        user: { $in: userIds }
+                    }
+                },
+                { $sort: { createdAt: -1 } },
+                {
+                    $group: {
+                        _id: '$user',
+                        lastActive: { $first: '$createdAt' }
+                    }
+                }
+            ])
+        ]);
 
-                // Pending should calculate ALL outstanding invoices, regardless of date
-                const pending = await Invoice.aggregate([
-                    {
-                        $match: {
-                            customerId: new mongoose.Types.ObjectId(user._id),
-                            status: 'Pending'
-                        }
-                    },
-                    { $group: { _id: null, total: { $sum: '$totalAmount' } } }
-                ]);
+        // Create lookup maps for O(1) matching
+        const txMap = new Map(transactions.map(t => [t._id.toString(), t.totalPaid]));
+        const invMap = new Map(pendingInvoices.map(i => [i._id.toString(), i.totalPending]));
+        const compMap = new Map(complaints.map(c => [c._id.toString(), c.count]));
+        const actMap = new Map(lastActivities.map(a => [a._id.toString(), a.lastActive]));
 
-                const complaints = await Complaint.countDocuments({
-                    raisedBy: user._id,
-                    createdAt: { $gte: startDate }
-                });
-
-                const lastActivity = await ActivityLog.findOne({
-                    user: user._id
-                }).sort({ createdAt: -1 });
-
-                return {
-                    name: user.name,
-                    email: user.email,
-                    flatNo: user.flatNo || 'N/A',
-                    paid: paid[0]?.total || 0,
-                    pending: pending[0]?.total || 0,
-                    complaints,
-                    lastActive: lastActivity
-                        ? new Date(lastActivity.createdAt).toLocaleDateString()
-                        : 'Never'
-                };
-            })
-        );
+        const userPayments = users.map(user => {
+            const uid = user._id.toString();
+            return {
+                name: user.name,
+                email: user.email,
+                flatNo: user.flatNo || 'N/A',
+                paid: txMap.get(uid) || 0,
+                pending: invMap.get(uid) || 0,
+                complaints: compMap.get(uid) || 0,
+                lastActive: actMap.get(uid)
+                    ? new Date(actMap.get(uid)).toLocaleDateString()
+                    : 'Never'
+            };
+        });
 
         // Summary statistics
         const summary = {
