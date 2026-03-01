@@ -30,9 +30,9 @@ export const resolveImageURL = (url) => {
         finalUrl = finalUrl.replace('http://', 'https://');
     }
 
-    // If it's an absolute URL pointing to localhost, fix it for live backend
-    if (finalUrl.includes('societymanagmentsystem.onrender.com') || finalUrl.includes('societymanagmentsystem.onrender.com') || finalUrl.includes('192.168.')) {
-        return finalUrl.replace(/http:\/\/[^/]+/g, BACKEND_URL);
+    // If it's an absolute URL pointing to localhost or local IP, fix it for live backend
+    if (typeof finalUrl === 'string' && (finalUrl.includes('localhost') || finalUrl.includes('192.168.'))) {
+        finalUrl = finalUrl.replace(/https?:\/\/[^/]+/g, BACKEND_URL);
     }
 
     return finalUrl;
