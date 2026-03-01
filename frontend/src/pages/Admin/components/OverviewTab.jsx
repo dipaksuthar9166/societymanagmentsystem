@@ -178,8 +178,8 @@ const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
     }, [activeEvent]); // Dependency added
 
     // Separate Independent Calculations from invoices prop
-    const pendingInvoices = invoices?.filter(i => i.status.toLowerCase() === 'pending') || [];
-    const overdueInvoices = invoices?.filter(i => i.status.toLowerCase() === 'overdue') || [];
+    const pendingInvoices = invoices?.filter(i => i.status?.toLowerCase() === 'pending') || [];
+    const overdueInvoices = invoices?.filter(i => i.status?.toLowerCase() === 'overdue') || [];
 
     const pendingAmount = pendingInvoices.reduce((acc, curr) => acc + curr.totalAmount, 0);
     const overdueAmount = overdueInvoices.reduce((acc, curr) => acc + curr.totalAmount, 0); // Include Arrears sum
