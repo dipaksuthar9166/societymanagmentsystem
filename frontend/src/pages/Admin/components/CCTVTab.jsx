@@ -28,6 +28,67 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { API_BASE_URL } from '../../../config';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../../components/ToastProvider';
+import { BACKEND_URL } from '../../../config';
+
+const CameraPlayer = ({ cam }) => {
+    const canvasRef = React.useRef(null);
+    const videoRef = React.useRef(null);
+    const playerRef = React.useRef(null);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        const isRTSP = cam.streamUrl.startsWith('rtsp://');
+
+        if (isRTSP && window.JSMpeg) {
+            // Deduce WS URL based on BACKEND_URL
+            const wsUrl = BACKEND_URL.replace(/^http/, 'ws') + `/api/stream/${cam._id}`;
+
+            playerRef.current = new window.JSMpeg.Player(wsUrl, {
+                canvas: canvasRef.current,
+                autoplay: true,
+                audio: false,
+                onVideoDecode: () => setHasError(false), // successful frame render
+            });
+
+            return () => {
+                if (playerRef.current) playerRef.current.destroy();
+            };
+        }
+    }, [cam._id, cam.streamUrl]);
+
+    if (hasError) {
+        return (
+            <div className="flex flex-col items-center justify-center text-slate-500 w-full h-full">
+                <VideoOff size={48} className="mb-2" />
+                <span className="text-xs uppercase tracking-wider font-bold">Stream Failed</span>
+            </div>
+        );
+    }
+
+    const isRTSP = cam.streamUrl.startsWith('rtsp://');
+
+    return (
+        <div className="w-full h-full">
+            {isRTSP ? (
+                <canvas
+                    ref={canvasRef}
+                    className="w-full h-full object-cover"
+                />
+            ) : (
+                <video
+                    ref={videoRef}
+                    src={cam.streamUrl}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="w-full h-full object-cover"
+                    onError={() => setHasError(true)}
+                />
+            )}
+        </div>
+    );
+};
 
 const CCTVTab = () => {
     const { user } = useAuth();
@@ -192,8 +253,8 @@ const CCTVTab = () => {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     className={`group relative rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${selectedCamera?._id === cam._id
-                                            ? 'border-indigo-500 ring-4 ring-indigo-500/20'
-                                            : 'border-slate-800 hover:border-slate-600'
+                                        ? 'border-indigo-500 ring-4 ring-indigo-500/20'
+                                        : 'border-slate-800 hover:border-slate-600'
                                         } bg-slate-900 aspect-video`}
                                     onClick={() => setSelectedCamera(cam)}
                                 >
@@ -206,20 +267,8 @@ const CCTVTab = () => {
                                             </div>
                                         ) : (
                                             <div className="relative w-full h-full">
-                                                {/* Actual Video Tag */}
-                                                <video
-                                                    src={cam.streamUrl}
-                                                    autoPlay
-                                                    muted
-                                                    loop
-                                                    playsInline
-                                                    className="w-full h-full object-cover"
-                                                    onError={(e) => {
-                                                        // Fallback UI if stream fails
-                                                        e.target.style.display = 'none';
-                                                        e.target.parentElement.classList.add('flex-col', 'items-center', 'justify-center', 'text-slate-500');
-                                                    }}
-                                                />
+                                                {/* Actual Video Tag or Canvas */}
+                                                <CameraPlayer cam={cam} />
                                                 {/* Scanline & Overlay Effect */}
                                                 <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] pointer-events-none opacity-30"></div>
 
@@ -347,8 +396,8 @@ const CCTVTab = () => {
                                     <button
                                         onClick={toggleRecording}
                                         className={`w-full py-4 rounded-2xl font-black text-sm tracking-widest flex items-center justify-center gap-3 transition-all ${isRecording
-                                                ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/20'
-                                                : 'bg-slate-700 hover:bg-slate-600 text-slate-300 border border-slate-600 shadow-sm'
+                                            ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/20'
+                                            : 'bg-slate-700 hover:bg-slate-600 text-slate-300 border border-slate-600 shadow-sm'
                                             }`}
                                     >
                                         {isRecording ? <Square size={16} /> : <Play size={16} />}

@@ -31,7 +31,7 @@ export const resolveImageURL = (url) => {
     }
 
     // If it's an absolute URL pointing to localhost, fix it for live backend
-    if (finalUrl.includes('localhost:5001') || finalUrl.includes('127.0.0.1:5001') || finalUrl.includes('192.168.')) {
+    if (finalUrl.includes('societymanagmentsystem.onrender.com') || finalUrl.includes('societymanagmentsystem.onrender.com') || finalUrl.includes('192.168.')) {
         return finalUrl.replace(/http:\/\/[^/]+/g, BACKEND_URL);
     }
 
