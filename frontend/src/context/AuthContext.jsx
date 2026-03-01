@@ -38,7 +38,10 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         let socket;
         if (user) {
-            socket = io(getSocketURL());
+            socket = io(getSocketURL(), {
+                transports: ['websocket'],
+                upgrade: false
+            });
             window.io = socket; // Expose to window for other components like TrafficAnalytics
 
             socket.on('connect', () => {
