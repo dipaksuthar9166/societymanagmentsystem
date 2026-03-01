@@ -271,13 +271,13 @@ const ChatWidget = () => {
             {/* Floating Chat Button */}
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-24 z-50 w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all"
+                className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
             >
-                <MessageCircle size={24} />
+                <MessageCircle size={22} className="md:w-6 md:h-6" />
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-pulse border-2 border-slate-900">
                         {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                 )}
