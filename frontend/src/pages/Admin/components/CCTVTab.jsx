@@ -419,7 +419,7 @@ const CCTVTab = () => {
                 </div>
 
                 {/* Controls Sidebar */}
-                <div className="w-full lg:w-96 bg-slate-800 border-l border-slate-700 flex flex-col">
+                <div className="w-full lg:w-96 bg-slate-800 border-l border-slate-700 flex flex-col overflow-y-auto">
                     <div className="p-6 border-b border-slate-700">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                             <Shield className="text-indigo-400" size={20} />
@@ -502,8 +502,8 @@ const CCTVTab = () => {
                                         <button
                                             onClick={toggleMotionDetection}
                                             className={`border p-4 rounded-2xl flex flex-col items-center justify-center gap-2 transition-all group ${selectedCamera.motionDetection
-                                                    ? 'bg-red-500/10 border-red-500 text-red-400'
-                                                    : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-500 hover:text-slate-300'
+                                                ? 'bg-red-500/10 border-red-500 text-red-400'
+                                                : 'bg-slate-900 border-slate-700 hover:border-slate-500 text-slate-500 hover:text-slate-300'
                                                 }`}
                                         >
                                             <Radar size={24} className={`${selectedCamera.motionDetection ? 'animate-pulse' : 'group-hover:scale-110 transition-all'}`} />
