@@ -28,4 +28,29 @@ const sendEmail = async (to, subject, text, attachments = []) => {
     }
 };
 
-module.exports = { sendEmail };
+const crypto = require('crypto');
+
+const generateVerificationToken = () => {
+    return crypto.randomBytes(20).toString('hex');
+};
+
+const sendVerificationEmail = async (user, token) => {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const link = `${frontendUrl}/verify-account/${token}`;
+    const subject = 'Please verify your email address';
+    const text = `Hi ${user.name},\n\nPlease click on the following link to verify your email address:\n${link}\n\nIf you did not request this, please ignore this email.`;
+    return await sendEmail(user.email, subject, text);
+};
+
+const sendAccountActivatedEmail = async (user) => {
+    const subject = 'Your account has been activated!';
+    const text = `Hi ${user.name},\n\nYour account has been successfully verified and activated. You can now login.`;
+    return await sendEmail(user.email, subject, text);
+};
+
+module.exports = { 
+    sendEmail, 
+    generateVerificationToken, 
+    sendVerificationEmail, 
+    sendAccountActivatedEmail 
+};

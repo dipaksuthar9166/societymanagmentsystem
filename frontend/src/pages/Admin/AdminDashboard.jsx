@@ -132,7 +132,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         if (!user || !user.company) return;
 
-        const socket = io(BACKEND_URL);
+        const socket = io(BACKEND_URL, { transports: ['websocket'] });
         socket.on('connect', () => {
             console.log("Admin connected to socket");
             // Join the specific society room

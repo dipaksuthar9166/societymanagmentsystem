@@ -30,7 +30,7 @@ export const EventThemeProvider = ({ children }) => {
         fetchConfig();
 
         // Socket Listener for Real-time Updates
-        const socket = io(API_BASE_URL);
+        const socket = io(API_BASE_URL, { transports: ['websocket'] });
         socket.on('connect', () => console.log("🎨 Theme Socket Connected"));
         socket.on('global_config_updated', (data) => {
             console.log("⚡ Theme Updated Externally:", data);

@@ -65,7 +65,6 @@ const LiveActivityFeed = ({ token, user }) => {
         }
     };
 
-    // Mark all as read
     const markAllAsRead = async () => {
         if (unreadCount === 0) return;
         try {
@@ -86,6 +85,22 @@ const LiveActivityFeed = ({ token, user }) => {
         } catch (error) {
             console.error('Error marking as read:', error);
         }
+    };
+
+    const clearStream = () => {
+        const unreadIds = activities.filter(a => !a.isRead).map(a => a._id);
+        if (unreadIds.length > 0) {
+            fetch(`${API_BASE_URL}/activities/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ activityIds: unreadIds })
+            }).catch(e => console.error(e));
+        }
+        setUnreadCount(0);
+        setActivities([]);
     };
 
     // Play Sound
@@ -110,7 +125,8 @@ const LiveActivityFeed = ({ token, user }) => {
         if (!societyId || !token) return;
 
         socketRef.current = io(API_BASE_URL, {
-            auth: { token }
+            auth: { token },
+            transports: ['websocket']
         });
 
         socketRef.current.on('connect', () => {
@@ -237,14 +253,24 @@ const LiveActivityFeed = ({ token, user }) => {
                             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase mt-0.5">Real-time Society Monitor</p>
                         </div>
                         <div className="flex items-center gap-3">
-                            {unreadCount > 0 && (
-                                <button
-                                    onClick={markAllAsRead}
-                                    className="text-[10px] font-bold bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-full transition-colors border border-slate-700 uppercase tracking-wider"
-                                >
-                                    Clear Stream
-                                </button>
-                            )}
+                            <div className="flex gap-2">
+                                {unreadCount > 0 && (
+                                    <button
+                                        onClick={markAllAsRead}
+                                        className="text-[10px] font-bold bg-indigo-900/50 hover:bg-indigo-800 text-indigo-200 px-3 py-1.5 rounded-full transition-colors border border-indigo-700/50 uppercase tracking-wider"
+                                    >
+                                        Mark Read
+                                    </button>
+                                )}
+                                {activities.length > 0 && (
+                                    <button
+                                        onClick={clearStream}
+                                        className="text-[10px] font-bold bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-full transition-colors border border-slate-700 uppercase tracking-wider"
+                                    >
+                                        Clear Stream
+                                    </button>
+                                )}
+                            </div>
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="p-1.5 hover:bg-slate-800 rounded-full transition-colors"

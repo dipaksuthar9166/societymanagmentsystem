@@ -75,6 +75,22 @@ const LiveActivityFeed = ({ token, user }) => {
         }
     };
 
+    const clearStream = () => {
+        const unreadIds = activities.filter(a => !a.isRead).map(a => a._id);
+        if (unreadIds.length > 0) {
+            fetch(`${API_BASE_URL}/activities/mark-read`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ activityIds: unreadIds })
+            }).catch(e => console.error(e));
+        }
+        setUnreadCount(0);
+        setActivities([]);
+    };
+
     // Setup Socket.io for real-time updates
     useEffect(() => {
         const societyId = user?.companyId || user?.society || user?.company;
@@ -84,7 +100,8 @@ const LiveActivityFeed = ({ token, user }) => {
 
         // Connect to Socket.io
         socketRef.current = io(API_BASE_URL, {
-            auth: { token }
+            auth: { token },
+            transports: ['websocket']
         });
 
         socketRef.current.on('connect', () => {
@@ -212,18 +229,26 @@ const LiveActivityFeed = ({ token, user }) => {
                                 <h3 className="text-lg font-bold text-slate-800 dark:text-white">Live Activity</h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">{unreadCount} unread notifications</p>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center">
                                 {unreadCount > 0 && (
                                     <button
                                         onClick={markAllAsRead}
-                                        className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                                        className="text-[10px] font-bold bg-indigo-100/50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-full transition-colors border border-indigo-200 uppercase tracking-wider dark:bg-indigo-900/50 dark:hover:bg-indigo-800 dark:text-indigo-200 dark:border-indigo-700/50 flex-shrink-0"
                                     >
-                                        Mark all read
+                                        Mark Read
+                                    </button>
+                                )}
+                                {activities.length > 0 && (
+                                    <button
+                                        onClick={clearStream}
+                                        className="text-[10px] font-bold bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full transition-colors border border-slate-200 uppercase tracking-wider dark:bg-slate-800 dark:hover:bg-slate-700 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex-shrink-0"
+                                    >
+                                        Clear Stream
                                     </button>
                                 )}
                                 <button
                                     onClick={() => setIsOpen(false)}
-                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors ml-1"
                                 >
                                     <X size={18} className="text-slate-500 dark:text-slate-400" />
                                 </button>

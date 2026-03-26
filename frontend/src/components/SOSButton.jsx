@@ -8,7 +8,7 @@ import { API_BASE_URL } from '../config';
 
 // Derive Socket URL from API URL (remove /api)
 const socketUrl = API_BASE_URL.replace('/api', '');
-const socket = io(socketUrl);
+const socket = io(socketUrl, { transports: ['websocket'] });
 
 const SOSButton = () => {
     const { user } = useAuth();
