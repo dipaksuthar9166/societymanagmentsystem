@@ -42,8 +42,8 @@ router.post('/send', async (req, res) => {
         let debugOtp = null;
 
         try {
-            // 1. Try to send email (this generates its own OTP internally)
-            const result = await sendOTP(email, user.name);
+            // 1. Try to send email + SMS config
+            const result = await sendOTP(email, user.name, user.contactNumber);
 
             if (result.success) {
                 emailSent = true;

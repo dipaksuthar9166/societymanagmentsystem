@@ -75,15 +75,41 @@ const verifyOTP = (email, otp) => {
 };
 
 /**
- * Send OTP email
+ * Send OTP email and optional SMS
  */
-const sendOTP = async (email, name) => {
+const sendOTP = async (email, name, phone = null) => {
     try {
         const transporter = createTransporter();
         const otp = generateOTP();
 
         // Store OTP
         storeOTP(email, otp);
+
+        let smsSent = false;
+        
+        // Optionally send via Twilio if phone number is provided
+        if (phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+            try {
+                const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+                
+                // Format phone number (ensure + prefix)
+                let formattedPhone = phone;
+                if (!phone.startsWith('+')) {
+                    formattedPhone = `+91${phone}`; // Default to India code if no + is provided
+                }
+
+                await twilioClient.messages.create({
+                    body: `Your STATUS Sharan verification code is: ${otp}. It is valid for 5 minutes.`,
+                    from: process.env.TWILIO_PHONE_NUMBER,
+                    to: formattedPhone
+                });
+                console.log(`📱 SMS OTP sent to ${formattedPhone}: ${otp}`);
+                smsSent = true;
+            } catch (smsError) {
+                console.error('❌ Error sending SMS OTP:', smsError.message);
+                // Continue to email fallback
+            }
+        }
 
         const htmlTemplate = `
         <!DOCTYPE html>
@@ -188,9 +214,9 @@ const sendOTP = async (email, name) => {
         };
 
         await transporter.sendMail(mailOptions);
-        console.log(`✅ OTP sent to ${email}: ${otp}`);
+        console.log(`✅ Email OTP sent to ${email}: ${otp}`);
 
-        return { success: true, message: 'OTP sent successfully' };
+        return { success: true, message: smsSent ? 'OTP sent via SMS and Email' : 'OTP sent via Email' };
 
     } catch (error) {
         console.error('❌ Error sending OTP:', error);
