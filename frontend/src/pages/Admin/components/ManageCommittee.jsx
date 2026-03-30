@@ -4,7 +4,7 @@ import {
     Briefcase, Search, ChevronDown, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { API_BASE_URL } from '../../../config';
+import { API_BASE_URL, resolveImageURL } from '../../../config';
 
 const ManageCommittee = ({ token, refresh }) => {
     const [committee, setCommittee] = useState([]);
@@ -206,7 +206,7 @@ const ManageCommittee = ({ token, refresh }) => {
                                                 member.designation === 'Treasurer' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
                                         } flex items-center justify-center text-xl font-bold transition-colors`}>
                                         {member.profileImage ? (
-                                            <img src={member.profileImage} alt={member.name} className="w-full h-full object-cover" />
+                                            <img src={resolveImageURL(member.profileImage)} alt={member.name} className="w-full h-full object-cover" />
                                         ) : (
                                             member.name[0]
                                         )}
@@ -359,7 +359,7 @@ const ManageCommittee = ({ token, refresh }) => {
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold overflow-hidden">
                                                             {selectedResident.profileImage ? (
-                                                                <img src={selectedResident.profileImage} alt="" className="w-full h-full object-cover" />
+                                                                <img src={resolveImageURL(selectedResident.profileImage)} alt="" className="w-full h-full object-cover" />
                                                             ) : selectedResident.name[0]}
                                                         </div>
                                                         <div>
@@ -393,7 +393,7 @@ const ManageCommittee = ({ token, refresh }) => {
                                                             >
                                                                 <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold overflow-hidden">
                                                                     {r.profileImage ? (
-                                                                        <img src={r.profileImage} alt="" className="w-full h-full object-cover" />
+                                                                        <img src={resolveImageURL(r.profileImage)} alt="" className="w-full h-full object-cover" />
                                                                     ) : r.name[0]}
                                                                 </div>
                                                                 <div className="text-left flex-1">

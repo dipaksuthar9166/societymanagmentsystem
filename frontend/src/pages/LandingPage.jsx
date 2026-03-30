@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, resolveImageURL } from '../config';
 import Navbar from './Landing/Navbar';
 import Footer from './Landing/Footer';
 import HeroSection from './Landing/HeroSection';
@@ -175,7 +175,7 @@ const FeaturedProjects = ({ projects = [] }) => {
                             className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-white/5 shadow-xl group"
                         >
                             <div className="h-56 relative overflow-hidden bg-slate-200">
-                                <img src={p.img} alt={p.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <img src={resolveImageURL(p.img)} alt={p.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                                 <div className="absolute top-4 right-4 px-4 py-1.5 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-indigo-600 uppercase tracking-widest shadow-lg">
                                     {p.badge}
                                 </div>

@@ -394,7 +394,7 @@ const Societies = () => {
                                     <div className="flex items-center gap-4">
                                         {(formData.logoFile || formData.logo) && (
                                             <img
-                                                src={formData.logoFile ? URL.createObjectURL(formData.logoFile) : formData.logo}
+                                                src={formData.logoFile ? URL.createObjectURL(formData.logoFile) : resolveImageURL(formData.logo)}
                                                 alt="Preview"
                                                 className="w-10 h-10 rounded-lg object-cover border border-slate-200 dark:border-slate-700 shadow-sm"
                                             />
