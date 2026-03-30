@@ -16,13 +16,14 @@ export const BACKEND_URL = API_BASE_URL.replace('/api', '');
 export const resolveImageURL = (url) => {
     if (!url) return null;
 
-    let finalUrl = url;
+    // Convert Windows backslashes to forward slashes first
+    let finalUrl = String(url).replace(/\\/g, '/');
 
     // If it's a relative path, prepend backend URL
-    if (url.startsWith('/uploads')) {
-        finalUrl = `${BACKEND_URL}${url}`;
-    } else if (url.startsWith('uploads')) {
-        finalUrl = `${BACKEND_URL}/${url}`;
+    if (finalUrl.startsWith('/uploads')) {
+        finalUrl = `${BACKEND_URL}${finalUrl}`;
+    } else if (finalUrl.startsWith('uploads')) {
+        finalUrl = `${BACKEND_URL}/${finalUrl}`;
     }
 
     // Force HTTPS for Render links (fixes Mixed Content 404 blocked images)

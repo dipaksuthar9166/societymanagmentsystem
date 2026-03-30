@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { UserPlus } from 'lucide-react';
-import { useAlert } from '../../../context/AlertContext'; // Updated import path
+import { UserPlus, Edit, Trash2, X } from 'lucide-react';
+import { useAlert } from '../../../context/AlertContext'; 
 import { API_BASE_URL } from '../../../config';
 
 const TenantsTab = ({ tenants, refresh, token }) => {
-    const { showAlert, showConfirm } = useAlert(); // Hook
+    const { showAlert, showConfirm } = useAlert(); 
     const [showAdd, setShowAdd] = useState(false);
-    const [newTenant, setNewTenant] = useState({ name: '', email: '', password: '123' });
+    const [editingTenant, setEditingTenant] = useState(null);
+    const [newTenant, setNewTenant] = useState({ name: '', email: '', password: '123', role: 'user', flatNo: '', mobile: '' });
 
     const handleAdd = async () => {
         try {
@@ -18,6 +19,24 @@ const TenantsTab = ({ tenants, refresh, token }) => {
             if (res.ok) {
                 await showAlert('Success', 'Resident added successfully', 'success');
                 setShowAdd(false);
+                setNewTenant({ name: '', email: '', password: '123', role: 'user', flatNo: '', mobile: '' });
+                refresh();
+            } else {
+                await showAlert('Error', (await res.json()).message, 'error');
+            }
+        } catch (error) { console.error(error); }
+    };
+
+    const handleUpdate = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/customers/${editingTenant._id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify(editingTenant)
+            });
+            if (res.ok) {
+                await showAlert('Success', 'Resident updated successfully', 'success');
+                setEditingTenant(null);
                 refresh();
             } else {
                 await showAlert('Error', (await res.json()).message, 'error');
@@ -51,48 +70,94 @@ const TenantsTab = ({ tenants, refresh, token }) => {
             <div className="p-8 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-700/50 transition-colors">
                 <h3 className="text-xl font-bold text-slate-800 dark:text-white">Resident Directory</h3>
                 <div className="flex gap-4">
-                    <button onClick={() => setShowAdd(!showAdd)} className="bg-slate-900 dark:bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-800 dark:hover:bg-indigo-500 transition-colors">
+                    <button 
+                        onClick={() => {
+                            setShowAdd(!showAdd);
+                            setEditingTenant(null);
+                        }} 
+                        className="bg-slate-900 dark:bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-800 dark:hover:bg-indigo-500 transition-colors"
+                    >
                         <UserPlus size={18} /> {showAdd ? 'Cancel' : 'New Onboarding'}
                     </button>
                 </div>
             </div>
 
-            {showAdd && (
+            {/* Add/Edit Form */}
+            {(showAdd || editingTenant) && (
                 <div className="p-8 bg-slate-50 dark:bg-slate-900 border-b border-slate-100 dark:border-slate-700 animate-in slide-in-from-top duration-300">
-                    <h4 className="text-xs font-black uppercase tracking-[0.2em] mb-6 text-blue-600 dark:text-blue-400">New Account Registration Form</h4>
-                    <form onSubmit={(e) => { e.preventDefault(); handleAdd(); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h4 className="text-xs font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">
+                            {editingTenant ? 'Edit Account Details' : 'New Account Registration Form'}
+                        </h4>
+                        {editingTenant && (
+                            <button onClick={() => setEditingTenant(null)} className="text-slate-400 hover:text-slate-600">
+                                <X size={20} />
+                            </button>
+                        )}
+                    </div>
+                    
+                    <form onSubmit={(e) => { e.preventDefault(); editingTenant ? handleUpdate() : handleAdd(); }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Full Name</label>
-                            <input className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" placeholder="e.g. Rahul Sharma" value={newTenant.name} onChange={e => setNewTenant({ ...newTenant, name: e.target.value })} />
+                            <input 
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" 
+                                placeholder="Rahul Sharma" 
+                                value={editingTenant ? editingTenant.name : newTenant.name} 
+                                onChange={e => editingTenant ? setEditingTenant({ ...editingTenant, name: e.target.value }) : setNewTenant({ ...newTenant, name: e.target.value })} 
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Account Role</label>
                             <select
                                 className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors appearance-none"
-                                value={newTenant.role || 'user'}
-                                onChange={e => setNewTenant({ ...newTenant, role: e.target.value })}
+                                value={editingTenant ? editingTenant.role : newTenant.role}
+                                onChange={e => editingTenant ? setEditingTenant({ ...editingTenant, role: e.target.value }) : setNewTenant({ ...newTenant, role: e.target.value })}
                             >
-                                <option value="user" className="bg-white dark:bg-slate-800">Resident (User)</option>
-                                <option value="guard" className="bg-white dark:bg-slate-800">Security Guard</option>
+                                <option value="user">Resident (User)</option>
+                                <option value="guard">Security Guard</option>
                             </select>
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Email Address (Login ID)</label>
-                            <input className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" placeholder="e.g. rahul@gmail.com" value={newTenant.email} onChange={e => setNewTenant({ ...newTenant, email: e.target.value })} />
+                            <input 
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" 
+                                placeholder="rahul@gmail.com" 
+                                value={editingTenant ? editingTenant.email : newTenant.email} 
+                                onChange={e => editingTenant ? setEditingTenant({ ...editingTenant, email: e.target.value }) : setNewTenant({ ...newTenant, email: e.target.value })} 
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Unit / Post</label>
-                            <input className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" placeholder="e.g. A-101 OR Main Gate" value={newTenant.flatNo || ''} onChange={e => setNewTenant({ ...newTenant, flatNo: e.target.value })} />
+                            <input 
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" 
+                                placeholder="A-101" 
+                                value={editingTenant ? editingTenant.flatNo : newTenant.flatNo} 
+                                onChange={e => editingTenant ? setEditingTenant({ ...editingTenant, flatNo: e.target.value }) : setNewTenant({ ...newTenant, flatNo: e.target.value })} 
+                            />
                         </div>
                         <div className="space-y-2">
                             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Mobile Number</label>
-                            <input className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" placeholder="e.g. 9876543210" value={newTenant.mobile || ''} onChange={e => setNewTenant({ ...newTenant, mobile: e.target.value })} />
+                            <input 
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors" 
+                                placeholder="9876543210" 
+                                value={editingTenant ? (editingTenant.contactNumber || editingTenant.mobile || '') : newTenant.mobile} 
+                                onChange={e => editingTenant ? setEditingTenant({ ...editingTenant, contactNumber: e.target.value }) : setNewTenant({ ...newTenant, mobile: e.target.value })} 
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Update Password</label>
+                            <input 
+                                type="password"
+                                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:border-blue-500 p-4 rounded-xl text-slate-800 dark:text-white outline-none transition-colors text-sm" 
+                                placeholder={editingTenant ? "Leave blank to keep current" : "Set password"}
+                                value={editingTenant ? (editingTenant.password || '') : newTenant.password} 
+                                onChange={e => editingTenant ? setEditingTenant({ ...editingTenant, password: e.target.value }) : setNewTenant({ ...newTenant, password: e.target.value })} 
+                            />
                         </div>
                         <div className="col-span-full pt-4">
                             <button type="submit" className="w-full bg-blue-600 hover:bg-blue-500 p-4 rounded-2xl font-black uppercase text-[10px] tracking-widest text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-900/50 transition-all transform hover:scale-[1.01]">
-                                Verify & Onboard Account
+                                {editingTenant ? 'Update Account Information' : 'Verify & Onboard Account'}
                             </button>
-                            <p className="text-center text-[10px] text-slate-400 dark:text-slate-500 mt-4">* Default password will be set to '123'. User can change it later.</p>
                         </div>
                     </form>
                 </div>
@@ -144,36 +209,16 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                                             },
                                                             body: JSON.stringify({ userId: t._id })
                                                         });
-
                                                         const data = await res.json();
-
                                                         if (res.ok) {
                                                             if (data.verificationLink) {
-                                                                // Email service not configured - show link
-                                                                const confirmLink = await showConfirm(
-                                                                    'Email Service Not Configured',
-                                                                    'The backend email service is not set up.\n\nDo you want to copy the verification link to share it manually?',
-                                                                    'Copy Link',
-                                                                    'Cancel'
-                                                                );
-
-                                                                if (confirmLink) {
-                                                                    navigator.clipboard.writeText(data.verificationLink);
-                                                                    await showAlert('Copied!', 'Verification link copied to clipboard.', 'success');
-                                                                }
-                                                            } else {
-                                                                await showAlert('Sent!', 'Verification email sent successfully.', 'success');
-                                                            }
-                                                        } else {
-                                                            await showAlert('Failed', (data.message || 'Failed to send email'), 'error');
-                                                        }
-                                                    } catch (error) {
-                                                        console.error(error);
-                                                        await showAlert('Error', error.message, 'error');
-                                                    }
+                                                                const confirmLink = await showConfirm('Email Service Not Configured', 'Do you want to copy the verification link?', 'Copy Link', 'Cancel');
+                                                                if (confirmLink) { navigator.clipboard.writeText(data.verificationLink); await showAlert('Copied!', 'Verification link copied.', 'success'); }
+                                                            } else { await showAlert('Sent!', 'Verification email sent.', 'success'); }
+                                                        } else { await showAlert('Failed', (data.message || 'Failed'), 'error'); }
+                                                    } catch (error) { console.error(error); await showAlert('Error', error.message, 'error'); }
                                                 }}
-                                                className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold text-[10px] uppercase tracking-wider hover:underline transition-colors"
-                                                title="Resend verification email"
+                                                className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold text-[10px] uppercase tracking-wider hover:underline"
                                             >
                                                 Resend
                                             </button>
@@ -181,7 +226,26 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                     )}
                                 </td>
                                 <td className="py-6 px-4 text-right">
-                                    <button onClick={() => handleDelete(t._id)} className="text-red-500 dark:text-red-400 font-bold hover:underline text-xs">Remove</button>
+                                    <div className="flex justify-end gap-3">
+                                        <button 
+                                            onClick={() => {
+                                                setEditingTenant({ ...t, password: '' });
+                                                setShowAdd(false);
+                                                window.scrollTo({ top: 300, behavior: 'smooth' });
+                                            }} 
+                                            className="p-2 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                            title="Edit Resident"
+                                        >
+                                            <Edit size={16} />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDelete(t._id)} 
+                                            className="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                            title="Delete Resident"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}

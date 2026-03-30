@@ -100,8 +100,55 @@ const deleteCustomer = async (req, res) => {
     }
 };
 
+// @desc    Update a tenant's details
+// @route   PUT /api/admin/customers/:id
+// @access  Admin
+const updateCustomer = async (req, res) => {
+    try {
+        const { name, email, password, flatNo, mobile, role, contactNumber } = req.body;
+        const user = await User.findById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Verify user belongs to admin's company
+        if (user.company.toString() !== req.user.company.toString()) {
+            return res.status(401).json({ message: 'Not authorized to update users from other societies' });
+        }
+
+        // Update fields
+        user.name = name || user.name;
+        user.email = email || user.email;
+        user.role = role || user.role;
+        user.flatNo = flatNo || user.flatNo;
+        user.contactNumber = contactNumber || mobile || user.contactNumber;
+
+        // If password is provided, hash it
+        if (password && password.trim() !== '') {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
+
+        const updatedUser = await user.save();
+
+        res.json({
+            _id: updatedUser._id,
+            name: updatedUser.name,
+            email: updatedUser.email,
+            role: updatedUser.role,
+            flatNo: updatedUser.flatNo,
+            contactNumber: updatedUser.contactNumber
+        });
+    } catch (error) {
+        console.error('Update User Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 module.exports = {
     getCustomers,
     createCustomer,
-    deleteCustomer
+    deleteCustomer,
+    updateCustomer
 };

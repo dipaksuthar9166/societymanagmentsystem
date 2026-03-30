@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-const { getCustomers, createCustomer, deleteCustomer } = require('../controllers/adminController');
+const { getCustomers, createCustomer, deleteCustomer, updateCustomer } = require('../controllers/adminController');
 const { getAdminStats, getAdminDetailedAnalytics } = require('../controllers/analyticsController');
 const { getExpenses, createExpense, deleteExpense } = require('../controllers/expenseController');
 const { getMyCompany, updateMyCompany } = require('../controllers/companyController');
@@ -30,9 +30,10 @@ router.route('/customers')
     .get(protect, authorize('admin'), getCustomers)
     .post(protect, authorize('admin'), createCustomer);
 
-router.delete('/customers/:id', protect, authorize('admin'), deleteCustomer);
+router.route('/customers/:id')
+    .put(protect, authorize('admin'), updateCustomer)
+    .delete(protect, authorize('admin'), deleteCustomer);
 
-// Expense Management
 // Expense Management
 router.route('/expenses')
     .get(protect, authorize('admin'), getExpenses)
@@ -44,9 +45,9 @@ router.delete('/expenses/:id', protect, authorize('admin'), deleteExpense);
 router.get('/analytics/overview', protect, authorize('admin'), getAdminStats);
 router.get('/stats', protect, authorize('admin'), getAdminStats); // Keep for frontend compatibility
 router.get('/analytics/detailed', protect, authorize('admin'), getAdminDetailedAnalytics);
+
 router.route('/society')
     .get(protect, getMyCompany)
     .put(protect, authorize('admin'), upload.single('logo'), updateMyCompany);
-
 
 module.exports = router;
