@@ -124,7 +124,9 @@ const Navbar = ({ title, showSearch = true, notifications = 0, onMenuClick, onTa
                                 <div className="w-8 h-3 bg-indigo-200 dark:bg-indigo-700 animate-pulse rounded"></div>
                             ) : (
                                 <span className="text-[11px] font-black text-indigo-700 dark:text-indigo-300">
-                                    {smsBalance?.balance ? `${smsBalance.currency || '$'}${smsBalance.balance}` : 'SMS 0'}
+                                    {smsBalance?.balance && !isNaN(smsBalance.balance) 
+                                        ? `${smsBalance.currency || '$'}${parseFloat(smsBalance.balance).toFixed(2)}` 
+                                        : 'SMS Active'}
                                 </span>
                             )}
                         </div>

@@ -116,6 +116,25 @@ const CommunicationTab = ({ token }) => {
     });
     const [savingTwilio, setSavingTwilio] = useState(false);
 
+    const fetchTwilioConfig = async () => {
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/society`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (data?.twilioConfig) {
+                setTwilioConfig({
+                    accountSid: data.twilioConfig.accountSid || '',
+                    authToken: data.twilioConfig.authToken || '',
+                    phoneNumber: data.twilioConfig.phoneNumber || '',
+                    isActive: data.twilioConfig.isActive || false
+                });
+            }
+        } catch (error) {
+            console.error('Failed to fetch Twilio config:', error);
+        }
+    };
+
     const fetchSmsBalance = async () => {
         setLoadingSms(true);
         try {
@@ -124,9 +143,6 @@ const CommunicationTab = ({ token }) => {
             });
             const data = await res.json();
             setSmsBalance(data);
-            
-            // If data contains info about the config, we could pre-fill some things if needed, 
-            // but normally we need a separate fetch for security or just rely on the balance check response.
         } catch (error) {
             console.error('Failed to fetch SMS balance:', error);
         } finally {
@@ -137,6 +153,7 @@ const CommunicationTab = ({ token }) => {
     const handleSaveTwilio = async (e) => {
         e.preventDefault();
         setSavingTwilio(true);
+        setStatus(null);
         try {
             const res = await fetch(`${API_BASE_URL}/admin/society/twilio`, {
                 method: 'POST',
@@ -161,7 +178,10 @@ const CommunicationTab = ({ token }) => {
     };
 
     React.useEffect(() => {
-        if (token) fetchSmsBalance();
+        if (token) {
+            fetchSmsBalance();
+            fetchTwilioConfig();
+        }
     }, [token]);
 
     return (
@@ -187,7 +207,11 @@ const CommunicationTab = ({ token }) => {
                                 {loadingSms ? (
                                     <div className="h-10 w-32 bg-white/10 animate-pulse rounded-lg mt-1"></div>
                                 ) : (
-                                    <h2 className="text-3xl font-black">{smsBalance?.balance && !isNaN(smsBalance.balance) ? `${smsBalance.currency || '$'}${smsBalance.balance}` : smsBalance?.balance || '0.00'}</h2>
+                                    <h2 className="text-2xl sm:text-3xl font-black">
+                                        {smsBalance?.balance && !isNaN(smsBalance.balance) 
+                                            ? `${smsBalance.currency || '$'}${parseFloat(smsBalance.balance).toFixed(2)}` 
+                                            : smsBalance?.balance || '0.00'}
+                                    </h2>
                                 )}
                                 <p className="text-[10px] mt-2 font-bold text-white/50 uppercase tracking-tighter">Current Plan: {smsBalance?.type || 'Standard'}</p>
                             </div>
