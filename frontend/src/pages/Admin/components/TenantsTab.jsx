@@ -56,13 +56,17 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                 method: 'DELETE',
                 headers: { Authorization: `Bearer ${token}` }
             });
+            const data = await res.json();
             if (res.ok) {
                 await showAlert('Removed', 'Resident removed successfully', 'success');
                 refresh();
             } else {
-                await showAlert('Error', 'Failed to remove resident', 'error');
+                await showAlert('Error', data.message || 'Failed to remove resident', 'error');
             }
-        } catch (error) { console.error(error); }
+        } catch (error) { 
+            console.error(error); 
+            await showAlert('Error', 'Network error while removing resident: ' + error.message, 'error');
+        }
     };
 
     return (

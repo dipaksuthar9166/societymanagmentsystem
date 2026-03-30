@@ -82,6 +82,7 @@ const createCustomer = async (req, res) => {
 // @access  Admin
 const deleteCustomer = async (req, res) => {
     try {
+        console.log(`[Admin] Deleting user: ${req.params.id} requested by admin: ${req.user._id}`);
         const user = await User.findById(req.params.id);
 
         if (!user) {
@@ -89,14 +90,28 @@ const deleteCustomer = async (req, res) => {
         }
 
         // Verify user belongs to admin's company
-        if (user.company.toString() !== req.user.company.toString()) {
-            return res.status(401).json({ message: 'Not authorized' });
+        const userCompanyId = user.company ? user.company.toString() : null;
+        const adminCompanyId = req.user.company ? req.user.company.toString() : null;
+
+        if (!adminCompanyId) {
+            return res.status(400).json({ message: 'Admin is not associated with any society' });
+        }
+
+        if (userCompanyId !== adminCompanyId) {
+            console.error(`[Auth] Admin ${req.user._id} tried to delete user ${user._id} from different society. Admin Co: ${adminCompanyId}, User Co: ${userCompanyId}`);
+            return res.status(401).json({ message: 'Not authorized to delete users from other societies' });
+        }
+
+        // Check if deleting self
+        if (user._id.toString() === req.user._id.toString()) {
+            return res.status(400).json({ message: 'Admin cannot delete their own account from here' });
         }
 
         await user.deleteOne();
-        res.json({ message: 'User removed' });
+        res.json({ message: 'User removed successfully' });
     } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Delete User Error:', error);
+        res.status(500).json({ message: 'Server Error: ' + error.message });
     }
 };
 
