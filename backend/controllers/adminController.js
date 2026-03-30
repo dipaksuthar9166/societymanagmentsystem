@@ -174,7 +174,7 @@ const saveTwilioConfig = async (req, res) => {
         
         res.json({ 
             success: true, 
-            message: 'Twilio Settings Updated Successfully!', 
+            message: '✅ Twilio Settings Updated Successfully!', 
             config: {
                 accountSid: company.twilioConfig.accountSid,
                 phoneNumber: company.twilioConfig.phoneNumber,
@@ -220,6 +220,7 @@ const getSMSBalance = async (req, res) => {
                 return res.json({
                     balance: balanceData.balance,
                     currency: balanceData.currency || '$',
+                    v: '2026.03.30.1315',
                     isGlobal: !company?.twilioConfig?.isActive
                 });
             } catch (balanceApiErr) {
@@ -229,6 +230,7 @@ const getSMSBalance = async (req, res) => {
                     balance: account.status === 'active' ? 'Active' : 'Account Error',
                     currency: '',
                     note: 'Balance API only available on paid Twilio accounts.',
+                    v: '2026.03.30.1315',
                     isGlobal: !company?.twilioConfig?.isActive
                 });
             }
@@ -236,12 +238,13 @@ const getSMSBalance = async (req, res) => {
             return res.json({
                 balance: 'Error',
                 note: 'Invalid Twilio Credentials: ' + twilioErr.message,
+                v: '2026.03.30.1315',
                 isGlobal: !company?.twilioConfig?.isActive
             });
         }
     } catch (error) {
         console.error('Twilio Balance Controller Error:', error);
-        res.json({ balance: 'Error', note: 'Internal Server Error fetching balance.' });
+        res.json({ balance: 'Error', note: 'Internal Server Error fetching balance.', v: '2026.03.30.1315' });
     }
 };
 
