@@ -19,6 +19,9 @@ export const resolveImageURL = (url) => {
     // Convert Windows backslashes to forward slashes first
     let finalUrl = String(url).replace(/\\/g, '/');
 
+    // Remove any accidental double slashes early on (except for protocol)
+    finalUrl = finalUrl.replace(/([^:]\/)\/+/g, "$1");
+
     // If it's a relative path, prepend backend URL
     if (finalUrl.startsWith('/uploads')) {
         finalUrl = `${BACKEND_URL}${finalUrl}`;
@@ -35,6 +38,9 @@ export const resolveImageURL = (url) => {
     if (typeof finalUrl === 'string' && (finalUrl.includes('localhost') || finalUrl.includes('192.168.'))) {
         finalUrl = finalUrl.replace(/https?:\/\/[^/]+/g, BACKEND_URL);
     }
+
+    // Final safety check: Clean up any double slashes that might have been introduced during concatenation
+    finalUrl = finalUrl.replace(/([^:]\/)\/+/g, "$1");
 
     return finalUrl;
 };

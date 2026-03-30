@@ -62,7 +62,7 @@ router.get('/projects', async (req, res) => {
             id: p._id,
             title: p.name,
             location: p.address || 'Premium Location',
-            img: p.logo ? `/uploads/${p.logo}` : `https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80`,
+            img: p.logo || `https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80`,
             badge: p.plan || 'Premium',
             price: '98% Occupancy'
         }));
