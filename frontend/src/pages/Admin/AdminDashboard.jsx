@@ -196,7 +196,7 @@ const AdminDashboard = () => {
             case 'overview': return <OverviewTab stats={stats} invoices={invoices} user={user} complaints={complaints} onAction={setActiveTab} />;
             case 'user-analytics': return <UserAnalyticsTab />;
             case 'rooms': return <RoomsTab flats={flats} refresh={fetchData} token={user?.token} complaints={complaints} />;
-            case 'tenants': return <TenantsTab tenants={tenants} flats={flats} refresh={fetchData} />;
+            case 'tenants': return <TenantsTab tenants={tenants} flats={flats} refresh={fetchData} token={user?.token} />;
             case 'billing': return <BillingTab invoices={invoices} tenants={tenants} refresh={fetchData} token={user?.token} societyDetails={societyDetails} />;
             case 'broadcast': return <BroadcastTab />;
             case 'expenses': return <ExpenseTracker token={user?.token} />;
