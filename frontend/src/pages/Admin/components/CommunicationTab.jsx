@@ -157,9 +157,9 @@ const CommunicationTab = ({ token }) => {
         try {
             const res = await fetch(`${API_BASE_URL}/admin/society/twilio`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}` 
+                    Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify(twilioConfig)
             });
@@ -208,15 +208,15 @@ const CommunicationTab = ({ token }) => {
                                     <div className="h-10 w-32 bg-white/10 animate-pulse rounded-lg mt-1"></div>
                                 ) : (
                                     <h2 className="text-2xl sm:text-3xl font-black">
-                                        {smsBalance?.balance && !isNaN(smsBalance.balance) 
-                                            ? `${smsBalance.currency || '$'}${parseFloat(smsBalance.balance).toFixed(2)}` 
+                                        {smsBalance?.balance && !isNaN(smsBalance.balance)
+                                            ? `${smsBalance.currency || '$'}${parseFloat(smsBalance.balance).toFixed(2)}`
                                             : smsBalance?.balance || '0.00'}
                                     </h2>
                                 )}
                                 <p className="text-[10px] mt-2 font-bold text-white/50 uppercase tracking-tighter">Current Plan: {smsBalance?.type || 'Standard'}</p>
                             </div>
-                            <button 
-                                onClick={fetchSmsBalance} 
+                            <button
+                                onClick={fetchSmsBalance}
                                 disabled={loadingSms}
                                 className={`p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-all ${loadingSms ? 'animate-spin' : ''}`}
                             >
@@ -233,42 +233,42 @@ const CommunicationTab = ({ token }) => {
                             <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Twilio Account Settings</h3>
                         </div>
                         <p className="text-xs text-slate-500 mb-4 italic">Configure your own Twilio account to use your custom sender ID and manage your own balance.</p>
-                        
+
                         <form onSubmit={handleSaveTwilio} className="space-y-4">
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Account SID</label>
-                                    <input 
+                                    <input
                                         type="password"
                                         value={twilioConfig.accountSid}
-                                        onChange={e => setTwilioConfig({...twilioConfig, accountSid: e.target.value})}
+                                        onChange={e => setTwilioConfig({ ...twilioConfig, accountSid: e.target.value })}
                                         className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
                                         placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxx"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Auth Token</label>
-                                    <input 
+                                    <input
                                         type="password"
                                         value={twilioConfig.authToken}
-                                        onChange={e => setTwilioConfig({...twilioConfig, authToken: e.target.value})}
+                                        onChange={e => setTwilioConfig({ ...twilioConfig, authToken: e.target.value })}
                                         className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
                                         placeholder="••••••••••••••••••••••••••••••••"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Twilio Phone Number</label>
-                                    <input 
+                                    <input
                                         type="text"
                                         value={twilioConfig.phoneNumber}
-                                        onChange={e => setTwilioConfig({...twilioConfig, phoneNumber: e.target.value})}
+                                        onChange={e => setTwilioConfig({ ...twilioConfig, phoneNumber: e.target.value })}
                                         className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
                                         placeholder="+1XXXXXXXXXX"
                                     />
                                 </div>
                                 <div className="flex items-center gap-3 py-2">
-                                    <div 
-                                        onClick={() => setTwilioConfig({...twilioConfig, isActive: !twilioConfig.isActive})}
+                                    <div
+                                        onClick={() => setTwilioConfig({ ...twilioConfig, isActive: !twilioConfig.isActive })}
                                         className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-300 ${twilioConfig.isActive ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}`}
                                     >
                                         <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${twilioConfig.isActive ? 'translate-x-6' : 'translate-x-0'}`}></div>
@@ -276,8 +276,8 @@ const CommunicationTab = ({ token }) => {
                                     <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Use this account for SMS</span>
                                 </div>
                             </div>
-                            
-                            <button 
+
+                            <button
                                 type="submit"
                                 disabled={savingTwilio}
                                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50"
