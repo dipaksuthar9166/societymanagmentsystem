@@ -223,19 +223,19 @@ const OTPLogin = () => {
                                 <form onSubmit={sendOTP} className="space-y-6">
                                     <div className="group">
                                         <label className="block text-xs font-black text-indigo-300 uppercase tracking-widest mb-2 pl-1">
-                                            Email Address
+                                            Login ID (Email or Mobile)
                                         </label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <Mail size={18} className="text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
+                                                <Globe size={18} className="text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
                                             </div>
                                             <input
-                                                type="email"
+                                                type="text"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 required
                                                 className="w-full pl-12 pr-4 py-4 bg-black/30 border border-indigo-500/20 text-white rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all placeholder-white/30 font-medium"
-                                                placeholder="your@email.com"
+                                                placeholder="Mobile Number or Email"
                                             />
                                         </div>
                                     </div>

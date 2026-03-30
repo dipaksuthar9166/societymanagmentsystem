@@ -142,6 +142,30 @@ const updateCustomer = async (req, res) => {
     }
 };
 
+// @desc    Verify customer manually without OTP/Link
+// @route   POST /api/admin/customers/:id/verify-manually
+// @access  Admin
+const verifyCustomerManually = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (user.company?.toString() !== req.user.company?.toString()) {
+            return res.status(401).json({ message: 'Not authorized for this society' });
+        }
+
+        user.isVerified = true;
+        user.status = 'active';
+        user.verificationToken = null;
+        user.verificationTokenExpiry = null;
+        await user.save();
+
+        res.json({ success: true, message: 'Resident activated manually' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+};
+
 // @desc    Update Twilio Configuration
 // @route   POST /api/admin/society/twilio
 // @access  Admin/Superadmin
@@ -254,5 +278,6 @@ module.exports = {
     deleteCustomer,
     updateCustomer,
     getSMSBalance,
-    saveTwilioConfig
+    saveTwilioConfig,
+    verifyCustomerManually
 };

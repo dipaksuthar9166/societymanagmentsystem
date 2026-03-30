@@ -216,15 +216,36 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                                         const data = await res.json();
                                                         if (res.ok) {
                                                             if (data.verificationLink) {
-                                                                const confirmLink = await showConfirm('Email Service Not Configured', 'Do you want to copy the verification link?', 'Copy Link', 'Cancel');
+                                                                const confirmLink = await showConfirm('Verification Sent', 'Do you want to copy the manual verification link?', 'Copy Link', 'Cancel');
                                                                 if (confirmLink) { navigator.clipboard.writeText(data.verificationLink); await showAlert('Copied!', 'Verification link copied.', 'success'); }
                                                             } else { await showAlert('Sent!', 'Verification SMS OTP & Email sent.', 'success'); }
                                                         } else { await showAlert('Failed', (data.message || 'Failed'), 'error'); }
                                                     } catch (error) { console.error(error); await showAlert('Error', error.message, 'error'); }
                                                 }}
-                                                className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold text-[10px] uppercase tracking-wider hover:underline"
+                                                className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold text-[10px] uppercase tracking-wider hover:underline border-r border-slate-200 dark:border-slate-700 pr-2"
                                             >
                                                 Resend
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    const confirmed = await showConfirm('Manual Activation?', `Confirm ${t.name} has been verified offline?`, 'Verify & Activate', 'Cancel');
+                                                    if (!confirmed) return;
+                                                    try {
+                                                        const res = await fetch(`${API_BASE_URL}/admin/customers/${t._id}/verify-manually`, {
+                                                            method: 'POST',
+                                                            headers: { 'Authorization': `Bearer ${token}` }
+                                                        });
+                                                        if (res.ok) {
+                                                            await showAlert('Verified!', 'Resident Activated!', 'success');
+                                                            refresh();
+                                                        } else {
+                                                            await showAlert('Error', 'Manual verification failed.', 'error');
+                                                        }
+                                                    } catch (error) { await showAlert('Error', error.message, 'error'); }
+                                                }}
+                                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold text-[10px] uppercase tracking-wider hover:underline"
+                                            >
+                                                Verify Now
                                             </button>
                                         </div>
                                     )}

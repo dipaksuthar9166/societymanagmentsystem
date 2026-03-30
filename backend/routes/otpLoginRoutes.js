@@ -19,18 +19,26 @@ const generateToken = (id) => {
  */
 router.post('/send', async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email: loginId } = req.body;
 
-        if (!email) {
-            return res.status(400).json({ message: 'Email is required' });
+        if (!loginId) {
+            return res.status(400).json({ message: 'Login ID (Email or Mobile) is required' });
         }
 
-        // Find user
-        const user = await User.findOne({ email });
+        // Find user by email OR contactNumber
+        let user = await User.findOne({ 
+            $or: [
+                { email: loginId.toLowerCase() },
+                { contactNumber: loginId },
+                { mobile: loginId }
+            ]
+        });
 
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ message: 'Resident account not found with this ID' });
         }
+
+        const email = user.email; // Use email as the canonical key for OTP store
 
         // Check if user is active
         if (user.status === 'inactive') {
@@ -92,11 +100,26 @@ router.post('/send', async (req, res) => {
  */
 router.post('/verify', async (req, res) => {
     try {
-        const { email, otp } = req.body;
+        const { email: loginId, otp } = req.body;
 
-        if (!email || !otp) {
-            return res.status(400).json({ message: 'Email and OTP are required' });
+        if (!loginId || !otp) {
+            return res.status(400).json({ message: 'Login ID and OTP are required' });
         }
+
+        // Find user first to get canonical email
+        const user = await User.findOne({ 
+            $or: [
+                { email: loginId.toLowerCase() },
+                { contactNumber: loginId },
+                { mobile: loginId }
+            ]
+        }).populate('company', 'name logo status');
+
+        if (!user) {
+            return res.status(404).json({ message: 'Resident account not found' });
+        }
+
+        const email = user.email;
 
         // Verify OTP
         const otpResult = verifyOTP(email, otp);
@@ -106,13 +129,6 @@ router.post('/verify', async (req, res) => {
                 success: false,
                 message: otpResult.message
             });
-        }
-
-        // Find user
-        const user = await User.findOne({ email }).populate('company', 'name logo status');
-
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
         }
 
         // Check company status
