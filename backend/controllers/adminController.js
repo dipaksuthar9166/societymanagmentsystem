@@ -208,32 +208,40 @@ const getSMSBalance = async (req, res) => {
         }
 
         if (!sid || !auth) {
-            return res.status(404).json({ message: 'SMS Service (Twilio) not configured.' });
+            return res.json({ balance: '0.00', currency: '$', note: 'Twilio not configured in Environment or Society settings.', isGlobal: true });
         }
 
-        const client = require('twilio')(sid, auth);
-        
         try {
-            const balanceData = await client.balance.fetch();
-            res.json({
-                balance: balanceData.balance,
-                currency: balanceData.currency || 'USD',
-                accountName: balanceData.accountSid === sid ? 'Active Account' : balanceData.accountName,
-                isGlobal: !company?.twilioConfig?.isActive
-            });
-        } catch (err) {
-            const account = await client.api.v2010.accounts(sid).fetch();
-            res.json({
-                status: account.status,
-                type: account.type,
-                balance: 'Upgraded Account Required for Live Balance API',
-                note: 'Twilio Trial or certain regions do not support direct balance fetch.',
+            const client = require('twilio')(sid, auth);
+            
+            try {
+                // Try the newest balance API
+                const balanceData = await client.balance.fetch();
+                return res.json({
+                    balance: balanceData.balance,
+                    currency: balanceData.currency || '$',
+                    isGlobal: !company?.twilioConfig?.isActive
+                });
+            } catch (balanceApiErr) {
+                // Fallback: Check if account exists at least
+                const account = await client.api.v2010.accounts(sid).fetch();
+                return res.json({
+                    balance: account.status === 'active' ? 'Active' : 'Account Error',
+                    currency: '',
+                    note: 'Balance API only available on paid Twilio accounts.',
+                    isGlobal: !company?.twilioConfig?.isActive
+                });
+            }
+        } catch (twilioErr) {
+            return res.json({
+                balance: 'Error',
+                note: 'Invalid Twilio Credentials: ' + twilioErr.message,
                 isGlobal: !company?.twilioConfig?.isActive
             });
         }
     } catch (error) {
-        console.error('Twilio Balance Error:', error.message);
-        res.status(500).json({ message: 'Failed to fetch balance: ' + error.message });
+        console.error('Twilio Balance Controller Error:', error);
+        res.json({ balance: 'Error', note: 'Internal Server Error fetching balance.' });
     }
 };
 
