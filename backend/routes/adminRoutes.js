@@ -34,7 +34,7 @@ router.route('/customers/:id')
     .put(protect, authorize('admin', 'superadmin'), updateCustomer)
     .delete(protect, authorize('admin', 'superadmin'), deleteCustomer);
 
-router.post('/customers/:id/verify-manually', protect, authorize('admin'), verifyCustomerManually);
+router.post('/customers/:id/verify-manually', protect, authorize('admin', 'superadmin'), verifyCustomerManually);
 
 // Expense Management
 router.route('/expenses')

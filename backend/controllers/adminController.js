@@ -150,7 +150,12 @@ const verifyCustomerManually = async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        if (user.company?.toString() !== req.user.company?.toString()) {
+        // Allow superadmin, or admin from the same society
+        const isSuperAdmin = req.user.role === 'superadmin';
+        const isSameSociety = user.company?.toString() === req.user.company?.toString();
+
+        if (!isSuperAdmin && !isSameSociety) {
+            console.warn(`[Admin] Unauthorized manual verify attempt: Admin ${req.user._id} vs User Society ${user.company}`);
             return res.status(401).json({ message: 'Not authorized for this society' });
         }
 
@@ -160,8 +165,10 @@ const verifyCustomerManually = async (req, res) => {
         user.verificationTokenExpiry = null;
         await user.save();
 
+        console.log(`✅ User ${user.email} manually verified by ${req.user.name}`);
         res.json({ success: true, message: 'Resident activated manually' });
     } catch (error) {
+        console.error('❌ Manual Verify Error:', error);
         res.status(500).json({ message: 'Server Error: ' + error.message });
     }
 };
