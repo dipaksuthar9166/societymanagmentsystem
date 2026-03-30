@@ -46,8 +46,8 @@ const HeroSection = ({ stats }) => {
                                 The Future of <br />
                                 <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-cyan-500 bg-clip-text text-transparent">Urban Living.</span>
                             </h1>
-                            <p className="text-slate-600 dark:text-slate-400 text-xl max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-                                SocieHub is a comprehensive ecosystem designed to digitize modern communities. From smart gate security to fully automated financial billing.
+                            <p className="text-sm md:text-lg text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
+                                Guru Kripa Building Site is a comprehensive ecosystem designed to digitize modern communities. From smart gate security to fully automated financial billing.
                             </p>
                         </motion.div>
 

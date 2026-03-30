@@ -20,7 +20,7 @@ const MarqueeSection = ({ brands = [] }) => (
         </div>
         <div className="flex overflow-hidden group">
             <div className="flex animate-marquee group-hover:pause gap-12 md:gap-24 items-center whitespace-nowrap px-10">
-                {(brands.length > 0 ? [...brands, ...brands] : ['Guru Kripa Building', 'Nexus Towers', 'Global Heights', 'Skyline Residency', 'Emerald Estate', 'Urban Oasis', 'Guru Kripa Building', 'Nexus Towers']).map((brand, i) => (
+                {(brands.length > 0 ? [...brands, ...brands] : ['Guru Kripa Building Site', 'Nexus Towers', 'Global Heights', 'Skyline Residency', 'Emerald Estate', 'Urban Oasis', 'Guru Kripa Building Site', 'Nexus Towers']).map((brand, i) => (
                     <span key={i} className="text-3xl md:text-5xl font-black text-slate-200 dark:text-slate-800 transition-colors hover:text-indigo-600 dark:hover:text-indigo-500 cursor-default uppercase italic tracking-tighter">
                         {brand}
                     </span>
@@ -96,14 +96,14 @@ const ComparisonSection = () => {
             <div className="max-w-5xl mx-auto px-6 relative z-10">
                 <div className="text-center mb-16 space-y-4">
                     <span className="text-indigo-400 font-bold uppercase tracking-widest text-xs">Modern Transformation</span>
-                    <h2 className="text-4xl md:text-5xl font-black">Upgrade to <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Guru Kripa Building</span></h2>
+                    <h2 className="text-4xl md:text-5xl font-black">Upgrade to <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Guru Kripa 2.0</span></h2>
                 </div>
 
                 <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl">
                     <div className="grid grid-cols-3 bg-indigo-600 p-8 font-black uppercase tracking-widest text-[10px]">
                         <div>Feature</div>
                         <div className="opacity-60">Legacy Systems</div>
-                        <div className="text-white">SocieHub Premium</div>
+                        <div className="text-white">Guru Kripa Building Site</div>
                     </div>
                     {points.map((p, i) => (
                         <div key={i} className="grid grid-cols-3 p-8 border-t border-white/5 items-center group hover:bg-white/5 transition-colors">
@@ -129,7 +129,7 @@ const CTASection = () => {
                 <div className="bg-indigo-600 rounded-[3.5rem] p-12 lg:p-24 text-center text-white relative overflow-hidden">
                     <div className="relative z-10 space-y-10">
                         <h2 className="text-5xl lg:text-7xl font-black leading-tight max-w-4xl mx-auto">Ready to digitalize <br /> your society?</h2>
-                        <p className="text-xl opacity-80 max-w-2xl mx-auto font-medium">Join 500+ modern communities who have already upgraded their urban lifestyle with Guru Kripa Building.</p>
+                        <p className="text-xl opacity-80 max-w-2xl mx-auto font-medium">Join 500+ modern communities who have already upgraded their urban lifestyle with Guru Kripa.</p>
                         
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <button 
@@ -302,7 +302,7 @@ const LandingPage = () => {
                         <div className="divide-y divide-slate-100 dark:divide-white/5">
                             <FAQItem question="Is our data secure on the cloud?" answer="Yes, we use AWS and Google Cloud infrastructure with bank-grade encryption (AES-256). Each society has an isolated data bucket ensuring absolute privacy." />
                             <FAQItem question="How do residents get their login credentials?" answer="Once an admin adds a resident, they receive an automated WhatsApp and Email with an OTP verification link to set up their account." />
-                            <FAQItem question="Can we manage multiple society accounts?" answer="Yes, committee members who live in multiple 'SocieHub Societies' can switch accounts with a single click in the app." />
+                            <FAQItem question="Can we manage multiple society accounts?" answer="Yes, committee members who live in multiple 'Guru Kripa Societies' can switch accounts with a single click in the app." />
                         </div>
                     </div>
                 </section>

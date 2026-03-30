@@ -99,7 +99,7 @@ const AboutUsPage = () => {
                                             <p className="text-orange-500 font-bold uppercase tracking-widest text-sm mt-1">Founding Developer & Lead Architect</p>
                                         </div>
                                         <p className="text-slate-600 dark:text-slate-400 font-medium italic">
-                                            "Guru Kripa Building is more than just a software; it's a commitment to making community living efficient, secure, and truly digital for every resident."
+                                            "Guru Kripa Building Site is more than just a software; it's a commitment to making community living efficient, secure, and truly digital for every resident."
                                         </p>
                                         <div className="flex justify-center md:justify-start gap-6">
                                             <a href="#" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-orange-500 transition-colors">GitHub</a>
@@ -126,7 +126,7 @@ const AboutUsPage = () => {
                         <div>
                             <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-8 leading-tight">Engineering for Impact</h2>
                             <div className="space-y-6 text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                                <p>Guru Kripa Building has been built to solve real-world friction. From tracking unpaid maintenance to vetting security guards, we've lived the problems we're now solving.</p>
+                                <p>Guru Kripa has been built to solve real-world friction. From tracking unpaid maintenance to vetting security guards, we've lived the problems we're now solving.</p>
                                 <p>Headquartered in Ahmedabad, Gujarat, we are dedicated to making urban living better, safer, and more connected for everyone.</p>
                             </div>
                             <div className="mt-12 flex gap-12 text-center md:text-left">

@@ -31,7 +31,7 @@ const CommunicationTab = ({ token, societyDetails }) => {
                             <tr>
                                 <td align="center" style="background-color: #f9f9f9; padding: 30px; border-bottom: 3px solid #006D77;" class="header-padding">
                                     <h1 class="logo-text" style="color: #006D77; margin: 0; font-size: 28px; letter-spacing: 1px; font-family: Arial, sans-serif; font-weight: bold;">
-                                        ${(societyDetails?.name || 'SocieHub').split(' ')[0]} <span style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: normal; color: #333;">${(societyDetails?.name || 'Cloud').split(' ').slice(1).join(' ')}</span>
+                                        ${(societyDetails?.name || 'Guru Kripa').split(' ')[0]} <span style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: normal; color: #333;">${(societyDetails?.name || 'Building Site').split(' ').slice(1).join(' ')}</span>
                                     </h1>
                                     <p style="font-size: 13px; color: #666; margin: 5px 0 0; text-transform: uppercase; letter-spacing: 2px;">Society Management Portal</p>
                                 </td>
@@ -72,7 +72,7 @@ const CommunicationTab = ({ token, societyDetails }) => {
                             <!-- Footer -->
                             <tr>
                                 <td align="center" style="background-color: #006D77; color: white; padding: 20px; font-size: 12px;">
-                                    <p style="margin: 0;">&copy; 2026 ${societyDetails?.name || 'SocieHub'} Portal | Secure Access</p>
+                                    <p style="margin: 0;">&copy; 2026 ${societyDetails?.name || 'Guru Kripa'} Portal | Secure Access</p>
                                     <p style="margin: 10px 0 0; opacity: 0.8;">Automated Notification System</p>
                                 </td>
                             </tr>

@@ -34,8 +34,8 @@ const Navbar = ({ scrolled }) => {
                         <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#030712] rounded-full animate-pulse"></div>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Socie<span className="text-indigo-600">Hub</span></span>
-                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mt-0.5">Community OS</span>
+                        <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight leading-none">Guru<span className="text-indigo-600">Kripa</span></span>
+                        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mt-0.5">Building Site</span>
                     </div>
                 </Link>
 
@@ -112,7 +112,7 @@ const Navbar = ({ scrolled }) => {
                         <div className="p-8 h-full flex flex-col justify-between">
                             <div className="space-y-8">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xl font-black dark:text-white">Guru Kripa <span className="text-indigo-600">Building</span></span>
+                                    <span className="text-xl font-black dark:text-white">Guru<span className="text-indigo-600">Kripa</span></span>
                                     <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-400"><X /></button>
                                 </div>
                                 <div className="space-y-4">

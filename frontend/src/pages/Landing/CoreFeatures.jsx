@@ -89,7 +89,7 @@ const CoreFeatures = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-20 space-y-4">
                     <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-xs">Standardized Excellence</span>
-                    <h2 className="text-4xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white">The Nexus <span className="text-slate-400">Suites.</span></h2>
+                    <h2 className="text-4xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white">Guru Kripa <span className="text-slate-400">Suites.</span></h2>
                 </div>
 
                 <FeatureBlock
