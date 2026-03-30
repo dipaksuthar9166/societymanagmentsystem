@@ -1,9 +1,9 @@
 
 import React, { useState } from 'react';
-import { Mail, Send, CheckCircle, AlertCircle, Smartphone, Monitor, RefreshCw } from 'lucide-react';
+import { Mail, Send, CheckCircle, AlertCircle, Smartphone, Monitor, RefreshCw, Settings } from 'lucide-react';
 import { API_BASE_URL } from '../../../config';
 
-const CommunicationTab = ({ token }) => {
+const CommunicationTab = () => {
     const [testEmail, setTestEmail] = useState('');
     const [sending, setSending] = useState(false);
     const [status, setStatus] = useState(null); // { type: 'success' | 'error', message: '' }
