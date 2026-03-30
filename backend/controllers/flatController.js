@@ -157,9 +157,18 @@ const updateFlat = async (req, res) => {
 
         // DOUBLE BOOKING CHECK
         if (flat.tenantId) {
-            const isAssigningNew = (newUser) || (resolvedTenantId && resolvedTenantId.toString() !== flat.tenantId.toString());
-            // Note: If updating rent of same tenant, resolvedTenantId equals flat.tenantId, so allowed.
-            if (isAssigningNew) {
+            const isAssigningDifferent = (resolvedTenantId && resolvedTenantId.toString() !== flat.tenantId.toString());
+            const isTryingToCreateNewOverExisting = (newUser && newUser.email && (!resolvedTenantId || resolvedTenantId.toString() !== flat.tenantId.toString()));
+            
+            // If the admin is providing 'newUser' but that user's email belongs to the SAME resident, allow it (as an update).
+            if (newUser && newUser.email) {
+                const existingUserWithEmail = await User.findOne({ email: newUser.email });
+                if (existingUserWithEmail && existingUserWithEmail._id.toString() === flat.tenantId.toString()) {
+                    // It's the same person, allow update
+                } else if (isTryingToCreateNewOverExisting || isAssigningDifferent) {
+                    return res.status(400).json({ message: 'Room is already occupied! Please "Vacate" it first before re-assigning to a different person.' });
+                }
+            } else if (isAssigningDifferent) {
                 return res.status(400).json({ message: 'Room is already occupied! Please "Vacate" it first before re-assigning.' });
             }
         }
