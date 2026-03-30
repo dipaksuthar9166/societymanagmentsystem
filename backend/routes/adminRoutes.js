@@ -27,12 +27,12 @@ router.get('/dashboard', protect, authorize('admin'), (req, res) => {
 
 // Customer Management Routes
 router.route('/customers')
-    .get(protect, authorize('admin'), getCustomers)
-    .post(protect, authorize('admin'), createCustomer);
+    .get(protect, authorize('admin', 'superadmin'), getCustomers)
+    .post(protect, authorize('admin', 'superadmin'), createCustomer);
 
 router.route('/customers/:id')
-    .put(protect, authorize('admin'), updateCustomer)
-    .delete(protect, authorize('admin'), deleteCustomer);
+    .put(protect, authorize('admin', 'superadmin'), updateCustomer)
+    .delete(protect, authorize('admin', 'superadmin'), deleteCustomer);
 
 // Expense Management
 router.route('/expenses')

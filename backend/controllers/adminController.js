@@ -79,35 +79,38 @@ const createCustomer = async (req, res) => {
 
 // @desc    Delete a tenant
 // @route   DELETE /api/admin/customers/:id
-// @access  Admin
+// @access  Admin/Superadmin
 const deleteCustomer = async (req, res) => {
     try {
-        console.log(`[Admin] Deleting user: ${req.params.id} requested by admin: ${req.user._id}`);
+        console.log(`[Admin] DELETE call for User: ${req.params.id} by Requester: ${req.user._id} (${req.user.role})`);
         const user = await User.findById(req.params.id);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Verify user belongs to admin's company
-        const userCompanyId = user.company ? user.company.toString() : null;
-        const adminCompanyId = req.user.company ? req.user.company.toString() : null;
+        // Allow Superadmins to delete anyone, or Admins to delete from their own society
+        if (req.user.role !== 'superadmin') {
+            const userCompanyId = user.company ? user.company.toString() : 'None';
+            const adminCompanyId = req.user.company ? req.user.company.toString() : 'None';
 
-        if (!adminCompanyId) {
-            return res.status(400).json({ message: 'Admin is not associated with any society' });
-        }
+            console.log(`[Auth Check] Resident Co: ${userCompanyId}, Requester Co: ${adminCompanyId}`);
 
-        if (userCompanyId !== adminCompanyId) {
-            console.error(`[Auth] Admin ${req.user._id} tried to delete user ${user._id} from different society. Admin Co: ${adminCompanyId}, User Co: ${userCompanyId}`);
-            return res.status(401).json({ message: 'Not authorized to delete users from other societies' });
+            if (userCompanyId !== adminCompanyId) {
+                return res.status(401).json({ 
+                    message: 'Not authorized to delete users from other societies',
+                    debug: { residentSociety: userCompanyId, requesterSociety: adminCompanyId }
+                });
+            }
         }
 
         // Check if deleting self
         if (user._id.toString() === req.user._id.toString()) {
-            return res.status(400).json({ message: 'Admin cannot delete their own account from here' });
+            return res.status(400).json({ message: 'Security: You cannot delete your own account from here.' });
         }
 
         await user.deleteOne();
+        console.log(`[Admin] User ${req.params.id} deleted successfully`);
         res.json({ message: 'User removed successfully' });
     } catch (error) {
         console.error('Delete User Error:', error);
@@ -117,7 +120,7 @@ const deleteCustomer = async (req, res) => {
 
 // @desc    Update a tenant's details
 // @route   PUT /api/admin/customers/:id
-// @access  Admin
+// @access  Admin/Superadmin
 const updateCustomer = async (req, res) => {
     try {
         const { name, email, password, flatNo, mobile, role, contactNumber } = req.body;
@@ -127,8 +130,8 @@ const updateCustomer = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Verify user belongs to admin's company
-        if (user.company.toString() !== req.user.company.toString()) {
+        // Authority check
+        if (req.user.role !== 'superadmin' && user.company.toString() !== req.user.company.toString()) {
             return res.status(401).json({ message: 'Not authorized to update users from other societies' });
         }
 
