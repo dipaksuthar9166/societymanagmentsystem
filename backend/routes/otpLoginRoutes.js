@@ -43,7 +43,8 @@ router.post('/send', async (req, res) => {
 
         try {
             // 1. Try to send email + SMS config
-            const result = await sendOTP(email, user.name, user.contactNumber);
+            const customTwilio = (user.company && user.company.twilioConfig?.isActive) ? user.company.twilioConfig : null;
+            const result = await sendOTP(email, user.name, user.contactNumber, customTwilio);
 
             if (result.success) {
                 emailSent = true;

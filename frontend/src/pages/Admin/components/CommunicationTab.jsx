@@ -108,6 +108,13 @@ const CommunicationTab = () => {
 
     const [smsBalance, setSmsBalance] = useState(null);
     const [loadingSms, setLoadingSms] = useState(false);
+    const [twilioConfig, setTwilioConfig] = useState({
+        accountSid: '',
+        authToken: '',
+        phoneNumber: '',
+        isActive: false
+    });
+    const [savingTwilio, setSavingTwilio] = useState(false);
 
     const fetchSmsBalance = async () => {
         setLoadingSms(true);
@@ -117,10 +124,39 @@ const CommunicationTab = () => {
             });
             const data = await res.json();
             setSmsBalance(data);
+            
+            // If data contains info about the config, we could pre-fill some things if needed, 
+            // but normally we need a separate fetch for security or just rely on the balance check response.
         } catch (error) {
             console.error('Failed to fetch SMS balance:', error);
         } finally {
             setLoadingSms(false);
+        }
+    };
+
+    const handleSaveTwilio = async (e) => {
+        e.preventDefault();
+        setSavingTwilio(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/society/twilio`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}` 
+                },
+                body: JSON.stringify(twilioConfig)
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setStatus({ type: 'success', message: '✅ Twilio Configuration Saved Successfully!' });
+                fetchSmsBalance();
+            } else {
+                setStatus({ type: 'error', message: data.message || 'Failed to save config' });
+            }
+        } catch (error) {
+            setStatus({ type: 'error', message: 'Network error saving Twilio config' });
+        } finally {
+            setSavingTwilio(false);
         }
     };
 
@@ -129,15 +165,15 @@ const CommunicationTab = () => {
     }, [token]);
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto max-h-screen custom-scrollbar">
             <div className="flex justify-between items-center mb-6">
                 <div>
                     <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Communication & Email</h2>
-                    <p className="text-slate-500 dark:text-slate-400">Manage email templates and notifications</p>
+                    <p className="text-slate-500 dark:text-slate-400">Manage email templates and SMS notifications</p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* Left Side: Test & Settings */}
                 <div className="space-y-6">
                     {/* SMS Balance Card */}
@@ -145,11 +181,13 @@ const CommunicationTab = () => {
                         <div className="absolute top-0 right-0 p-4 opacity-10 -rotate-12"><Smartphone size={80} /></div>
                         <div className="relative z-10 flex justify-between items-start">
                             <div>
-                                <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">Twilio Account Balance</p>
+                                <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">
+                                    {smsBalance?.isGlobal ? 'Global Balance (System)' : 'Society Account Balance'}
+                                </p>
                                 {loadingSms ? (
                                     <div className="h-10 w-32 bg-white/10 animate-pulse rounded-lg mt-1"></div>
                                 ) : (
-                                    <h2 className="text-3xl font-black">{smsBalance?.balance ? `${smsBalance.currency || '$'}${smsBalance.balance}` : 'N/A'}</h2>
+                                    <h2 className="text-3xl font-black">{smsBalance?.balance && !isNaN(smsBalance.balance) ? `${smsBalance.currency || '$'}${smsBalance.balance}` : smsBalance?.balance || '0.00'}</h2>
                                 )}
                                 <p className="text-[10px] mt-2 font-bold text-white/50 uppercase tracking-tighter">Current Plan: {smsBalance?.type || 'Standard'}</p>
                             </div>
@@ -162,6 +200,67 @@ const CommunicationTab = () => {
                             </button>
                         </div>
                         {smsBalance?.note && <p className="mt-4 text-[9px] font-bold text-white/40 italic">{smsBalance.note}</p>}
+                    </div>
+
+                    {/* Twilio Configuration Form */}
+                    <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Settings className="text-indigo-500" size={20} />
+                            <h3 className="text-lg font-semibold text-slate-800 dark:text-white">Twilio Account Settings</h3>
+                        </div>
+                        <p className="text-xs text-slate-500 mb-4 italic">Configure your own Twilio account to use your custom sender ID and manage your own balance.</p>
+                        
+                        <form onSubmit={handleSaveTwilio} className="space-y-4">
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Account SID</label>
+                                    <input 
+                                        type="password"
+                                        value={twilioConfig.accountSid}
+                                        onChange={e => setTwilioConfig({...twilioConfig, accountSid: e.target.value})}
+                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+                                        placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxx"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Auth Token</label>
+                                    <input 
+                                        type="password"
+                                        value={twilioConfig.authToken}
+                                        onChange={e => setTwilioConfig({...twilioConfig, authToken: e.target.value})}
+                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+                                        placeholder="••••••••••••••••••••••••••••••••"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Twilio Phone Number</label>
+                                    <input 
+                                        type="text"
+                                        value={twilioConfig.phoneNumber}
+                                        onChange={e => setTwilioConfig({...twilioConfig, phoneNumber: e.target.value})}
+                                        className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:border-indigo-500 transition-colors"
+                                        placeholder="+1XXXXXXXXXX"
+                                    />
+                                </div>
+                                <div className="flex items-center gap-3 py-2">
+                                    <div 
+                                        onClick={() => setTwilioConfig({...twilioConfig, isActive: !twilioConfig.isActive})}
+                                        className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors duration-300 ${twilioConfig.isActive ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                    >
+                                        <div className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${twilioConfig.isActive ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                                    </div>
+                                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Use this account for SMS</span>
+                                </div>
+                            </div>
+                            
+                            <button 
+                                type="submit"
+                                disabled={savingTwilio}
+                                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50"
+                            >
+                                {savingTwilio ? 'Saving...' : 'Save Twilio Configuration'}
+                            </button>
+                        </form>
                     </div>
 
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">

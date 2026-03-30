@@ -75,7 +75,7 @@ const verifyOTP = (email, otp) => {
 }/**
  * Send OTP email and optional SMS
  */
-const sendOTP = async (email, name, phone = null) => {
+const sendOTP = async (email, name, phone = null, customConfig = null) => {
     try {
         const otp = generateOTP();
         storeOTP(email, otp);
@@ -115,9 +115,13 @@ const sendOTP = async (email, name, phone = null) => {
         } catch (e) { console.error("Email setup error", e.message); }
 
         // 2. Prepare SMS (Twilio)
-        if (phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+        const sid = customConfig?.accountSid || process.env.TWILIO_ACCOUNT_SID;
+        const auth = customConfig?.authToken || process.env.TWILIO_AUTH_TOKEN;
+        const sender = customConfig?.phoneNumber || process.env.TWILIO_PHONE_NUMBER;
+
+        if (phone && sid && auth && sender) {
             try {
-                const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+                const twilioClient = require('twilio')(sid, auth);
                 
                 // Smarter formatting
                 let formattedPhone = phone.replace(/\D/g, ''); // Remove non-digits
@@ -131,10 +135,10 @@ const sendOTP = async (email, name, phone = null) => {
 
                 promises.push(twilioClient.messages.create({
                     body: `Your STATUS Sharan verification code is: ${otp}. Valid for 5 mins.`,
-                    from: process.env.TWILIO_PHONE_NUMBER,
+                    from: sender,
                     to: formattedPhone
                 }).then(() => {
-                    console.log(`📱 SMS OTP sent to ${formattedPhone}`);
+                    console.log(`📱 SMS OTP sent to ${formattedPhone} using ${sid === process.env.TWILIO_ACCOUNT_SID ? 'Global' : 'Society'} keys`);
                     return { type: 'sms', success: true };
                 }).catch(err => {
                     console.error(`❌ SMS failed: ${err.message}`);
@@ -148,7 +152,7 @@ const sendOTP = async (email, name, phone = null) => {
         const anySuccess = results.some(r => r.success);
 
         if (anySuccess) {
-            return { success: true, results };
+            return { success: true, results, otp }; // Return OTP just in case for debugging
         } else {
             return { success: false, error: 'All delivery services (Email/SMS) failed.', details: results };
         }

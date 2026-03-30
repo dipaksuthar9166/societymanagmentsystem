@@ -61,6 +61,12 @@ const companySchema = mongoose.Schema({
         keySecret: { type: String }, // Razorpay Key Secret
         isActive: { type: Boolean, default: false }
     },
+    twilioConfig: {
+        accountSid: { type: String },
+        authToken: { type: String },
+        phoneNumber: { type: String },
+        isActive: { type: Boolean, default: false }
+    },
     subscription: {
         planName: String, // Cached for easier access
         startDate: { type: Date, default: Date.now },

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Search, Settings, User, Menu, X, Sun, Moon, Clock, LogOut } from 'lucide-react';
+import { Bell, Search, Settings, User, Menu, X, Sun, Moon, Clock, LogOut, Smartphone, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { API_BASE_URL, resolveImageURL } from '../config';
@@ -10,6 +10,31 @@ const Navbar = ({ title, showSearch = true, notifications = 0, onMenuClick, onTa
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
     const [currentTime, setCurrentTime] = useState(new Date());
+
+    const [smsBalance, setSmsBalance] = useState(null);
+    const [loadingSms, setLoadingSms] = useState(false);
+
+    const fetchSmsBalance = async () => {
+        if (!user?.token || (user?.role !== 'admin' && user?.role !== 'superadmin')) return;
+        setLoadingSms(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/sms-balance`, {
+                headers: { Authorization: `Bearer ${user.token}` }
+            });
+            const data = await res.json();
+            setSmsBalance(data);
+        } catch (error) {
+            console.error('Navbar SMS fetch fail:', error);
+        } finally {
+            setLoadingSms(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchSmsBalance();
+        const interval = setInterval(fetchSmsBalance, 300000); // 5 mins
+        return () => clearInterval(interval);
+    }, [user?.token]);
 
     // Live Clock
     useEffect(() => {
@@ -87,6 +112,21 @@ const Navbar = ({ title, showSearch = true, notifications = 0, onMenuClick, onTa
                                 placeholder="Search..."
                                 className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full text-xs font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all dark:text-white"
                             />
+                        </div>
+                    )}
+
+                    {/* SMS Balance Bubble (Admin Only) */}
+                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-100 dark:border-indigo-800 rounded-full group cursor-pointer hover:bg-indigo-100 dark:hover:bg-indigo-800/50 transition-all mr-2"
+                             onClick={() => onTabChange && onTabChange('communication')}>
+                            <Smartphone size={14} className="text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+                            {loadingSms ? (
+                                <div className="w-8 h-3 bg-indigo-200 dark:bg-indigo-700 animate-pulse rounded"></div>
+                            ) : (
+                                <span className="text-[11px] font-black text-indigo-700 dark:text-indigo-300">
+                                    {smsBalance?.balance ? `${smsBalance.currency || '$'}${smsBalance.balance}` : 'SMS 0'}
+                                </span>
+                            )}
                         </div>
                     )}
 
