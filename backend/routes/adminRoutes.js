@@ -47,7 +47,7 @@ router.get('/stats', protect, authorize('admin'), getAdminStats); // Keep for fr
 router.get('/analytics/detailed', protect, authorize('admin'), getAdminDetailedAnalytics);
 
 router.get('/sms-balance', protect, authorize('admin', 'superadmin'), getSMSBalance);
-router.post('/society/twilio', protect, authorize('admin'), saveTwilioConfig);
+router.post('/society/twilio', protect, authorize('admin', 'superadmin'), saveTwilioConfig);
 
 router.route('/society')
     .get(protect, getMyCompany)

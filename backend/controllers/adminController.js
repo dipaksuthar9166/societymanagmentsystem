@@ -132,23 +132,40 @@ const saveTwilioConfig = async (req, res) => {
         const { accountSid, authToken, phoneNumber, isActive } = req.body;
         const companyId = req.user.company;
 
-        if (!companyId) return res.status(400).json({ message: 'No society associated.' });
+        console.log(`[Admin] Saving Twilio Config for Company: ${companyId} by User: ${req.user._id}`);
+        console.log(`[Data] SID: ${accountSid ? '***' + accountSid.slice(-4) : 'Empty'}, Active: ${isActive}`);
+
+        if (!companyId) return res.status(400).json({ message: 'User not associated with any society/company.' });
 
         const company = await Company.findById(companyId);
-        if (!company) return res.status(404).json({ message: 'Society not found.' });
+        if (!company) return res.status(404).json({ message: 'Society record not found in database.' });
 
+        // Update config
         company.twilioConfig = {
             accountSid: accountSid || company.twilioConfig?.accountSid,
             authToken: authToken || company.twilioConfig?.authToken,
             phoneNumber: phoneNumber || company.twilioConfig?.phoneNumber,
-            isActive: isActive !== undefined ? isActive : company.twilioConfig?.isActive
+            isActive: isActive !== undefined ? isActive : (company.twilioConfig?.isActive || false)
         };
 
+        // If explicitly setting to inactive, make sure it's caught
+        if (isActive === false) company.twilioConfig.isActive = false;
+
         await company.save();
-        res.json({ success: true, message: 'Twilio Settings Updated!', config: company.twilioConfig });
+        console.log(`✅ Twilio Config saved successfully for ${company.name}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Twilio Settings Updated Successfully!', 
+            config: {
+                accountSid: company.twilioConfig.accountSid,
+                phoneNumber: company.twilioConfig.phoneNumber,
+                isActive: company.twilioConfig.isActive
+            }
+        });
     } catch (error) {
-        console.error('Save Twilio Error:', error);
-        res.status(500).json({ message: 'Failed to save settings: ' + error.message });
+        console.error('❌ Save Twilio Error:', error);
+        res.status(500).json({ message: 'Server error while saving: ' + error.message });
     }
 };
 
