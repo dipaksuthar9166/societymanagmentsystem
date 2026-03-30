@@ -213,7 +213,7 @@ const AdminDashboard = () => {
             case 'emergency': return <EmergencyTab token={user?.token} />;
             case 'profile': return <ProfileTab initialData={user} societyDetails={societyDetails} refreshSociety={fetchData} />;
             case 'subscription': return <AdminSubscription token={user?.token} user={user} />;
-            case 'communication': return <CommunicationTab />;
+            case 'communication': return <CommunicationTab token={user?.token} />;
             case 'payment-settings': return <PaymentSettingsTab token={user?.token} />;
             case 'legal-notice': return <LegalNoticeTab society={societyDetails} />;
             case 'cctv': return <CCTVTab />;

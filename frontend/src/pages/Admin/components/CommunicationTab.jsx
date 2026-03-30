@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Mail, Send, CheckCircle, AlertCircle, Smartphone, Monitor } from 'lucide-react';
+import { Mail, Send, CheckCircle, AlertCircle, Smartphone, Monitor, RefreshCw } from 'lucide-react';
 import { API_BASE_URL } from '../../../config';
 
 const CommunicationTab = () => {
@@ -106,6 +106,28 @@ const CommunicationTab = () => {
         }
     };
 
+    const [smsBalance, setSmsBalance] = useState(null);
+    const [loadingSms, setLoadingSms] = useState(false);
+
+    const fetchSmsBalance = async () => {
+        setLoadingSms(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/admin/sms-balance`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await res.json();
+            setSmsBalance(data);
+        } catch (error) {
+            console.error('Failed to fetch SMS balance:', error);
+        } finally {
+            setLoadingSms(false);
+        }
+    };
+
+    React.useEffect(() => {
+        if (token) fetchSmsBalance();
+    }, [token]);
+
     return (
         <div className="p-6 space-y-6">
             <div className="flex justify-between items-center mb-6">
@@ -118,6 +140,30 @@ const CommunicationTab = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Left Side: Test & Settings */}
                 <div className="space-y-6">
+                    {/* SMS Balance Card */}
+                    <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-xl shadow-indigo-200 dark:shadow-none text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 -rotate-12"><Smartphone size={80} /></div>
+                        <div className="relative z-10 flex justify-between items-start">
+                            <div>
+                                <p className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">Twilio Account Balance</p>
+                                {loadingSms ? (
+                                    <div className="h-10 w-32 bg-white/10 animate-pulse rounded-lg mt-1"></div>
+                                ) : (
+                                    <h2 className="text-3xl font-black">{smsBalance?.balance ? `${smsBalance.currency || '$'}${smsBalance.balance}` : 'N/A'}</h2>
+                                )}
+                                <p className="text-[10px] mt-2 font-bold text-white/50 uppercase tracking-tighter">Current Plan: {smsBalance?.type || 'Standard'}</p>
+                            </div>
+                            <button 
+                                onClick={fetchSmsBalance} 
+                                disabled={loadingSms}
+                                className={`p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-all ${loadingSms ? 'animate-spin' : ''}`}
+                            >
+                                <RefreshCw size={20} />
+                            </button>
+                        </div>
+                        {smsBalance?.note && <p className="mt-4 text-[9px] font-bold text-white/40 italic">{smsBalance.note}</p>}
+                    </div>
+
                     <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
                         <div className="flex items-center gap-2 mb-4">
                             <Send className="text-teal-500" size={20} />

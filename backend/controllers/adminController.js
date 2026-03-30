@@ -164,9 +164,49 @@ const updateCustomer = async (req, res) => {
     }
 };
 
+// @desc    Get Twilio SMS Balance
+// @route   GET /api/admin/sms-balance
+// @access  Admin/Superadmin
+const getSMSBalance = async (req, res) => {
+    try {
+        const sid = process.env.TWILIO_ACCOUNT_SID;
+        const auth = process.env.TWILIO_AUTH_TOKEN;
+
+        if (!sid || !auth) {
+            return res.status(404).json({ message: 'SMS Service (Twilio) not configured.' });
+        }
+
+        const client = require('twilio')(sid, auth);
+        
+        // Twilio Account Fetch returns basic info including balance for some account types
+        // But the most reliable for balance is the balance resource (may require upgraded account)
+        try {
+            const balanceData = await client.balance.fetch();
+            res.json({
+                balance: balanceData.balance,
+                currency: balanceData.currency || 'USD',
+                accountName: balanceData.accountSid === sid ? 'Primary Account' : balanceData.accountName
+            });
+        } catch (err) {
+            // Fallback: Just fetch account info
+            const account = await client.api.v2010.accounts(sid).fetch();
+            res.json({
+                status: account.status,
+                type: account.type,
+                balance: 'Upgraded Account Required for Live Balance',
+                note: 'Twilio Trial accounts do not expose balance via API.'
+            });
+        }
+    } catch (error) {
+        console.error('Twilio Balance Error:', error.message);
+        res.status(500).json({ message: 'Failed to fetch balance: ' + error.message });
+    }
+};
+
 module.exports = {
     getCustomers,
     createCustomer,
     deleteCustomer,
-    updateCustomer
+    updateCustomer,
+    getSMSBalance
 };

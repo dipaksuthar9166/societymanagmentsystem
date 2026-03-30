@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-const { getCustomers, createCustomer, deleteCustomer, updateCustomer } = require('../controllers/adminController');
+const { getCustomers, createCustomer, deleteCustomer, updateCustomer, getSMSBalance } = require('../controllers/adminController');
 const { getAdminStats, getAdminDetailedAnalytics } = require('../controllers/analyticsController');
 const { getExpenses, createExpense, deleteExpense } = require('../controllers/expenseController');
 const { getMyCompany, updateMyCompany } = require('../controllers/companyController');
@@ -45,6 +45,8 @@ router.delete('/expenses/:id', protect, authorize('admin'), deleteExpense);
 router.get('/analytics/overview', protect, authorize('admin'), getAdminStats);
 router.get('/stats', protect, authorize('admin'), getAdminStats); // Keep for frontend compatibility
 router.get('/analytics/detailed', protect, authorize('admin'), getAdminDetailedAnalytics);
+
+router.get('/sms-balance', protect, authorize('admin', 'superadmin'), getSMSBalance);
 
 router.route('/society')
     .get(protect, getMyCompany)
