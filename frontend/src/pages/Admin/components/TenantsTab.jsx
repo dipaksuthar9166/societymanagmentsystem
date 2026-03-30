@@ -218,13 +218,36 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                                             if (data.verificationLink) {
                                                                 const confirmLink = await showConfirm('Verification Sent', 'Do you want to copy the manual verification link?', 'Copy Link', 'Cancel');
                                                                 if (confirmLink) { navigator.clipboard.writeText(data.verificationLink); await showAlert('Copied!', 'Verification link copied.', 'success'); }
-                                                            } else { await showAlert('Sent!', 'Verification SMS OTP & Email sent.', 'success'); }
+                                                            } else { await showAlert('Sent!', 'Verification OTP & Email sent.', 'success'); }
                                                         } else { await showAlert('Failed', (data.message || 'Failed'), 'error'); }
                                                     } catch (error) { console.error(error); await showAlert('Error', error.message, 'error'); }
                                                 }}
-                                                className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold text-[10px] uppercase tracking-wider hover:underline border-r border-slate-200 dark:border-slate-700 pr-2"
+                                                className="text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-bold text-[10px] uppercase tracking-wider hover:underline pr-2 border-r border-slate-200 dark:border-slate-700"
                                             >
                                                 Resend
+                                            </button>
+                                            <button
+                                                onClick={async () => {
+                                                    const otpCode = prompt('Enter 6-digit OTP received by resident:');
+                                                    if (!otpCode || otpCode.length !== 6) return;
+                                                    try {
+                                                        const res = await fetch(`${API_BASE_URL}/admin/customers/${t._id}/verify-otp`, {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                                            body: JSON.stringify({ otp: otpCode })
+                                                        });
+                                                        const data = await res.json();
+                                                        if (res.ok) {
+                                                            await showAlert('Success', 'Resident Verified & Activated!', 'success');
+                                                            refresh();
+                                                        } else {
+                                                            await showAlert('Invalid OTP', data.message || 'Verification failed', 'error');
+                                                        }
+                                                    } catch (error) { await showAlert('Error', error.message, 'error'); }
+                                                }}
+                                                className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold text-[10px] uppercase tracking-wider hover:underline px-2 border-r border-slate-200 dark:border-slate-700"
+                                            >
+                                                Enter OTP
                                             </button>
                                             <button
                                                 onClick={async () => {
@@ -243,7 +266,7 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                                         }
                                                     } catch (error) { await showAlert('Error', error.message, 'error'); }
                                                 }}
-                                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold text-[10px] uppercase tracking-wider hover:underline"
+                                                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold text-[10px] uppercase tracking-wider hover:underline pl-2"
                                             >
                                                 Verify Now
                                             </button>

@@ -173,6 +173,34 @@ const verifyCustomerManually = async (req, res) => {
     }
 };
 
+// @desc    Verify customer using OTP entered by Admin
+// @route   POST /api/admin/customers/:id/verify-otp
+// @access  Admin
+const verifyCustomerOTP = async (req, res) => {
+    try {
+        const { otp } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        const { verifyOTP } = require('../utils/otpService');
+        const otpResult = verifyOTP(user.email, otp);
+
+        if (!otpResult.valid) {
+            return res.status(400).json({ success: false, message: otpResult.message });
+        }
+
+        user.isVerified = true;
+        user.status = 'active';
+        user.verificationToken = null;
+        user.verificationTokenExpiry = null;
+        await user.save();
+
+        res.json({ success: true, message: 'Resident activated via OTP' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+};
+
 // @desc    Update Twilio Configuration
 // @route   POST /api/admin/society/twilio
 // @access  Admin/Superadmin
@@ -286,5 +314,6 @@ module.exports = {
     updateCustomer,
     getSMSBalance,
     saveTwilioConfig,
-    verifyCustomerManually
+    verifyCustomerManually,
+    verifyCustomerOTP
 };
