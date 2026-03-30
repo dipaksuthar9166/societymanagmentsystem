@@ -29,107 +29,86 @@ ChartJS.register(
 
 const StatCard = ({ label, value, sub, icon: Icon, color, trend }) => {
     const gradients = {
-        blue: 'from-blue-500 via-cyan-500 to-blue-500',
-        green: 'from-green-500 via-emerald-500 to-green-500',
-        orange: 'from-orange-500 via-amber-500 to-orange-500',
-        red: 'from-red-500 via-rose-500 to-red-500',
-        indigo: 'from-indigo-500 via-purple-500 to-indigo-500',
-        purple: 'from-purple-500 via-pink-500 to-purple-500'
+        blue: 'from-blue-600 to-cyan-500',
+        green: 'from-emerald-600 to-teal-500',
+        orange: 'from-orange-600 to-amber-500',
+        red: 'from-rose-600 to-red-500',
+        indigo: 'from-indigo-600 to-violet-500',
+        purple: 'from-fuchsia-600 to-purple-500'
     };
 
-    const iconBg = {
-        blue: 'bg-blue-50 dark:bg-blue-900/30',
-        green: 'bg-green-50 dark:bg-green-900/30',
-        orange: 'bg-orange-50 dark:bg-orange-900/30',
-        red: 'bg-red-50 dark:bg-red-900/30',
-        indigo: 'bg-indigo-50 dark:bg-indigo-900/30',
-        purple: 'bg-purple-50 dark:bg-purple-900/30'
-    };
-
-    const iconColor = {
-        blue: 'text-blue-600 dark:text-blue-400',
-        green: 'text-green-600 dark:text-green-400',
-        orange: 'text-orange-600 dark:text-orange-400',
-        red: 'text-red-600 dark:text-red-400',
-        indigo: 'text-indigo-600 dark:text-indigo-400',
-        purple: 'text-purple-600 dark:text-purple-400'
-    };
-
-    const trendBg = {
-        blue: 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
-        green: 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400',
-        orange: 'bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400',
-        red: 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400',
-        indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
-        purple: 'bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
-    };
-
-    const circleBg = {
-        blue: 'bg-blue-50 dark:bg-blue-500',
-        green: 'bg-green-50 dark:bg-green-500',
-        orange: 'bg-orange-50 dark:bg-orange-500',
-        red: 'bg-red-50 dark:bg-red-500',
-        indigo: 'bg-indigo-50 dark:bg-indigo-500',
-        purple: 'bg-purple-50 dark:bg-purple-500'
+    const shadowColor = {
+        blue: 'shadow-blue-200/50 dark:shadow-none',
+        green: 'shadow-emerald-200/50 dark:shadow-none',
+        orange: 'shadow-orange-200/50 dark:shadow-none',
+        red: 'shadow-rose-200/50 dark:shadow-none',
+        indigo: 'shadow-indigo-200/50 dark:shadow-none',
+        purple: 'shadow-fuchsia-200/50 dark:shadow-none'
     };
 
     return (
-        <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-lg transition-all duration-300 group cursor-pointer transform hover:scale-[1.02]">
-            {/* Animated Gradient Top Border */}
-            <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${gradients[color]} animate-gradient bg-[length:200%_100%]`}></div>
-
-            <div className="p-4">
-                <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${iconBg[color]} group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon size={18} className={iconColor[color]} />
+        <div className={`relative overflow-hidden bg-white dark:bg-slate-800/80 backdrop-blur-xl rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 p-6 transition-all duration-500 group cursor-pointer hover:-translate-y-2 shadow-xl ${shadowColor[color]}`}>
+            {/* Glossy Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            
+            <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${gradients[color]} text-white shadow-lg group-hover:rotate-6 transition-transform duration-500`}>
+                        <Icon size={24} />
                     </div>
                     {trend && (
-                        <div className={`flex items-center gap-1 text-xs font-bold px-1.5 py-0.5 rounded ${trendBg[color]}`}>
+                        <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
                             <TrendingUp size={12} />
                             {trend}
                         </div>
                     )}
                 </div>
-                <div>
-                    <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-1">{label}</p>
-                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-0.5 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 transition-all duration-300">{value}</h3>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{sub}</p>
+                
+                <h3 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight leading-none mb-1 tabular-nums group-hover:scale-105 origin-left transition-transform duration-500">
+                    {value}
+                </h3>
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">{label}</p>
+                
+                <div className="flex items-center gap-2">
+                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${gradients[color]} animate-pulse`}></div>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate">{sub}</p>
                 </div>
             </div>
 
-            {/* Decorative Circle */}
-            <div className={`absolute bottom-0 right-0 w-16 h-16 ${circleBg[color]} rounded-full -mr-8 -mb-8 opacity-20 dark:opacity-10 group-hover:opacity-30 dark:group-hover:opacity-20 transition-opacity duration-300`}></div>
-
-            {/* Custom Animation */}
-            <style>{`
-                @keyframes gradient {
-                    0%, 100% {
-                        background-position: 0% 50%;
-                    }
-                    50% {
-                        background-position: 100% 50%;
-                    }
-                }
-                .animate-gradient {
-                    animation: gradient 3s ease infinite;
-                }
-            `}</style>
+            {/* Background Glow */}
+            <div className={`absolute -bottom-12 -right-12 w-32 h-32 bg-gradient-to-br ${gradients[color]} rounded-full blur-3xl opacity-5 dark:opacity-10 group-hover:opacity-20 transition-opacity duration-700`}></div>
         </div>
     );
 };
 
-const QuickAction = ({ label, icon: Icon, onClick, color = 'indigo' }) => (
-    <button
-        onClick={onClick}
-        className={`flex items-center gap-3 p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-${color}-300 dark:hover:border-${color}-500 hover:shadow-md transition-all group`}
-    >
-        <div className={`p-2 rounded-lg bg-${color}-50 dark:bg-${color}-900/30 group-hover:bg-${color}-100 dark:group-hover:bg-${color}-900/50 transition-colors`}>
-            <Icon size={20} className={`text-${color}-600 dark:text-${color}-400`} />
-        </div>
-        <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{label}</span>
-        <ArrowRight size={16} className="ml-auto text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" />
-    </button>
-);
+const QuickAction = ({ label, icon: Icon, onClick, color = 'indigo' }) => {
+    const colors = {
+        indigo: 'group-hover:text-indigo-600 dark:group-hover:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20',
+        green: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
+        purple: 'group-hover:text-purple-600 dark:group-hover:text-purple-400 bg-purple-50 dark:bg-purple-900/20',
+        blue: 'group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+    };
+
+    return (
+        <button
+            onClick={onClick}
+            className="flex flex-col items-center justify-center gap-4 p-8 bg-white dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-[2.5rem] hover:shadow-2xl hover:shadow-indigo-200/40 dark:hover:shadow-none transition-all duration-500 group relative overflow-hidden"
+        >
+            <div className={`p-5 rounded-2xl ${colors[color]} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner`}>
+                <Icon size={32} />
+            </div>
+            <div className="text-center">
+                <span className="block text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">{label}</span>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Launch Module</span>
+            </div>
+            
+            {/* Hover Decor */}
+            <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                <ArrowRight size={40} className="-rotate-45" />
+            </div>
+        </button>
+    );
+};
 
 const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
     const { activeEvent } = useEventTheme(); // Hook
@@ -201,54 +180,72 @@ const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
     // Actually, 'bg-gradient-to-r' sets background-image. Inline 'background' overrides it.
 
     return (
-        <div className="space-y-6">
-            {/* ... (Welcome Section remains unchanged) */}
+        <div className="space-y-8 animate-in fade-in duration-700">
+            {/* Operations Center Header */}
             <div
-                className={`rounded-2xl p-4 text-white shadow-lg transition-all duration-1000 relative overflow-hidden animate-gradient bg-[length:200%_200%] ${!activeEvent ? `bg-gradient-to-r ${gradient}` : ''}`}
+                className={`group relative overflow-hidden rounded-[2.5rem] p-8 text-white transition-all duration-1000 shadow-2xl shadow-indigo-200/40 dark:shadow-none animate-gradient bg-[length:200%_200%] ${!activeEvent ? `bg-gradient-to-br ${gradient}` : ''}`}
                 style={bannerStyle}
             >
-                {/* Decorative Shapes for specific times */}
-                <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full -mr-12 -mt-12 blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full -ml-6 -mb-6 blur-2xl"></div>
+                {/* High-fidelity background decor */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] group-hover:scale-125 transition-transform duration-[3s]"></div>
+                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-[80px]"></div>
 
-                <div className="flex flex-col md:flex-row items-center justify-between relative z-10 gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm">
-                            <span className="animate-wave text-2xl inline-block origin-bottom-right">
-                                {activeEvent ? (
-                                    activeEvent.animation === 'snowfall' ? '❄️' :
-                                        activeEvent.animation === 'fireworks' ? '🎆' :
-                                            activeEvent.animation === 'diyas-sparkle' ? '🪔' :
-                                                activeEvent.animation === 'tricolor-confetti' ? '🇮🇳' :
-                                                    activeEvent.animation === 'peace-symbols' ? '🕊️' : '👋'
-                                ) : '👋'}
-                            </span>
+                <div className="flex flex-col lg:flex-row items-center justify-between relative z-10 gap-8">
+                    <div className="flex items-center gap-6">
+                        <div className="relative">
+                            <div className="bg-white/20 p-5 rounded-[2rem] backdrop-blur-xl border border-white/30 shadow-2xl group-hover:rotate-[10deg] transition-transform duration-500">
+                                <span className="animate-wave text-4xl inline-block origin-bottom-right">
+                                    {activeEvent ? (
+                                        activeEvent.animation === 'snowfall' ? '❄️' :
+                                            activeEvent.animation === 'fireworks' ? '🎆' :
+                                                activeEvent.animation === 'diyas-sparkle' ? '🪔' :
+                                                    activeEvent.animation === 'tricolor-confetti' ? '🇮🇳' :
+                                                        activeEvent.animation === 'peace-symbols' ? '🕊️' : '🙌'
+                                    ) : '🏢'}
+                                </span>
+                            </div>
+                            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-400 border-4 border-white/20 rounded-full animate-ping"></div>
                         </div>
                         <div>
-                            <h1 className="text-lg font-bold flex items-center gap-2 leading-tight">
-                                {activeEvent ? activeEvent.heroBannerText : `${greeting}, ${user?.name?.split(' ')[0] || 'Admin'}!`}
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-white/20">
+                                    Operations Live
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+                                    <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Normal Latency</span>
+                                </div>
+                            </div>
+                            <h1 className="text-3xl font-black tracking-tight leading-none mb-2 drop-shadow-md">
+                                {activeEvent ? activeEvent.heroBannerText : `${greeting}, Administrator!`}
                             </h1>
-                            <p className="text-white/90 text-xs font-medium">
-                                {activeEvent ? `Celebrating ${activeEvent.name} at STATUS Sharan` : "Here's what's happening today."}
+                            <p className="text-white/80 text-sm font-bold max-w-md">
+                                {activeEvent ? `Celebrating ${activeEvent.name} at STATUS Sharan` : `Welcome to the command center. You have ${pendingComplaintsCount} urgent tickets requiring attention.`}
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-sm flex items-center gap-4">
-                        <div className="text-right">
-                            <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">
-                                {currentTime.toLocaleDateString('en-US', { weekday: 'long' })}
-                            </p>
-                            <p className="text-[10px] font-medium opacity-80">
-                                {currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </p>
+                    <div className="flex items-center gap-4">
+                        <div className="bg-white/10 backdrop-blur-2xl px-6 py-4 rounded-[2rem] border border-white/20 shadow-2xl flex items-center gap-6 group/clock hover:bg-white/20 transition-all duration-500">
+                            <div className="text-right">
+                                <p className="text-xs font-black uppercase tracking-[0.2em] opacity-70 group-hover:opacity-100 transition-opacity">
+                                    {currentTime.toLocaleDateString('en-US', { weekday: 'long' })}
+                                </p>
+                                <p className="text-xs font-bold opacity-70 group-hover:opacity-100">
+                                    {currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </p>
+                            </div>
+                            <div className="h-10 w-px bg-white/20"></div>
+                            <div className="flex flex-col">
+                                <p className="text-3xl font-black leading-none tracking-tighter tabular-nums">
+                                    {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                                <span className="text-[10px] text-center font-black opacity-50 uppercase tracking-widest mt-1">Status: Syncing</span>
+                            </div>
                         </div>
-                        <div className="h-8 w-px bg-white/20"></div>
-                        <p className="text-2xl font-black leading-none tracking-tight">
-                            {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
                     </div>
                 </div>
+                
                 <style>{`
                     @keyframes gradient {
                         0% { background-position: 0% 50%; }
@@ -256,22 +253,12 @@ const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
                         100% { background-position: 0% 50%; }
                     }
                     .animate-gradient {
-                        animation: gradient 6s ease infinite;
-                    }
-                    @keyframes wave {
-                        0%, 100% { transform: rotate(0deg); }
-                        25% { transform: rotate(20deg); }
-                        75% { transform: rotate(-15deg); }
-                    }
-                    .animate-wave {
-                        animation: wave 1.5s ease-in-out infinite;
-                        transform-origin: 70% 70%;
-                        display: inline-block;
+                        animation: gradient 8s ease infinite;
                     }
                 `}</style>
             </div>
 
-            {/* Stats Grid */}
+            {/* Bento Grid Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     label="Total Collection"
@@ -305,10 +292,13 @@ const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
                 />
             </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700">
-                <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Command Pallete / Quick Actions */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-3 px-2">
+                    <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
+                    <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-widest">Rapid Control</h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <QuickAction label="Create Invoice" icon={Receipt} color="indigo" onClick={() => onAction?.('billing')} />
                     <QuickAction label="Add Resident" icon={Users} color="green" onClick={() => onAction?.('tenants')} />
                     <QuickAction label="Post Notice" icon={Calendar} color="purple" onClick={() => onAction?.('notices')} />

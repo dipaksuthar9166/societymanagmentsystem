@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Mail, Send, CheckCircle, AlertCircle, Smartphone, Monitor, RefreshCw, Settings } from 'lucide-react';
 import { API_BASE_URL } from '../../../config';
 
-const CommunicationTab = ({ token }) => {
+const CommunicationTab = ({ token, societyDetails }) => {
     const [testEmail, setTestEmail] = useState('');
     const [sending, setSending] = useState(false);
     const [status, setStatus] = useState(null); // { type: 'success' | 'error', message: '' }
@@ -30,15 +30,17 @@ const CommunicationTab = ({ token }) => {
                             <!-- Header with Branding -->
                             <tr>
                                 <td align="center" style="background-color: #f9f9f9; padding: 30px; border-bottom: 3px solid #006D77;" class="header-padding">
-                                    <h1 class="logo-text" style="color: #006D77; margin: 0; font-size: 28px; letter-spacing: 1px; font-family: Arial, sans-serif; font-weight: bold;">STATUS <span style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: normal; color: #333;">Sharan</span></h1>
-                                    <p style="font-size: 13px; color: #666; margin: 5px 0 0; text-transform: uppercase; letter-spacing: 2px;">Where dreams find solace</p>
+                                    <h1 class="logo-text" style="color: #006D77; margin: 0; font-size: 28px; letter-spacing: 1px; font-family: Arial, sans-serif; font-weight: bold;">
+                                        ${(societyDetails?.name || 'SocieHub').split(' ')[0]} <span style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: normal; color: #333;">${(societyDetails?.name || 'Cloud').split(' ').slice(1).join(' ')}</span>
+                                    </h1>
+                                    <p style="font-size: 13px; color: #666; margin: 5px 0 0; text-transform: uppercase; letter-spacing: 2px;">Society Management Portal</p>
                                 </td>
                             </tr>
 
                             <!-- Main Content -->
                             <tr>
                                 <td align="center" style="padding: 40px 30px;" class="content-padding">
-                                    <h2 style="color: #333; margin-top: 0; font-size: 22px;">Hello, Admin User!</h2>
+                                    <h2 style="color: #333; margin-top: 0; font-size: 22px;">Hello, Resident!</h2>
                                     <p style="color: #555; line-height: 1.6; font-size: 16px; margin-bottom: 30px;">
                                         Use the verification code below to login to your account.<br>
                                         This code is valid for the next <strong>10 minutes</strong>.
@@ -70,8 +72,8 @@ const CommunicationTab = ({ token }) => {
                             <!-- Footer -->
                             <tr>
                                 <td align="center" style="background-color: #006D77; color: white; padding: 20px; font-size: 12px;">
-                                    <p style="margin: 0;">&copy; 2026 Status Sharan Residents Portal | Ahmedabad</p>
-                                    <p style="margin: 10px 0 0; opacity: 0.8;">Secure Automated Notification System</p>
+                                    <p style="margin: 0;">&copy; 2026 ${societyDetails?.name || 'SocieHub'} Portal | Secure Access</p>
+                                    <p style="margin: 10px 0 0; opacity: 0.8;">Automated Notification System</p>
                                 </td>
                             </tr>
                         </table>

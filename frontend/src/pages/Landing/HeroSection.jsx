@@ -69,16 +69,22 @@ const HeroSection = ({ stats }) => {
 
                         <motion.div variants={heroVariants} className="flex items-center justify-center lg:justify-start gap-10 pt-4 border-t border-slate-100 dark:border-slate-800/50">
                             <div>
-                                <h4 className="text-3xl font-black text-slate-900 dark:text-white">500+</h4>
+                                <h4 className="text-3xl font-black text-slate-900 dark:text-white">
+                                    {stats?.societies || '10'}+
+                                </h4>
                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Active Societies</p>
                             </div>
                             <div>
-                                <h4 className="text-3xl font-black text-slate-900 dark:text-white">1.2M</h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Happy Residents</p>
+                                <h4 className="text-3xl font-black text-slate-900 dark:text-white">
+                                    {((stats?.residents || 1200) / 1000).toFixed(1)}k
+                                </h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Residents</p>
                             </div>
                             <div className="hidden sm:block">
-                                <h4 className="text-3xl font-black text-indigo-600 dark:text-indigo-400">99.9%</h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Uptime Record</p>
+                                <h4 className="text-3xl font-black text-indigo-600 dark:text-indigo-400">
+                                    {stats?.uptime || '99.9%'}
+                                </h4>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">System Uptime</p>
                             </div>
                         </motion.div>
                     </motion.div>

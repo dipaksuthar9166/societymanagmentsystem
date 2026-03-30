@@ -295,4 +295,116 @@ router.post('/generate-analytics-data', protect, async (req, res) => {
     }
 });
 
+/**
+ * @route   POST /api/test/seed-system
+ * @desc    Initialize the entire system with 3 premium societies and data
+ * @access  Private (SuperAdmin)
+ */
+router.post('/seed-system', protect, async (req, res) => {
+    if (req.user.role !== 'superadmin') {
+        return res.status(403).json({ message: 'Forbidden' });
+    }
+
+    try {
+        const Company = require('../models/Company');
+        const User = require('../models/User');
+        const Invoice = require('../models/Invoice');
+        const Transaction = require('../models/Transaction');
+        const Complaint = require('../models/Complaint');
+        const Asset = require('../models/Asset');
+
+        // 1. Create 3 Societies
+        const societiesData = [
+            { name: 'Status Sharan Premium', address: 'Ahmedabad, Gujarat', plan: 'Premium', status: 'Active' },
+            { name: 'Nexus Heights', address: 'Mumbai, Maharashtra', plan: 'Gold', status: 'Active' },
+            { name: 'Emerald Valley', address: 'Pune, Maharashtra', plan: 'Standard', status: 'Active' }
+        ];
+
+        const createdSocieties = [];
+        for (const s of societiesData) {
+            let soc = await Company.findOne({ name: s.name });
+            if (!soc) soc = await Company.create(s);
+            createdSocieties.push(soc);
+        }
+
+        // 2. For each society, create 5 residents + 1 admin
+        for (const soc of createdSocieties) {
+            const adminEmail = `admin@${soc.name.toLowerCase().replace(/\s/g, '')}.com`;
+            let admin = await User.findOne({ email: adminEmail });
+            if (!admin) {
+                admin = await User.create({
+                    name: `Admin of ${soc.name}`,
+                    email: adminEmail,
+                    password: await require('bcryptjs').hash('admin123', 10),
+                    role: 'admin',
+                    company: soc._id,
+                    isVerified: true,
+                    status: 'approved'
+                });
+            }
+
+            for (let i = 1; i <= 5; i++) {
+                const userEmail = `user${i}@${soc.name.toLowerCase().replace(/\s/g, '')}.com`;
+                let user = await User.findOne({ email: userEmail });
+                if (!user) {
+                    user = await User.create({
+                        name: `Resident ${i}`,
+                        email: userEmail,
+                        password: await require('bcryptjs').hash('user123', 10),
+                        role: 'user',
+                        company: soc._id,
+                        flatNo: `${String.fromCharCode(64 + i)}-10${i}`,
+                        isVerified: true
+                    });
+
+                    // 3. Create 3 Transactions for each user
+                    for (let j = 0; j < 3; j++) {
+                        const amount = 2500 + (j * 500);
+                        const inv = await Invoice.create({
+                            societyId: soc._id,
+                            adminId: admin._id,
+                            customerId: user._id,
+                            customerName: user.name,
+                            items: [{ name: 'Maintenance', price: amount, quantity: 1 }],
+                            totalAmount: amount,
+                            status: j === 2 ? 'Pending' : 'Paid'
+                        });
+
+                        if (j !== 2) {
+                            await Transaction.create({
+                                companyId: soc._id,
+                                userId: user._id,
+                                invoiceId: inv._id,
+                                amount,
+                                status: 'Success',
+                                paymentMethod: 'UPI',
+                                createdAt: new Date(Date.now() - (j * 10 * 24 * 60 * 60 * 1000))
+                            });
+                        }
+                    }
+                }
+            }
+
+            // 4. Create Assets
+            const assets = ['Main Elevator', 'Diesel Generator', 'Swimming Pool Pump', 'Fire Hydrant System'];
+            for (const aName of assets) {
+                if (!(await Asset.findOne({ name: aName, society: soc._id }))) {
+                    await Asset.create({
+                        name: aName,
+                        category: 'Infrastructure',
+                        location: 'Ground Floor / Common Area',
+                        status: 'Operational',
+                        society: soc._id
+                    });
+                }
+            }
+        }
+
+        res.json({ success: true, message: 'System Seeded with 3 Societies and real data!' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 module.exports = router;

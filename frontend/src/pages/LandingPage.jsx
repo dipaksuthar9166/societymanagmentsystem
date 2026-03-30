@@ -153,6 +153,52 @@ const CTASection = () => {
     );
 };
 
+const FeaturedProjects = ({ projects = [] }) => {
+    return (
+        <section className="py-24 bg-slate-50 dark:bg-slate-900/10" id="projects">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                    <div className="space-y-4">
+                        <span className="text-indigo-600 font-black uppercase tracking-widest text-[10px]">Active Hubs</span>
+                        <h2 className="text-4xl font-black text-slate-900 dark:text-white leading-tight">Societies Powered <br /> by <span className="text-indigo-600">SocieHub</span></h2>
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm">From luxury estates to community clusters, we manage the most premium societies across the country.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {projects.map((p, i) => (
+                        <motion.div 
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            whileHover={{ scale: 1.02 }}
+                            className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-white/5 shadow-xl group"
+                        >
+                            <div className="h-56 relative overflow-hidden bg-slate-200">
+                                <img src={p.img} alt={p.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                                <div className="absolute top-4 right-4 px-4 py-1.5 bg-white/90 backdrop-blur-md rounded-full text-[10px] font-black text-indigo-600 uppercase tracking-widest shadow-lg">
+                                    {p.badge}
+                                </div>
+                            </div>
+                            <div className="p-8">
+                                <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2">{p.title}</h3>
+                                <div className="text-xs text-slate-500 font-medium flex items-center gap-2 mb-6">
+                                    <MapPin size={14} className="text-indigo-500" />
+                                    {p.location}
+                                </div>
+                                <div className="flex items-center justify-between pt-6 border-t border-slate-50 dark:border-white/5 mt-auto">
+                                    <span className="text-xs font-black text-indigo-600 uppercase tracking-widest">{p.price}</span>
+                                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Active Hub</span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
 const FAQItem = ({ question, answer }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -187,6 +233,7 @@ const LandingPage = () => {
     const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
     const [scrolled, setScrolled] = useState(false);
     const [stats, setStats] = useState(null);
+    const [projects, setProjects] = useState([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -197,6 +244,12 @@ const LandingPage = () => {
         fetch(`${API_BASE_URL.replace('/api', '')}/api/public/stats`)
             .then(res => res.json())
             .then(data => setStats(data))
+            .catch(e => console.error(e));
+
+        // Fetch Featured Projects
+        fetch(`${API_BASE_URL.replace('/api', '')}/api/public/projects`)
+            .then(res => res.json())
+            .then(data => setProjects(data))
             .catch(e => console.error(e));
 
         return () => window.removeEventListener('scroll', handleScroll);
@@ -211,7 +264,8 @@ const LandingPage = () => {
 
             <main>
                 <HeroSection stats={stats} />
-                <MarqueeSection />
+                <MarqueeSection brands={stats?.brands} />
+                <FeaturedProjects projects={projects} />
                 <FeatureShowcase />
                 <ComparisonSection />
                 

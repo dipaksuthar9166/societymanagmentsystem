@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/ToastProvider';
 import { io } from 'socket.io-client';
 import { API_BASE_URL, BACKEND_URL, resolveImageURL } from '../../config';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
     LayoutDashboard,
     Users,
@@ -23,7 +24,10 @@ import {
     BarChart3,
     Mail,
     CreditCard,
-    Video
+    Video,
+    Zap,
+    Scale,
+    UserCheck
 } from 'lucide-react';
 
 // Components
@@ -47,21 +51,17 @@ import BroadcastTab from './components/BroadcastTab';
 import EmergencyTab from './components/EmergencyTab';
 import SubscriptionLock from '../../components/SubscriptionLock';
 import CCTVTab from './components/CCTVTab';
-
-import { Link } from 'react-router-dom';
 import AdminSubscription from './AdminSubscription';
 import AssetManagement from './AssetManagement';
 import ReportsTab from './components/ReportsTab';
 import CommunicationTab from './components/CommunicationTab';
 import PaymentSettingsTab from './components/PaymentSettingsTab';
 import LegalNoticeTab from './components/LegalNoticeTab';
-import SkillAdmin from './SkillAdmin'; // New
-import ParkingSystem from './ParkingSystem'; // New
-import { Scale, Zap, UserCheck } from 'lucide-react'; // Added Icons
+import SkillAdmin from './SkillAdmin';
+import ParkingSystem from './ParkingSystem';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
 const AdminDashboard = () => {
-    // Check URL or prop for redirect if needed, but for now state is enough
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
     const [societyDetails, setSocietyDetails] = useState(null);
@@ -121,40 +121,29 @@ const AdminDashboard = () => {
         if (user) fetchData();
     }, [user]);
 
-    // Handle Hash Navigation (e.g. from SubscriptionLock)
     useEffect(() => {
         if (window.location.hash === '#billing' || window.location.hash === '#subscription') {
             setActiveTab('subscription');
         }
     }, [window.location.hash]);
 
-    // Socket.io for SOS Alerts
     useEffect(() => {
         if (!user || !user.company) return;
 
         const socket = io(BACKEND_URL, { transports: ['websocket'] });
         socket.on('connect', () => {
-            console.log("Admin connected to socket");
-            // Join the specific society room
             socket.emit('join_society', user.company);
         });
 
         socket.on('receive_sos', (data) => {
             const audio = new Audio('https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a');
             audio.play().catch(e => console.log("Audio play failed", e));
-
-            // Format Location for alert
             const locString = data.location && data.location.lat ? `${data.location.lat.toFixed(4)}, ${data.location.lng.toFixed(4)}` : "Unknown";
-
             showWarning('🚨 SOS ALERT! 🚨', `User: ${data.userName || data.user} | Location: ${locString}`);
-
-            // Re-fetch data to show alert in feed if needed
             fetchData();
         });
 
-        // Listen for Real-time Subscription Updates
         socket.on('subscription_updated', (data) => {
-            console.log("Subscription Updated:", data);
             showSuccess('Subscription Event', data.message);
             fetchData();
         });
@@ -174,8 +163,8 @@ const AdminDashboard = () => {
         { id: 'defaulters', label: 'Defaulters', icon: AlertCircle },
         { id: 'guards', label: 'Security & Staff', icon: Shield },
         { id: 'cctv', label: 'CCTV Controller', icon: Video },
-        { id: 'skills', label: 'Skill Approvals', icon: UserCheck }, // New
-        { id: 'parking', label: 'Parking Manager', icon: Zap }, // New
+        { id: 'skills', label: 'Skill Approvals', icon: UserCheck },
+        { id: 'parking', label: 'Parking Manager', icon: Zap },
         { id: 'complaints', label: 'Complaints', icon: AlertCircle },
         { id: 'notices', label: 'Notices', icon: Bell },
         { id: 'committee', label: 'Committee', icon: UserPlus },
@@ -190,7 +179,10 @@ const AdminDashboard = () => {
     ];
 
     const renderContent = () => {
-        if (loading && activeTab === 'overview') return <div className="h-full flex items-center justify-center text-slate-400 dark:text-slate-500">Loading Admin Dashboard...</div>;
+        if (loading && activeTab === 'overview') return <div className="h-full flex flex-col items-center justify-center space-y-4">
+            <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-xs font-black uppercase tracking-widest text-slate-400">Loading Control Center...</p>
+        </div>;
 
         switch (activeTab) {
             case 'overview': return <OverviewTab stats={stats} invoices={invoices} user={user} complaints={complaints} onAction={setActiveTab} />;
@@ -213,7 +205,7 @@ const AdminDashboard = () => {
             case 'emergency': return <EmergencyTab token={user?.token} />;
             case 'profile': return <ProfileTab initialData={user} societyDetails={societyDetails} refreshSociety={fetchData} />;
             case 'subscription': return <AdminSubscription token={user?.token} user={user} />;
-            case 'communication': return <CommunicationTab token={user?.token} />;
+            case 'communication': return <CommunicationTab token={user?.token} societyDetails={societyDetails} />;
             case 'payment-settings': return <PaymentSettingsTab token={user?.token} />;
             case 'legal-notice': return <LegalNoticeTab society={societyDetails} />;
             case 'cctv': return <CCTVTab />;
@@ -221,122 +213,148 @@ const AdminDashboard = () => {
         }
     };
 
-
     return (
-        <div className="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
+        <div className="flex h-screen bg-[#f8fafc] dark:bg-[#0f172a] transition-all duration-500 font-['Montserrat'] overflow-hidden">
+            {/* Custom Background Decor */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-40">
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]"></div>
+            </div>
+
             {/* Mobile Overlay */}
             {isMobileMenuOpen && (
-                <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+                <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60] lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
             )}
 
-            {/* Sidebar */}
+            {/* Sidebar - Floating Modern Style */}
             <aside className={`
-                fixed lg:relative z-50 w-64 h-full bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300
-                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                fixed lg:relative z-[70] h-[calc(100%-2rem)] m-4 w-72 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-[2.5rem] flex flex-col transition-all duration-500 shadow-2xl shadow-slate-200/50 dark:shadow-none
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[120%] lg:translate-x-0'}
             `}>
-                {/* Logo/Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-slate-700">
-                    <div className="flex items-center gap-3">
+                {/* Logo Section */}
+                <div className="p-8 border-b border-slate-100 dark:border-slate-700/50 flex items-center gap-4 group">
+                    <div className="relative">
                         {societyDetails?.logo ? (
-                            <img src={resolveImageURL(societyDetails.logo)} alt="Logo" className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm object-cover shadow-sm" />
+                            <img src={resolveImageURL(societyDetails.logo)} alt="Logo" className="w-12 h-12 rounded-2xl object-cover shadow-2xl group-hover:rotate-12 transition-transform duration-500 ring-4 ring-white dark:ring-slate-700" />
                         ) : (
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center text-white font-['Montserrat'] font-black text-xl shadow-lg border border-white/10">
-                                {societyDetails?.name?.[0] || 'A'}
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-2xl shadow-xl group-hover:scale-110 transition-transform duration-500">
+                                {societyDetails?.name?.[0] || 'S'}
                             </div>
                         )}
-                        <div className="flex flex-col">
-                            <div className="flex items-baseline gap-1 line-clamp-1">
-                                <span className="text-sm font-['Montserrat'] font-black text-slate-800 dark:text-white uppercase tracking-[0.2em]">
-                                    {(societyDetails?.name || 'Status').split(' ')[0]}
-                                </span>
-                                <span className="text-2xl font-['Great_Vibes'] text-indigo-600 dark:text-indigo-400 font-normal -ml-1">
-                                    {(societyDetails?.name || 'Status Sharan').split(' ').slice(1).join(' ') || 'Sharan'}
-                                </span>
-                            </div>
-                            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest font-['Montserrat']">Society Management</p>
-                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full animate-pulse shadow-sm"></div>
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <h2 className="text-lg font-black text-slate-800 dark:text-white leading-none tracking-tight truncate uppercase">
+                            {societyDetails?.name?.split(' ')[0] || 'Status'}
+                        </h2>
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1.5 ml-0.5 whitespace-nowrap">
+                            Admin Portal
+                        </span>
                     </div>
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                {/* Navigation - Enhanced list */}
+                <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto scrollbar-hide custom-scrollbar">
                     {menuItems.map((item) => (
                         <button
                             key={item.id}
                             onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-sm font-semibold ${activeTab === item.id
-                                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20'
-                                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50'
-                                }`}
+                            className={`
+                                w-full flex items-center gap-4 px-5 py-4 rounded-[1.5rem] transition-all duration-300 relative group
+                                ${activeTab === item.id
+                                    ? 'bg-slate-900 border-slate-800 text-white shadow-xl shadow-slate-200/50 dark:shadow-none dark:bg-indigo-600 dark:border-indigo-500'
+                                    : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/40 hover:text-slate-900 dark:hover:text-white'
+                                }
+                            `}
                         >
-                            <item.icon size={20} />
-                            <span>{item.label}</span>
+                            <div className={`
+                                p-2 rounded-xl transition-all duration-300
+                                ${activeTab === item.id ? 'bg-white/10' : 'bg-transparent group-hover:bg-indigo-50 dark:group-hover:bg-white/5'}
+                            `}>
+                                <item.icon size={20} className={activeTab === item.id ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'} />
+                            </div>
+                            <span className="text-sm font-bold tracking-tight">{item.label}</span>
                         </button>
                     ))}
                 </nav>
 
-                {/* User Profile Section */}
-                <div className="p-4 border-t border-slate-100 dark:border-slate-700">
-                    <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 mb-3">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm">
+                {/* User Card - Refined */}
+                <div className="p-4 mt-auto">
+                    <div className="bg-slate-50/50 dark:bg-slate-900/40 rounded-[2rem] p-4 border border-slate-100 dark:border-slate-700/30">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white ring-2 ring-white/50 dark:ring-slate-700">
                                 {user?.name?.[0] || 'A'}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user?.name}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400">Administrator</p>
+                                <p className="text-sm font-black text-slate-800 dark:text-white truncate">{user?.name}</p>
+                                <p className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Master Admin</p>
                             </div>
                         </div>
+                        <button
+                            onClick={() => setShowLogoutConfirm(true)}
+                            className="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-100 dark:hover:border-red-900/30 text-slate-500 hover:text-red-600 dark:hover:text-red-400 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all"
+                        >
+                            <LogOut size={16} /> Secure Exit
+                        </button>
                     </div>
-                    <button
-                        onClick={() => setShowLogoutConfirm(true)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 font-semibold text-sm transition-colors"
-                    >
-                        <LogOut size={16} /> Sign Out
-                    </button>
                 </div>
             </aside>
 
-            {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
-                {/* Header with Navbar and Activity Feed injected as rightComponent */}
-                <Navbar
-                    title={activeTab === 'overview' ? 'Dashboard Overview' : activeTab.replace('-', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                    showSearch={true}
-                    notifications={complaints?.filter(c => c.status === 'Pending').map(c => ({
-                        title: `New Complaint: ${c.category}`,
-                        time: new Date(c.createdAt).toLocaleDateString(),
-                        type: 'Complaint',
-                        onClick: () => {
-                            setActiveTab('complaints');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }
-                    })) || []}
-                    onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    onTabChange={setActiveTab}
-                    onLogout={() => setShowLogoutConfirm(true)}
-                    // Pass LiveActivityFeed directly into the Navbar to prevent overlap
-                    rightComponent={<LiveActivityFeed token={user?.token} user={user} />}
-                />
+            {/* Main Content Area */}
+            <main className="flex-1 flex flex-col overflow-hidden relative z-10">
+                {/* Modern Header */}
+                <div className="px-8 pt-6 pb-2">
+                    <Navbar
+                        title={activeTab === 'overview' ? 'Operational Hub' : activeTab.replace('-', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                        showSearch={true}
+                        notifications={complaints?.filter(c => c.status === 'Pending').map(c => ({
+                            title: `New Alert: ${c.category}`,
+                            time: new Date(c.createdAt).toLocaleDateString(),
+                            type: 'Alert',
+                            onClick: () => setActiveTab('complaints')
+                        })) || []}
+                        onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        onTabChange={setActiveTab}
+                        onLogout={() => setShowLogoutConfirm(true)}
+                        rightComponent={<LiveActivityFeed token={user?.token} user={user} />}
+                    />
+                </div>
 
-                {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-6">
+                {/* Scrollable Content Container */}
+                <div className="flex-1 overflow-y-auto px-8 pb-8 custom-scrollbar scroll-smooth">
                     {user?.isDemo && (
-                        <div className="mb-8 p-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-xl shadow-yellow-500/20 flex items-center justify-between overflow-hidden relative">
-                            <div className="absolute top-0 right-0 p-4 opacity-10 -rotate-12"><LayoutDashboard size={80} /></div>
-                            <div className="flex items-center gap-4 relative z-10">
-                                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center"><Zap className="animate-pulse" /></div>
-                                <div>
-                                    <h2 className="text-lg font-black uppercase tracking-wider leading-none mb-1">Demo Mode Active</h2>
-                                    <p className="text-sm font-bold opacity-90">Exploring as a Society Administrator with pre-loaded data.</p>
+                        <div className="mb-8 p-6 rounded-[2rem] bg-slate-900 dark:bg-indigo-600 text-white shadow-2xl shadow-indigo-200/40 dark:shadow-none flex items-center justify-between overflow-hidden relative group">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-110 transition-transform duration-[2s]"></div>
+                            <div className="flex items-center gap-6 relative z-10">
+                                <div className="w-16 h-16 rounded-[1.5rem] bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner border border-white/20">
+                                    <Zap className="animate-pulse text-yellow-300" size={32} />
+                                </div>
+                                <div className="">
+                                    <h2 className="text-xl font-black uppercase tracking-[0.2em] leading-none mb-2">Simulated Insight</h2>
+                                    <p className="text-sm font-bold opacity-70 max-w-md">Demo account active with pre-seeded analytics. Real-world synchronization disabled.</p>
                                 </div>
                             </div>
-                            <button onClick={logout} className="px-6 py-2.5 bg-white text-amber-600 font-black rounded-xl text-xs uppercase tracking-widest hover:bg-amber-50 transition-colors shadow-lg relative z-10">Exit Demo</button>
+                            <button onClick={logout} className="px-8 py-4 bg-white text-slate-900 font-black rounded-2xl text-xs uppercase tracking-[0.2em] hover:bg-slate-100 transition-all shadow-xl active:scale-95 relative z-10">
+                                Return to Live
+                            </button>
                         </div>
                     )}
-                    <SubscriptionLock societyDetails={societyDetails}>
-                        {renderContent()}
-                    </SubscriptionLock>
+
+                    <div className="animate-presence">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                <SubscriptionLock societyDetails={societyDetails}>
+                                    {renderContent()}
+                                </SubscriptionLock>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
                 </div>
 
                 <ChatWidget />
@@ -345,17 +363,28 @@ const AdminDashboard = () => {
                     isOpen={showLogoutConfirm}
                     onClose={() => setShowLogoutConfirm(false)}
                     onConfirm={logout}
-                    title="Sign Out?"
-                    message="Are you sure you want to exit your administrator session?"
-                    confirmText="Sign Out"
-                    cancelText="Stay Here"
+                    title="Terminate Session?"
+                    message="Are you sure you want to securely sign out of the administrator control panel?"
+                    confirmText="Terminate"
+                    cancelText="Stay Active"
                     type="danger"
                 />
             </main>
+
+            <style>{`
+                .scrollbar-hide::-webkit-scrollbar { display: none; }
+                .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { 
+                    background: rgba(148, 163, 184, 0.2); 
+                    border-radius: 10px; 
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { 
+                    background: rgba(148, 163, 184, 0.4); 
+                }
+            `}</style>
         </div>
     );
 };
 
-
 export default AdminDashboard;
-

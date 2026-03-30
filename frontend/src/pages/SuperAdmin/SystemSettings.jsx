@@ -235,16 +235,27 @@ const SystemSettings = () => {
                         </div>
 
                         <div className="bg-white/5 p-6 rounded-2xl border border-white/10 backdrop-blur-sm">
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h4 className="font-bold">GDPR Compliance Mode</h4>
-                                    <p className="text-xs text-slate-400 mt-1">Mask sensitive user data (PII) in logs.</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                                </label>
-                            </div>
+                            <h4 className="font-bold mb-2">System Initialization</h4>
+                            <p className="text-xs text-slate-400 mb-4">Populate the database with 3 premium societies and sample activity data.</p>
+                            <button
+                                onClick={async () => {
+                                    if(!confirm('This will seed the database with sample data. Continue?')) return;
+                                    setSaving(true);
+                                    try {
+                                        const res = await fetch(`${API_BASE_URL.replace('/api', '')}/api/test/seed-system`, {
+                                            method: 'POST',
+                                            headers: { Authorization: `Bearer ${user.token}` }
+                                        });
+                                        if(res.ok) alert('System Seeded Successfully!');
+                                        else alert('Seeding Failed');
+                                    } catch(e) { console.error(e); }
+                                    finally { setSaving(false); }
+                                }}
+                                disabled={saving}
+                                className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2"
+                            >
+                                <RefreshCw className={saving ? 'animate-spin' : ''} size={16} /> Seed Demo Hubs
+                            </button>
                         </div>
                     </div>
                 </div>
