@@ -72,154 +72,89 @@ const verifyOTP = (email, otp) => {
     // OTP is valid - remove it
     otpStore.delete(email);
     return { valid: true, message: 'OTP verified successfully' };
-};
-
-/**
+}/**
  * Send OTP email and optional SMS
  */
 const sendOTP = async (email, name, phone = null) => {
     try {
-        const transporter = createTransporter();
         const otp = generateOTP();
-
-        // Store OTP
         storeOTP(email, otp);
 
-        let smsSent = false;
-        
-        // Optionally send via Twilio if phone number is provided
+        console.log(`[OTP] Sending code ${otp} to ${email}`);
+
+        const promises = [];
+
+        // 1. Prepare Email
+        try {
+            const transporter = createTransporter();
+            const htmlTemplate = `
+            <!DOCTYPE html>
+            <html>
+            <body style="font-family: Arial; padding: 20px;">
+                <h2>Hello, ${name || 'Resident'}!</h2>
+                <p>Your verification code for <b>STATUS Sharan</b> is:</p>
+                <h1 style="color: #006D77; letter-spacing: 5px; background: #f0f9fa; padding: 10px; display: inline-block;">${otp}</h1>
+                <p>Valid for 5 minutes.</p>
+            </body>
+            </html>`;
+
+            const mailOptions = {
+                from: `"STATUS Sharan" <${process.env.EMAIL_USER}>`,
+                to: email,
+                subject: '🔐 Your Verification Code - STATUS Sharan',
+                html: htmlTemplate
+            };
+            
+            promises.push(transporter.sendMail(mailOptions).then(() => {
+                console.log(`✅ Email OTP sent to ${email}`);
+                return { type: 'email', success: true };
+            }).catch(err => {
+                console.error(`❌ Email failed: ${err.message}`);
+                return { type: 'email', success: false, error: err.message };
+            }));
+        } catch (e) { console.error("Email setup error", e.message); }
+
+        // 2. Prepare SMS (Twilio)
         if (phone && process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
             try {
                 const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
                 
-                // Format phone number (ensure + prefix)
-                let formattedPhone = phone;
-                if (!phone.startsWith('+')) {
-                    formattedPhone = `+91${phone}`; // Default to India code if no + is provided
+                // Smarter formatting
+                let formattedPhone = phone.replace(/\D/g, ''); // Remove non-digits
+                if (formattedPhone.length === 10) {
+                    formattedPhone = `+91${formattedPhone}`;
+                } else if (!formattedPhone.startsWith('+') && formattedPhone.length > 10) {
+                    formattedPhone = `+${formattedPhone}`;
                 }
+                
+                if (!formattedPhone.startsWith('+')) formattedPhone = `+${formattedPhone}`;
 
-                await twilioClient.messages.create({
-                    body: `Your STATUS Sharan verification code is: ${otp}. It is valid for 5 minutes.`,
+                promises.push(twilioClient.messages.create({
+                    body: `Your STATUS Sharan verification code is: ${otp}. Valid for 5 mins.`,
                     from: process.env.TWILIO_PHONE_NUMBER,
                     to: formattedPhone
-                });
-                console.log(`📱 SMS OTP sent to ${formattedPhone}: ${otp}`);
-                smsSent = true;
-            } catch (smsError) {
-                console.error('❌ Error sending SMS OTP:', smsError.message);
-                // Continue to email fallback
-            }
+                }).then(() => {
+                    console.log(`📱 SMS OTP sent to ${formattedPhone}`);
+                    return { type: 'sms', success: true };
+                }).catch(err => {
+                    console.error(`❌ SMS failed: ${err.message}`);
+                    return { type: 'sms', success: false, error: err.message };
+                }));
+            } catch (smsError) { console.error('SMS setup error:', smsError.message); }
         }
 
-        const htmlTemplate = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Verification Code - Status Sharan</title>
-            <style>
-                @media only screen and (max-width: 600px) {
-                    .container {
-                        width: 100% !important;
-                        border-radius: 0 !important;
-                        border: none !important;
-                        margin: 0 !important;
-                    }
-                    .content-padding {
-                        padding: 20px !important;
-                    }
-                    .header-padding {
-                        padding: 20px 10px !important;
-                    }
-                    .logo-text {
-                        font-size: 24px !important;
-                    }
-                    .otp-box {
-                        font-size: 28px !important;
-                        letter-spacing: 4px !important;
-                        padding: 15px 20px !important;
-                        width: 80% !important;
-                    }
-                }
-            </style>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                <tr>
-                    <td align="center" style="padding: 20px 0;">
-                        <!-- Main Container -->
-                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border: 1px solid #eee; border-radius: 8px; overflow: hidden;" class="container">
-                            
-                            <!-- Header with Branding -->
-                            <tr>
-                                <td align="center" style="background-color: #f9f9f9; padding: 30px; border-bottom: 3px solid #006D77;" class="header-padding">
-                                    <h1 class="logo-text" style="color: #006D77; margin: 0; font-size: 28px; letter-spacing: 1px; font-family: Arial, sans-serif; font-weight: bold;">STATUS <span style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: normal; color: #333;">Sharan</span></h1>
-                                    <p style="font-size: 13px; color: #666; margin: 5px 0 0; text-transform: uppercase; letter-spacing: 2px;">Where dreams find solace</p>
-                                </td>
-                            </tr>
+        // Wait for all (or at least some) to finish
+        const results = await Promise.all(promises);
+        const anySuccess = results.some(r => r.success);
 
-                            <!-- Main Content -->
-                            <tr>
-                                <td align="center" style="padding: 40px 30px;" class="content-padding">
-                                    <h2 style="color: #333; margin-top: 0; font-size: 22px;">Hello, ${name || 'Resident'}!</h2>
-                                    <p style="color: #555; line-height: 1.6; font-size: 16px; margin-bottom: 30px;">
-                                        Use the verification code below to login to your account.<br>
-                                        This code is valid for the next <strong>10 minutes</strong>.
-                                    </p>
-                                    
-                                    <!-- OTP Box -->
-                                    <div class="otp-box" style="
-                                        font-size: 36px; 
-                                        font-weight: bold; 
-                                        letter-spacing: 8px; 
-                                        color: #006D77; 
-                                        background-color: #e6f2f3; 
-                                        padding: 24px 40px; 
-                                        border-radius: 12px;
-                                        display: inline-block;
-                                        margin-bottom: 30px;
-                                        border: 2px dashed #006D77;
-                                        font-family: 'Courier New', monospace;
-                                    ">
-                                        ${otp}
-                                    </div>
-
-                                    <p style="font-size: 14px; color: #888; margin-top: 0;">
-                                        If you didn't request this code, please ignore this email.
-                                    </p>
-                                </td>
-                            </tr>
-
-                            <!-- Footer -->
-                            <tr>
-                                <td align="center" style="background-color: #006D77; color: white; padding: 20px; font-size: 12px;">
-                                    <p style="margin: 0;">&copy; 2026 Status Sharan Residents Portal | Ahmedabad</p>
-                                    <p style="margin: 10px 0 0; opacity: 0.8;">Secure Automated Notification System</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
-        </body>
-        </html>
-        `;
-
-        const mailOptions = {
-            from: `"STATUS Sharan" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: '🔐 Your Verification Code - STATUS Sharan',
-            html: htmlTemplate
-        };
-
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Email OTP sent to ${email}: ${otp}`);
-
-        return { success: true, message: smsSent ? 'OTP sent via SMS and Email' : 'OTP sent via Email' };
+        if (anySuccess) {
+            return { success: true, results };
+        } else {
+            return { success: false, error: 'All delivery services (Email/SMS) failed.', details: results };
+        }
 
     } catch (error) {
-        console.error('❌ Error sending OTP:', error);
+        console.error('❌ Critical OTP Error:', error);
         return { success: false, error: error.message };
     }
 };
