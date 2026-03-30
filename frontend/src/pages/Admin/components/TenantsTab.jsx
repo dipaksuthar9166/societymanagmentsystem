@@ -218,7 +218,7 @@ const TenantsTab = ({ tenants, refresh, token }) => {
                                                             if (data.verificationLink) {
                                                                 const confirmLink = await showConfirm('Email Service Not Configured', 'Do you want to copy the verification link?', 'Copy Link', 'Cancel');
                                                                 if (confirmLink) { navigator.clipboard.writeText(data.verificationLink); await showAlert('Copied!', 'Verification link copied.', 'success'); }
-                                                            } else { await showAlert('Sent!', 'Verification email sent.', 'success'); }
+                                                            } else { await showAlert('Sent!', 'Verification SMS OTP & Email sent.', 'success'); }
                                                         } else { await showAlert('Failed', (data.message || 'Failed'), 'error'); }
                                                     } catch (error) { console.error(error); await showAlert('Error', error.message, 'error'); }
                                                 }}

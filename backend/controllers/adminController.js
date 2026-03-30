@@ -53,19 +53,37 @@ const createCustomer = async (req, res) => {
         });
 
         if (user) {
-            res.status(201).json({
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                company: user.company
-            });
+            // Trigger automatic verification (Email + SMS)
+            const { generateVerificationToken, sendVerificationEmail } = require('../utils/emailService');
+            const { sendOTP } = require('../utils/otpService');
+            
+            const verificationToken = generateVerificationToken();
+            const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+            user.verificationToken = verificationToken;
+            user.verificationTokenExpiry = tokenExpiry;
+            await user.save();
+
+            // 1. Send SMS Onboarding
+            if (user.contactNumber) {
+                try {
+                    const company = await Company.findById(user.company);
+                    const twilioConfig = company?.twilioConfig?.isActive ? company.twilioConfig : null;
+                    await sendOTP(user.email, user.name, user.contactNumber, twilioConfig);
+                } catch (smsErr) { console.error('SMS Onboard Fail:', smsErr.message); }
+            }
+
+            // 2. Send Email Onboarding
+            try {
+                await sendVerificationEmail(user, verificationToken);
+            } catch (mailErr) { console.error('Mail Onboard Fail:', mailErr.message); }
+
+            res.status(201).json(user);
         } else {
             res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Server Error: ' + error.message });
     }
 };
 

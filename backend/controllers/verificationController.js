@@ -84,24 +84,40 @@ const resendVerification = async (req, res) => {
         user.verificationTokenExpiry = tokenExpiry;
         await user.save();
 
-        // Try to send email (optional - won't fail if email not configured)
+        const Company = require('../models/Company');
+        const company = await Company.findById(user.company);
+        const { sendOTP } = require('../utils/otpService');
+
+        let smsSent = false;
+        let emailSent = false;
+
+        // 1. Try to send SMS if phone exists
+        if (user.contactNumber) {
+            try {
+                const twilioConfig = company?.twilioConfig?.isActive ? company.twilioConfig : null;
+                const smsResult = await sendOTP(user.email, user.name, user.contactNumber, twilioConfig);
+                smsSent = smsResult.success;
+                if (smsResult.success) console.log(`✅ Welcome SMS sent to ${user.contactNumber}`);
+            } catch (smsError) {
+                console.error('❌ SMS Sending Error:', smsError.message);
+            }
+        }
+
+        // 2. Try to send Email
         try {
             const emailResult = await sendVerificationEmail(user, verificationToken);
-
-            if (emailResult.success) {
-                console.log(`✅ Verification email sent to ${user.email}`);
-            } else {
-                console.log(`⚠️ Email service not configured or failed: ${emailResult.error}`);
-            }
+            emailSent = emailResult.success;
+            if (emailResult.success) console.log(`✅ Verification email sent to ${user.email}`);
         } catch (emailError) {
-            console.error('⚠️ Email sending failed:', emailError.message);
-            // Continue anyway - token is saved in database
+            console.error('❌ Email sending failed:', emailError.message);
         }
 
         // Always return success if token is saved
         res.json({
             success: true,
-            message: 'Verification token generated! (Email service may not be configured)',
+            message: smsSent ? 'Verification OTP & Email Sent!' : 'Verification email sent! (SMS failed or no number)',
+            smsSent,
+            emailSent,
             verificationLink: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-account/${verificationToken}`
         });
     } catch (error) {
