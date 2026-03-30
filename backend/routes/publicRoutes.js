@@ -29,7 +29,7 @@ router.get('/stats', async (req, res) => {
             residents: userCount,
             revenue: revenue,
             uptime: "99.99%",
-            brands: ['Nexus OS', 'Skyline', 'Status Sharan', 'Emerald', 'Global Heights']
+            brands: ['Guru Kripa Building', 'Skyline', 'Status Sharan', 'Emerald', 'Global Heights']
         });
     } catch (err) {
         console.error('Stats Error:', err);
@@ -50,7 +50,7 @@ router.get('/projects', async (req, res) => {
         // Seed some "Real" looking projects if DB is empty
         if (projects.length === 0) {
             projects = [
-                { _id: '1', name: 'Status Sharan Premium', address: 'Ahmedabad, Gujarat', plan: 'Premium', logo: null },
+                { _id: '1', name: 'Guru Kripa Building', address: 'Ahmedabad, Gujarat', plan: 'Premium', logo: null },
                 { _id: '2', name: 'Nexus Heights', address: 'Mumbai, Maharashtra', plan: 'Gold', logo: null },
                 { _id: '3', name: 'Emerald Valley', address: 'Pune, Maharashtra', plan: 'Standard', logo: null },
                 { _id: '4', name: 'Skyline Residency', address: 'Delhi, NCR', plan: 'Premium', logo: null }

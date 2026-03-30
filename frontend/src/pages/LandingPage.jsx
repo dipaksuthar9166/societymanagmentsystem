@@ -20,7 +20,7 @@ const MarqueeSection = ({ brands = [] }) => (
         </div>
         <div className="flex overflow-hidden group">
             <div className="flex animate-marquee group-hover:pause gap-12 md:gap-24 items-center whitespace-nowrap px-10">
-                {(brands.length > 0 ? [...brands, ...brands] : ['SocieHub Elite', 'Nexus Towers', 'Global Heights', 'Skyline Residency', 'Emerald Estate', 'Urban Oasis', 'SocieHub Elite', 'Nexus Towers']).map((brand, i) => (
+                {(brands.length > 0 ? [...brands, ...brands] : ['Guru Kripa Building', 'Nexus Towers', 'Global Heights', 'Skyline Residency', 'Emerald Estate', 'Urban Oasis', 'Guru Kripa Building', 'Nexus Towers']).map((brand, i) => (
                     <span key={i} className="text-3xl md:text-5xl font-black text-slate-200 dark:text-slate-800 transition-colors hover:text-indigo-600 dark:hover:text-indigo-500 cursor-default uppercase italic tracking-tighter">
                         {brand}
                     </span>
@@ -96,7 +96,7 @@ const ComparisonSection = () => {
             <div className="max-w-5xl mx-auto px-6 relative z-10">
                 <div className="text-center mb-16 space-y-4">
                     <span className="text-indigo-400 font-bold uppercase tracking-widest text-xs">Modern Transformation</span>
-                    <h2 className="text-4xl md:text-5xl font-black">Upgrade to <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">SocieHub 2.0</span></h2>
+                    <h2 className="text-4xl md:text-5xl font-black">Upgrade to <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Guru Kripa Building</span></h2>
                 </div>
 
                 <div className="bg-white/5 backdrop-blur-3xl rounded-[3rem] border border-white/10 overflow-hidden shadow-2xl">
@@ -129,7 +129,7 @@ const CTASection = () => {
                 <div className="bg-indigo-600 rounded-[3.5rem] p-12 lg:p-24 text-center text-white relative overflow-hidden">
                     <div className="relative z-10 space-y-10">
                         <h2 className="text-5xl lg:text-7xl font-black leading-tight max-w-4xl mx-auto">Ready to digitalize <br /> your society?</h2>
-                        <p className="text-xl opacity-80 max-w-2xl mx-auto font-medium">Join 500+ modern communities who have already upgraded their urban lifestyle with SocieHub.</p>
+                        <p className="text-xl opacity-80 max-w-2xl mx-auto font-medium">Join 500+ modern communities who have already upgraded their urban lifestyle with Guru Kripa Building.</p>
                         
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                             <button 
@@ -160,7 +160,7 @@ const FeaturedProjects = ({ projects = [] }) => {
                 <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
                     <div className="space-y-4">
                         <span className="text-indigo-600 font-black uppercase tracking-widest text-[10px]">Active Hubs</span>
-                        <h2 className="text-4xl font-black text-slate-900 dark:text-white leading-tight">Societies Powered <br /> by <span className="text-indigo-600">SocieHub</span></h2>
+                        <h2 className="text-4xl font-black text-slate-900 dark:text-white leading-tight">Societies Powered <br /> by <span className="text-indigo-600">Guru Kripa</span></h2>
                     </div>
                     <p className="text-slate-500 dark:text-slate-400 font-medium max-w-sm">From luxury estates to community clusters, we manage the most premium societies across the country.</p>
                 </div>

@@ -112,7 +112,7 @@ const Navbar = ({ scrolled }) => {
                         <div className="p-8 h-full flex flex-col justify-between">
                             <div className="space-y-8">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xl font-black dark:text-white">Socie<span className="text-indigo-600">Hub</span></span>
+                                    <span className="text-xl font-black dark:text-white">Guru Kripa <span className="text-indigo-600">Building</span></span>
                                     <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-400"><X /></button>
                                 </div>
                                 <div className="space-y-4">

@@ -12,7 +12,7 @@ const Footer = () => {
                             <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white">
                                 <Building2 size={16} />
                             </div>
-                            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Nexus <span className="text-orange-500 italic">OS</span></span>
+                            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Guru Kripa <span className="text-orange-500 italic">Building</span></span>
                         </div>
                         <p className="text-slate-600 dark:text-slate-500 text-sm leading-relaxed max-w-xs mb-8 font-medium">
                             Empowering modern communities with intelligent automation. Manage billing, security, and communication with ease.
@@ -50,7 +50,7 @@ const Footer = () => {
                     </div>
                 </div>
                 <div className="pt-8 border-t border-slate-200 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-[10px] font-black uppercase tracking-widest text-center md:text-left">
-                    <p>© 2026 Nexus OS Platforms. All rights reserved.</p>
+                    <p>© 2026 Guru Kripa Building. All rights reserved.</p>
                     <p className="flex items-center gap-1.5 order-first md:order-none">
                         Designed & Developed with <span className="text-red-500 animate-pulse text-xs">❤️</span> by
                         <span className="text-slate-900 dark:text-white hover:text-orange-500 transition-colors cursor-pointer border-b border-orange-500/30 pb-0.5"> Dipak Suthar</span>
