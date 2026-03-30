@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-const { getCustomers, createCustomer, deleteCustomer, updateCustomer, getSMSBalance } = require('../controllers/adminController');
+const { getCustomers, createCustomer, deleteCustomer, updateCustomer, getSMSBalance, saveTwilioConfig } = require('../controllers/adminController');
 const { getAdminStats, getAdminDetailedAnalytics } = require('../controllers/analyticsController');
 const { getExpenses, createExpense, deleteExpense } = require('../controllers/expenseController');
 const { getMyCompany, updateMyCompany } = require('../controllers/companyController');
