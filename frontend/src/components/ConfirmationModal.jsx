@@ -10,7 +10,8 @@ const ConfirmationModal = ({
     message,
     confirmText = "Confirm",
     cancelText = "Cancel",
-    type = "danger" // danger, warning, info
+    type = "danger", // danger, warning, info
+    inputConfig = null
 }) => {
     if (!isOpen) return null;
 
@@ -48,10 +49,26 @@ const ConfirmationModal = ({
                             {message}
                         </p>
 
+                        {inputConfig && (
+                            <div className="w-full mb-6 relative">
+                                <input
+                                    type={inputConfig.type || "text"}
+                                    placeholder={inputConfig.placeholder}
+                                    value={inputConfig.value}
+                                    onChange={inputConfig.onChange}
+                                    min={inputConfig.min}
+                                    step={inputConfig.step}
+                                    autoFocus
+                                    className="w-full bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 placeholder:text-slate-400 font-bold focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all outline-none"
+                                />
+                            </div>
+                        )}
+
                         <div className="w-full flex flex-col gap-3">
                             <button
-                                onClick={onConfirm}
-                                className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.15em] text-xs transition-all shadow-xl active:scale-95 ${type === 'danger' ? 'bg-red-600 text-white hover:bg-red-700 shadow-red-200 dark:shadow-none' :
+                                onClick={() => onConfirm(inputConfig?.value)}
+                                disabled={inputConfig?.required && !inputConfig.value}
+                                className={`w-full py-4 rounded-2xl font-black uppercase tracking-[0.15em] text-xs transition-all shadow-xl active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${type === 'danger' ? 'bg-red-600 text-white hover:bg-red-700 shadow-red-200 dark:shadow-none' :
                                         type === 'warning' ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-amber-200 dark:shadow-none' :
                                             'bg-indigo-600 text-white hover:bg-indigo-700 shadow-indigo-200 dark:shadow-none'
                                     }`}

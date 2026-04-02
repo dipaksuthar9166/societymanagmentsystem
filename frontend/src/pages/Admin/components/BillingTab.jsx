@@ -4,9 +4,18 @@ import { API_BASE_URL, resolveImageURL } from '../../../config';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import QRCode from 'qrcode';
+import ConfirmationModal from '../../../components/ConfirmationModal';
+import { useToast } from '../../../components/ToastProvider';
 
 const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
     const [loading, setLoading] = useState(false);
+    const { showSuccess, showError, showWarning, showInfo } = useToast();
+    
+    // Modal State
+    const [dialogConfig, setDialogConfig] = useState({ isOpen: false });
+    const [dialogInputValue, setDialogInputValue] = useState("");
+
+    const closeDialog = () => setDialogConfig({ isOpen: false });
 
     // Form State
     const [mode, setMode] = useState('manual'); // 'manual' | 'bulk'
@@ -78,39 +87,7 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
         return billItems.reduce((acc, item) => acc + (Number(item.price) * Number(item.quantity)), 0);
     };
 
-    const handleGenerateInvoice = async () => {
-        if (billItems.length === 0) return alert("Please add at least one bill item.");
-
-        let endpoint = '/invoices';
-        let body = {};
-
-        if (mode === 'manual') {
-            if (!selectedTenantId) return alert("Please select a user/owner first.");
-            const subtotal = calculateCurrentTotal();
-            const gst = subtotal * 0.18;
-            const totalWithGST = subtotal + gst + arrears;
-            if (!confirm(`Generate Bill for ${selectedTenant.name}?\n\nSubtotal: ₹${subtotal.toLocaleString()}\nGST (18%): ₹${gst.toLocaleString()}\nArrears: ₹${arrears.toLocaleString()}\n\nTotal Payable: ₹${totalWithGST.toLocaleString()}`)) return;
-
-            body = {
-                customerId: selectedTenantId,
-                type: 'Maintenance',
-                items: billItems,
-                billingPeriod,
-                dueDate,
-                notes
-            };
-        } else {
-            if (!confirm(`⚠️ BULK ACTION\nGenerate bills for ALL residents in the society?\n\nThis will create invoices for everyone based on the template.`)) return;
-            endpoint = '/invoices/bulk';
-            body = {
-                items: billItems,
-                billingPeriod,
-                dueDate,
-                type: 'Maintenance',
-                notes
-            };
-        }
-
+    const executeGenerate = async (endpoint, body, generationMode) => {
         setLoading(true);
         try {
             const res = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -121,105 +98,193 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
 
             const data = await res.json();
             if (res.ok) {
-                if (mode === 'bulk') {
-                    alert(`Bulk Generation Complete!\nSuccess: ${data.message}`);
+                if (generationMode === 'bulk') {
+                    showSuccess("Bulk Generation Complete", data.message);
                 } else {
-                    alert(`Invoice Generated Successfully!\nTotal Amount: ₹${data.totalAmount}`);
+                    showSuccess("Invoice Generated", `Total Amount: ₹${data.totalAmount}`);
                 }
-                // Reset Form
                 refresh();
                 setBillItems([{ name: 'Monthly Maintenance', price: 2500, quantity: 1 }]);
                 setSelectedTenantId('');
             } else {
-                alert(data.message || 'Generation Failed');
+                showError("Generation Failed", data.message || 'Error occurred');
             }
         } catch (error) {
             console.error(error);
-            alert("Network Error");
+            showError("Network Error", "Failed to connect to server");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleMarkPaid = async (invoiceId) => {
-        if (!confirm('Mark this invoice as PAID (Cash Recieved)?\nUser will be notified.')) return;
-        try {
-            const res = await fetch(`${API_BASE_URL}/invoices/${invoiceId}/pay`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+    const handleGenerateInvoice = () => {
+        if (billItems.length === 0) return showError("Validation Error", "Please add at least one bill item.");
+
+        let endpoint = '/invoices';
+        let body = {};
+
+        if (mode === 'manual') {
+            if (!selectedTenantId) return showError("Validation Error", "Please select a user/owner first.");
+            const subtotal = calculateCurrentTotal();
+            const gst = subtotal * 0.18;
+            const totalWithGST = subtotal + gst + arrears;
+            
+            setDialogConfig({
+                isOpen: true,
+                title: 'Generate Single Bill',
+                message: `Generate Bill for ${selectedTenant.name}?\n\nSubtotal: ₹${subtotal.toLocaleString()}\nGST (18%): ₹${gst.toLocaleString()}\nArrears: ₹${arrears.toLocaleString()}\n\nTotal Payable: ₹${totalWithGST.toLocaleString()}`,
+                type: 'info',
+                confirmText: 'Generate Bill',
+                onConfirm: async () => {
+                    closeDialog();
+                    body = { customerId: selectedTenantId, type: 'Maintenance', items: billItems, billingPeriod, dueDate, notes };
+                    executeGenerate(endpoint, body, 'single');
+                }
             });
-            if (res.ok) {
-                alert('Invoice Marked as Paid!');
-                refresh();
-            } else {
-                alert('Action Failed');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Network Error');
+        } else {
+            setDialogConfig({
+                isOpen: true,
+                title: 'Confirm Bulk Action',
+                message: `⚠️ Generate bills for ALL residents in the society?\n\nThis will create invoices for everyone based on the template.`,
+                type: 'warning',
+                confirmText: 'Generate All Bills',
+                onConfirm: async () => {
+                    closeDialog();
+                    endpoint = '/invoices/bulk';
+                    body = { items: billItems, billingPeriod, dueDate, type: 'Maintenance', notes };
+                    executeGenerate(endpoint, body, 'bulk');
+                }
+            });
         }
     };
 
-    const handleAddInterest = async (invoiceId, billTotalAmount, currentInterest) => {
-        const rateStr = prompt('Enter interest percentage (e.g. 5) to charge for this invoice:');
-        if (rateStr === null || rateStr === '') return;
-        const rate = Number(rateStr);
-        if (isNaN(rate) || rate < 0) return alert('Invalid interest percentage');
-        
-        // Calculate Principal (Total minus existing interest) to avoid compounding interest on interest
-        const principal = billTotalAmount - (currentInterest || 0);
-        const interestAmount = Math.round(principal * (rate / 100));
-
-        if (!confirm(`This will apply ₹${interestAmount} (${rate}%) as interest on the principal of ₹${principal}. Continue?`)) return;
-        
-        try {
-            const res = await fetch(`${API_BASE_URL}/invoices/${invoiceId}/interest`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ interest: interestAmount })
-            });
-
-            if (res.ok) {
-                alert('Interest updated successfully!');
-                refresh();
-            } else {
-                alert('Failed to update interest');
+    const handleMarkPaid = (invoiceId) => {
+        setDialogConfig({
+            isOpen: true,
+            title: 'Confirm Payment',
+            message: 'Mark this invoice as PAID (Cash Received)? User will be notified.',
+            type: 'info',
+            confirmText: 'Mark as Paid',
+            onConfirm: async () => {
+                closeDialog();
+                try {
+                    const res = await fetch(`${API_BASE_URL}/invoices/${invoiceId}/pay`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        showSuccess("Success", "Invoice Marked as Paid!");
+                        refresh();
+                    } else {
+                        showError("Failed", "Action Failed");
+                    }
+                } catch (error) {
+                    showError("Network Error", "Failed to connect");
+                }
             }
-        } catch (error) {
-            console.error(error);
-            alert('Network Error');
-        }
+        });
     };
 
-    const handleBulkInterest = async () => {
-        const rateStr = prompt('Enter interest percentage (e.g. 5) to apply to ALL Overdue bills:');
-        if (rateStr === null || rateStr === '') return;
-        const interestRatePercentage = Number(rateStr);
-        if (isNaN(interestRatePercentage) || interestRatePercentage <= 0) return alert('Invalid interest percentage');
-        
-        if (!confirm(`Are you sure you want to apply ${interestRatePercentage}% penalty to ALL overdue bills?`)) return;
+    const handleAddInterest = (invoiceId, billTotalAmount, currentInterest) => {
+        setDialogInputValue(""); // Clear previous input
+        setDialogConfig({
+            isOpen: true,
+            title: 'Apply Penalty / Interest',
+            message: 'Enter interest percentage (e.g. 5) to charge for this invoice:',
+            type: 'warning',
+            needsInput: true,
+            inputPlaceholder: 'Percentage %',
+            confirmText: 'Calculate',
+            onConfirm: (rateStr) => {
+                if (!rateStr) return;
+                const rate = Number(rateStr);
+                if (isNaN(rate) || rate < 0) return showError('Invalid input', 'Invalid interest percentage');
+                closeDialog();
+                
+                const principal = billTotalAmount - (currentInterest || 0);
+                const interestAmount = Math.round(principal * (rate / 100));
 
-        try {
-            setLoading(true);
-            const res = await fetch(`${API_BASE_URL}/invoices/action/bulk-interest`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ interestRatePercentage })
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                alert(data.message);
-                refresh();
-            } else {
-                alert(data.message || 'Failed to apply bulk interest');
+                setTimeout(() => { // small delay for modal state transition
+                    setDialogConfig({
+                        isOpen: true,
+                        title: 'Confirm Penalty',
+                        message: `This will apply ₹${interestAmount} (${rate}%) as interest on the principal of ₹${principal}. Continue?`,
+                        type: 'danger',
+                        confirmText: 'Apply Penalty',
+                        onConfirm: async () => {
+                            closeDialog();
+                            try {
+                                const res = await fetch(`${API_BASE_URL}/invoices/${invoiceId}/interest`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                                    body: JSON.stringify({ interest: interestAmount })
+                                });
+                                if (res.ok) {
+                                    showSuccess('Success', 'Interest updated successfully!');
+                                    refresh();
+                                } else {
+                                    showError('Failed', 'Failed to update interest');
+                                }
+                            } catch (error) {
+                                showError('Network Error', 'Failed to connect');
+                            }
+                        }
+                    });
+                }, 100);
             }
-        } catch (error) {
-            console.error(error);
-            alert('Network Error');
-        } finally {
-            setLoading(false);
-        }
+        });
+    };
+
+    const handleBulkInterest = () => {
+        setDialogInputValue(""); // clear input
+        setDialogConfig({
+            isOpen: true,
+            title: 'Bulk Apply Penalty',
+            message: 'Enter interest percentage (e.g. 5) to apply to ALL Overdue bills:',
+            type: 'danger',
+            needsInput: true,
+            inputPlaceholder: 'Percentage %',
+            confirmText: 'Next',
+            onConfirm: (rateStr) => {
+                if (!rateStr) return;
+                const interestRatePercentage = Number(rateStr);
+                if (isNaN(interestRatePercentage) || interestRatePercentage <= 0) return showError('Invalid Input', 'Invalid interest percentage');
+                
+                closeDialog();
+
+                setTimeout(() => {
+                    setDialogConfig({
+                        isOpen: true,
+                        title: 'Confirm Bulk Action',
+                        message: `Are you sure you want to apply ${interestRatePercentage}% penalty to ALL overdue bills?`,
+                        type: 'danger',
+                        confirmText: 'Apply to All',
+                        onConfirm: async () => {
+                            closeDialog();
+                            setLoading(true);
+                            try {
+                                const res = await fetch(`${API_BASE_URL}/invoices/action/bulk-interest`, {
+                                    method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                                    body: JSON.stringify({ interestRatePercentage })
+                                });
+                                const data = await res.json();
+                                if (res.ok) {
+                                    showSuccess('Bulk Action Complete', data.message);
+                                    refresh();
+                                } else {
+                                    showError('Failed', data.message || 'Failed to apply bulk interest');
+                                }
+                            } catch (error) {
+                                showError('Network Error', 'Failed to connect');
+                            } finally {
+                                setLoading(false);
+                            }
+                        }
+                    });
+                }, 100);
+            }
+        });
     };
 
     // --- PDF Logic (Updated) ---
@@ -323,7 +388,7 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
 
         } catch (error) {
             console.error("PDF Error", error);
-            alert("Failed to generate PDF");
+            showError("Failed to Generate PDF", "Something went wrong while generating the receipt.");
         }
     };
 
@@ -649,6 +714,16 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
                 </div>
             </div>
 
+            <ConfirmationModal
+                {...dialogConfig}
+                onClose={closeDialog}
+                inputConfig={dialogConfig.needsInput ? {
+                    type: 'number',
+                    placeholder: dialogConfig.inputPlaceholder || 'Enter value...',
+                    value: dialogInputValue,
+                    onChange: (e) => setDialogInputValue(e.target.value)
+                } : null}
+            />
         </div>
     );
 };
