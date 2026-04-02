@@ -3,8 +3,8 @@
 
 const getAPIBaseURL = () => {
     // Return live backend URL for all environments
-    // return 'https://societymanagmentsystem.onrender.com/api';
-    return 'http://localhost:5001/api';
+    return 'https://societymanagmentsystem.onrender.com/api';
+    // return 'http://localhost:5001/api';
 };
 
 export const API_BASE_URL = getAPIBaseURL();
