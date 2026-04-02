@@ -16,13 +16,23 @@ const generatePaymentLink = async (req, res) => {
         // 1. Get Society Credentials
         const company = await Company.findById(req.user.company);
 
-        if (!company || !company.paymentGateway || !company.paymentGateway.isActive) {
+        // Allow payments if either company gateway is active OR we have fallback env keys
+        const hasEnvKeys = process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET;
+        
+        if (!company && !hasEnvKeys) {
             return res.status(400).json({
-                message: 'Online payments not enabled by Society Admin.'
+                message: 'Online payments not configured.'
             });
         }
 
-        const { keyId, keySecret } = company.paymentGateway;
+        let keyId = company?.paymentGateway?.keyId;
+        let keySecret = company?.paymentGateway?.keySecret;
+
+        // Fallback to ENV if DB keys are broken or missing
+        if (!keyId || !keyId.startsWith('rzp_')) {
+            keyId = process.env.RAZORPAY_KEY_ID;
+            keySecret = process.env.RAZORPAY_KEY_SECRET;
+        }
 
         if (!keyId || !keySecret) {
             return res.status(500).json({ message: 'Payment gateway configuration error.' });
@@ -108,10 +118,17 @@ const verifyBillPayment = async (req, res) => {
 
         // 1. Get Society Credentials
         const company = await Company.findById(req.user.company);
-        if (!company || !company.paymentGateway) {
+        
+        let keySecret = company?.paymentGateway?.keySecret;
+        let keyId = company?.paymentGateway?.keyId;
+
+        if (!keyId || !keyId.startsWith('rzp_')) {
+            keySecret = process.env.RAZORPAY_KEY_SECRET;
+        }
+
+        if (!keySecret) {
             return res.status(400).json({ message: 'Payment gateway configuration missing.' });
         }
-        const { keySecret } = company.paymentGateway;
 
         // 2. Verify Signature
         const body = razorpay_order_id + "|" + razorpay_payment_id;
