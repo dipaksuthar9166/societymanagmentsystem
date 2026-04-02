@@ -342,11 +342,57 @@ const updateInterest = async (req, res) => {
     }
 };
 
+// @desc    Apply Bulk Interest to all Overdue invoices
+// @route   PUT /api/invoices/bulk-interest
+// @access  Admin
+const applyBulkInterest = async (req, res) => {
+    try {
+        const { interestRatePercentage } = req.body;
+        const rate = Number(interestRatePercentage) || 0;
+
+        if (rate <= 0) {
+            return res.status(400).json({ message: 'Valid positive interest rate is required.' });
+        }
+
+        if (!req.user.company) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        // Find all Overdue bills
+        const overdueInvoices = await Invoice.find({
+            societyId: req.user.company,
+            status: 'Overdue'
+        });
+
+        if (overdueInvoices.length === 0) {
+            return res.status(404).json({ message: 'No overdue bills found.' });
+        }
+
+        let updatedCount = 0;
+        for (let invoice of overdueInvoices) {
+            const baseAmount = invoice.totalAmount - (invoice.interest || 0); // Calculate interest based on principal only
+            const addedInterest = (baseAmount * rate) / 100;
+            
+            invoice.interest = (invoice.interest || 0) + addedInterest;
+            invoice.totalAmount = invoice.totalAmount + addedInterest;
+
+            await invoice.save();
+            updatedCount++;
+        }
+
+        res.json({ message: `Successfully applied ${rate}% interest to ${updatedCount} overdue bills.` });
+    } catch (error) {
+        console.error("Bulk Interest Error:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 module.exports = {
     getInvoices,
     createInvoice,
     createBulkInvoices,
     markAsPaid,
     getInvoicesByUser,
-    updateInterest
+    updateInterest,
+    applyBulkInterest
 };

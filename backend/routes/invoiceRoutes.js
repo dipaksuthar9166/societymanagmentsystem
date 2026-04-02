@@ -6,7 +6,8 @@ const {
     markAsPaid,
     createBulkInvoices,
     getInvoicesByUser,
-    updateInterest
+    updateInterest,
+    applyBulkInterest
 } = require('../controllers/invoiceController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -19,5 +20,6 @@ router.post('/bulk', protect, authorize('admin'), createBulkInvoices);
 
 router.put('/:id/pay', protect, authorize('admin', 'employee'), markAsPaid);
 router.put('/:id/interest', protect, authorize('admin', 'employee'), updateInterest);
+router.put('/action/bulk-interest', protect, authorize('admin', 'employee'), applyBulkInterest);
 
 module.exports = router;

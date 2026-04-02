@@ -185,6 +185,37 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
         }
     };
 
+    const handleBulkInterest = async () => {
+        const rateStr = prompt('Enter interest percentage (e.g. 5) to apply to ALL Overdue bills:');
+        if (rateStr === null || rateStr === '') return;
+        const interestRatePercentage = Number(rateStr);
+        if (isNaN(interestRatePercentage) || interestRatePercentage <= 0) return alert('Invalid interest percentage');
+        
+        if (!confirm(`Are you sure you want to apply ${interestRatePercentage}% penalty to ALL overdue bills?`)) return;
+
+        try {
+            setLoading(true);
+            const res = await fetch(`${API_BASE_URL}/invoices/action/bulk-interest`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ interestRatePercentage })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                refresh();
+            } else {
+                alert(data.message || 'Failed to apply bulk interest');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Network Error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // --- PDF Logic (Updated) ---
     const downloadInvoice = async (bill) => {
         // ... (Same as before)
@@ -565,7 +596,10 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
             {/* Kept minimal as per 'Paper' look requests usually don't include a dashboard table inside the bill, but we keep it below the bill container */}
             <div className="mt-12">
                 <div className="flex justify-between items-end mb-4 border-b border-slate-200 dark:border-slate-700 pb-2">
-                    <h3 className="text-xl font-bold text-slate-700 dark:text-white">Recent Generated Bills</h3>
+                    <div className="flex items-center gap-4">
+                        <h3 className="text-xl font-bold text-slate-700 dark:text-white">Recent Generated Bills</h3>
+                        <button onClick={handleBulkInterest} className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-600 hover:text-white px-3 py-1 rounded-full uppercase transition-colors flex items-center gap-1"><AlertCircle size={12} /> Apply Bulk Penalty</button>
+                    </div>
                     <button onClick={refresh} className="text-sm font-bold text-[#005496] dark:text-blue-400 hover:underline">Refresh List</button>
                 </div>
                 <div className="overflow-x-auto">
