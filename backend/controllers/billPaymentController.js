@@ -37,17 +37,18 @@ const generatePaymentLink = async (req, res) => {
         const user = await User.findById(req.user._id);
 
         // 3. Create Payment Link
+        const frontendUrl = req.headers.origin || req.headers.referer?.split('?')[0].replace(/\/$/, '') || "http://localhost:5173";
         const linkOptions = {
-            amount: amount * 100, // amount in paise
+            amount: Math.round(amount * 100), // amount in paise, prevent floating point errors
             currency: "INR",
             accept_partial: false,
             // expire_by: 1691097057, // Optional expiry
             reference_id: `inv_${invoiceId}_${Date.now()}`,
             description: `Payment for Bill #${invoiceId}`,
             customer: {
-                name: user.name,
+                name: user.name || "Customer",
                 contact: user.mobile || user.contactNumber || "+919999999999", // Fallback if missing
-                email: user.email
+                email: user.email || "support@societymanagement.com"
             },
             notify: {
                 sms: true,
@@ -59,8 +60,8 @@ const generatePaymentLink = async (req, res) => {
                 invoiceId: invoiceId,
                 userId: req.user._id.toString()
             },
-            // Redirect user back to local app after payment (User Dashboard)
-            callback_url: `${req.protocol}://${req.get('host').replace('5001', '5173')}/user-dashboard?payment=success&invoice=${invoiceId}`,
+            // Redirect user back to valid frontend app after payment (User Dashboard)
+            callback_url: `${frontendUrl}/user-dashboard?payment=success&invoice=${invoiceId}`,
             callback_method: "get"
         };
 
