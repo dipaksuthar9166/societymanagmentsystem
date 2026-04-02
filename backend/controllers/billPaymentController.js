@@ -53,8 +53,8 @@ const generatePaymentLink = async (req, res) => {
             currency: "INR",
             accept_partial: false,
             // expire_by: 1691097057, // Optional expiry
-            reference_id: `inv_${invoiceId}_${Date.now()}`,
-            description: `Payment for Bill #${invoiceId}`,
+            reference_id: `inv_${invoiceId.toString().slice(-8)}_${Date.now()}`,
+            description: `Payment for Bill #${invoiceId.toString().slice(-6).toUpperCase()}`,
             customer: {
                 name: user.name || "Customer",
                 contact: user.mobile || user.contactNumber || "+919999999999", // Fallback if missing
