@@ -48,6 +48,11 @@ const generatePaymentLink = async (req, res) => {
 
         // 3. Create Payment Link
         const frontendUrl = req.headers.origin || req.headers.referer?.split('?')[0].replace(/\/$/, '') || "http://localhost:5173";
+        const userContact = user.mobile || user.contactNumber;
+        if (!userContact || userContact.toString().length < 10) {
+             return res.status(400).json({ message: 'Valid mobile number is required in your profile to process payments online.' });
+        }
+
         const linkOptions = {
             amount: Math.round(amount * 100), // amount in paise, prevent floating point errors
             currency: "INR",
@@ -57,7 +62,7 @@ const generatePaymentLink = async (req, res) => {
             description: `Payment for Bill #${invoiceId.toString().slice(-6).toUpperCase()}`,
             customer: {
                 name: user.name || "Customer",
-                contact: user.mobile || user.contactNumber || "+919876543210", // Valid-looking fallback
+                contact: userContact,
                 email: user.email || "support@societymanagement.com"
             },
             notify: {
