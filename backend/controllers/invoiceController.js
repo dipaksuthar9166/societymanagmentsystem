@@ -310,10 +310,43 @@ const getInvoicesByUser = async (req, res) => {
     }
 };
 
+// @desc    Update interest on a specific invoice
+// @route   PUT /api/invoices/:id/interest
+// @access  Admin
+const updateInterest = async (req, res) => {
+    try {
+        const { interest } = req.body;
+        const invoice = await Invoice.findById(req.params.id);
+
+        if (!invoice) {
+            return res.status(404).json({ message: 'Invoice not found' });
+        }
+
+        if (invoice.societyId.toString() !== req.user.company.toString()) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        // Subtract the old interest and add the new one to totalAmount
+        const oldInterest = invoice.interest || 0;
+        const newInterest = Number(interest) || 0;
+        
+        invoice.interest = newInterest;
+        invoice.totalAmount = invoice.totalAmount - oldInterest + newInterest;
+
+        await invoice.save();
+
+        res.json({ message: 'Interest updated successfully', invoice });
+    } catch (error) {
+        console.error("Update Interest Error:", error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
 module.exports = {
     getInvoices,
     createInvoice,
     createBulkInvoices,
     markAsPaid,
-    getInvoicesByUser
+    getInvoicesByUser,
+    updateInterest
 };

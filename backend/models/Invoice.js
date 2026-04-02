@@ -59,6 +59,10 @@ const invoiceSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    interest: {
+        type: Number,
+        default: 0
+    },
     lastPenaltyDate: { type: Date },
     notes: { type: String },
     subtotal: {

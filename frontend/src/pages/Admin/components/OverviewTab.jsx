@@ -28,83 +28,62 @@ ChartJS.register(
 );
 
 const StatCard = ({ label, value, sub, icon: Icon, color, trend }) => {
-    const gradients = {
-        blue: 'from-blue-600 to-cyan-500',
-        green: 'from-emerald-600 to-teal-500',
-        orange: 'from-orange-600 to-amber-500',
-        red: 'from-rose-600 to-red-500',
-        indigo: 'from-indigo-600 to-violet-500',
-        purple: 'from-fuchsia-600 to-purple-500'
+    const iconColors = {
+        blue: 'text-blue-500 bg-blue-50 dark:bg-blue-500/10',
+        green: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10',
+        orange: 'text-orange-500 bg-orange-50 dark:bg-orange-500/10',
+        red: 'text-rose-500 bg-rose-50 dark:bg-rose-500/10',
+        indigo: 'text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10',
+        purple: 'text-purple-500 bg-purple-50 dark:bg-purple-500/10'
     };
 
-    const shadowColor = {
-        blue: 'shadow-blue-200/50 dark:shadow-none',
-        green: 'shadow-emerald-200/50 dark:shadow-none',
-        orange: 'shadow-orange-200/50 dark:shadow-none',
-        red: 'shadow-rose-200/50 dark:shadow-none',
-        indigo: 'shadow-indigo-200/50 dark:shadow-none',
-        purple: 'shadow-fuchsia-200/50 dark:shadow-none'
+    const borderColors = {
+        blue: 'border-t-blue-400',
+        green: 'border-t-emerald-400',
+        orange: 'border-t-orange-400',
+        red: 'border-t-rose-400',
+        indigo: 'border-t-indigo-400',
+        purple: 'border-t-purple-400'
     };
 
     return (
-        <div className={`relative overflow-hidden bg-white dark:bg-slate-800/80 backdrop-blur-xl rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 p-6 transition-all duration-500 group cursor-pointer hover:-translate-y-2 shadow-xl ${shadowColor[color]}`}>
-            {/* Glossy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            
-            <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                    <div className={`p-4 rounded-2xl bg-gradient-to-br ${gradients[color]} text-white shadow-lg group-hover:rotate-6 transition-transform duration-500`}>
-                        <Icon size={24} />
-                    </div>
-                    {trend && (
-                        <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                            <TrendingUp size={12} />
-                            {trend}
-                        </div>
-                    )}
-                </div>
-                
-                <h3 className="text-3xl font-black text-slate-800 dark:text-white tracking-tight leading-none mb-1 tabular-nums group-hover:scale-105 origin-left transition-transform duration-500">
-                    {value}
-                </h3>
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-2">{label}</p>
-                
-                <div className="flex items-center gap-2">
-                    <div className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${gradients[color]} animate-pulse`}></div>
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 truncate">{sub}</p>
+        <div className={`bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 border-t-4 ${borderColors[color]} p-6 shadow-sm`}>
+            <div className="flex items-center justify-between mb-4">
+                <div className={`p-2.5 rounded-lg ${iconColors[color]}`}>
+                    <Icon size={20} className="stroke-[2.5]" />
                 </div>
             </div>
-
-            {/* Background Glow */}
-            <div className={`absolute -bottom-12 -right-12 w-32 h-32 bg-gradient-to-br ${gradients[color]} rounded-full blur-3xl opacity-5 dark:opacity-10 group-hover:opacity-20 transition-opacity duration-700`}></div>
+            
+            <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">{label}</p>
+            <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-1">
+                {value}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{sub}</p>
         </div>
     );
 };
 
 const QuickAction = ({ label, icon: Icon, onClick, color = 'indigo' }) => {
     const colors = {
-        indigo: 'group-hover:text-indigo-600 dark:group-hover:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20',
-        green: 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20',
-        purple: 'group-hover:text-purple-600 dark:group-hover:text-purple-400 bg-purple-50 dark:bg-purple-900/20',
-        blue: 'group-hover:text-blue-600 dark:group-hover:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+        indigo: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20',
+        green: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20',
+        purple: 'text-purple-600 bg-purple-50 dark:bg-purple-500/10 group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20',
+        blue: 'text-blue-600 bg-blue-50 dark:bg-blue-500/10 group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20'
     };
 
     return (
         <button
             onClick={onClick}
-            className="flex flex-col items-center justify-center gap-4 p-8 bg-white dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 rounded-[2.5rem] hover:shadow-2xl hover:shadow-indigo-200/40 dark:hover:shadow-none transition-all duration-500 group relative overflow-hidden"
+            className="flex items-center gap-4 w-full p-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl hover:border-slate-300 transition-colors group"
         >
-            <div className={`p-5 rounded-2xl ${colors[color]} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-inner`}>
-                <Icon size={32} />
+            <div className={`p-3 rounded-xl transition-colors ${colors[color]}`}>
+                <Icon size={20} className="stroke-[2]" />
             </div>
-            <div className="text-center">
-                <span className="block text-sm font-black text-slate-800 dark:text-white uppercase tracking-widest">{label}</span>
-                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Launch Module</span>
+            <div className="flex-1 text-left">
+                <span className="block text-sm font-bold text-slate-800 dark:text-white">{label}</span>
             </div>
-            
-            {/* Hover Decor */}
-            <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                <ArrowRight size={40} className="-rotate-45" />
+            <div className="text-slate-400 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+                <ArrowRight size={18} />
             </div>
         </button>
     );
@@ -183,79 +162,52 @@ const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Operations Center Header */}
             <div
-                className={`group relative overflow-hidden rounded-[2.5rem] p-8 text-white transition-all duration-1000 shadow-2xl shadow-indigo-200/40 dark:shadow-none animate-gradient bg-[length:200%_200%] ${!activeEvent ? `bg-gradient-to-br ${gradient}` : ''}`}
+                className={`relative overflow-hidden rounded-[1.5rem] p-6 text-white bg-[#00a3ff]`}
                 style={bannerStyle}
             >
-                {/* High-fidelity background decor */}
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-32 -mt-32 blur-[100px] group-hover:scale-125 transition-transform duration-[3s]"></div>
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-black/10 rounded-full blur-[80px]"></div>
+                {/* Subtle background decor */}
+                <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl group-hover:scale-110 transition-transform duration-[3s]"></div>
 
-                <div className="flex flex-col lg:flex-row items-center justify-between relative z-10 gap-8">
-                    <div className="flex items-center gap-6">
-                        <div className="relative">
-                            <div className="bg-white/20 p-5 rounded-[2rem] backdrop-blur-xl border border-white/30 shadow-2xl group-hover:rotate-[10deg] transition-transform duration-500">
-                                <span className="animate-wave text-4xl inline-block origin-bottom-right">
-                                    {activeEvent ? (
-                                        activeEvent.animation === 'snowfall' ? '❄️' :
-                                            activeEvent.animation === 'fireworks' ? '🎆' :
-                                                activeEvent.animation === 'diyas-sparkle' ? '🪔' :
-                                                    activeEvent.animation === 'tricolor-confetti' ? '🇮🇳' :
-                                                        activeEvent.animation === 'peace-symbols' ? '🕊️' : '🙌'
-                                    ) : '🏢'}
-                                </span>
-                            </div>
-                            <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-400 border-4 border-white/20 rounded-full animate-ping"></div>
+                <div className="flex flex-col lg:flex-row items-center justify-between relative z-10 gap-4">
+                    <div className="flex items-center gap-4">
+                        <div className="bg-white/20 p-4 rounded-full flex items-center justify-center h-16 w-16 backdrop-blur-md shadow-inner">
+                            <span className="animate-wave text-3xl inline-block origin-bottom-right">
+                                {activeEvent ? (
+                                    activeEvent.animation === 'snowfall' ? '❄️' :
+                                        activeEvent.animation === 'fireworks' ? '🎆' :
+                                            activeEvent.animation === 'diyas-sparkle' ? '🪔' :
+                                                activeEvent.animation === 'tricolor-confetti' ? '🇮🇳' :
+                                                    activeEvent.animation === 'peace-symbols' ? '🕊️' : '🙌'
+                                ) : '👋'}
+                            </span>
                         </div>
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-white/20">
-                                    Operations Live
-                                </span>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
-                                    <span className="text-[10px] font-bold opacity-80 uppercase tracking-widest">Normal Latency</span>
-                                </div>
-                            </div>
-                            <h1 className="text-3xl font-black tracking-tight leading-none mb-2 drop-shadow-md">
-                                {activeEvent ? activeEvent.heroBannerText : `${greeting}, Administrator!`}
+                            <h1 className="text-2xl font-bold tracking-tight mb-1">
+                                {activeEvent ? activeEvent.heroBannerText : `${greeting}, ${user?.name?.split(' ')[0] || 'Dipak'}!`}
                             </h1>
-                            <p className="text-white/80 text-sm font-bold max-w-md">
-                                {activeEvent ? `Celebrating ${activeEvent.name} at STATUS Sharan` : `Welcome to the command center. You have ${pendingComplaintsCount} urgent tickets requiring attention.`}
+                            <p className="text-white/90 text-sm font-medium">
+                                {activeEvent ? `Celebrating ${activeEvent.name} at STATUS Sharan` : `Here's what's happening today.`}
                             </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                        <div className="bg-white/10 backdrop-blur-2xl px-6 py-4 rounded-[2rem] border border-white/20 shadow-2xl flex items-center gap-6 group/clock hover:bg-white/20 transition-all duration-500">
+                    <div className="flex items-center">
+                        <div className="bg-white/20 backdrop-blur-md px-6 py-3 rounded-[1.25rem] flex items-center gap-4 hover:bg-white/30 transition-colors">
                             <div className="text-right">
-                                <p className="text-xs font-black uppercase tracking-[0.2em] opacity-70 group-hover:opacity-100 transition-opacity">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-white/90">
                                     {currentTime.toLocaleDateString('en-US', { weekday: 'long' })}
                                 </p>
-                                <p className="text-xs font-bold opacity-70 group-hover:opacity-100">
-                                    {currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                <p className="text-xs font-semibold">
+                                    {currentTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 </p>
                             </div>
-                            <div className="h-10 w-px bg-white/20"></div>
-                            <div className="flex flex-col">
-                                <p className="text-3xl font-black leading-none tracking-tighter tabular-nums">
-                                    {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                                <span className="text-[10px] text-center font-black opacity-50 uppercase tracking-widest mt-1">Status: Syncing</span>
+                            <div className="h-8 w-px bg-white/30"></div>
+                            <div className="text-2xl font-black tracking-tight tabular-nums">
+                                {currentTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <style>{`
-                    @keyframes gradient {
-                        0% { background-position: 0% 50%; }
-                        50% { background-position: 100% 50%; }
-                        100% { background-position: 0% 50%; }
-                    }
-                    .animate-gradient {
-                        animation: gradient 8s ease infinite;
-                    }
-                `}</style>
             </div>
 
             {/* Bento Grid Stats */}
@@ -294,9 +246,8 @@ const OverviewTab = ({ stats, invoices, user, complaints, onAction }) => {
 
             {/* Command Pallete / Quick Actions */}
             <div className="space-y-4">
-                <div className="flex items-center gap-3 px-2">
-                    <div className="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
-                    <h2 className="text-xl font-black text-slate-800 dark:text-white uppercase tracking-widest">Rapid Control</h2>
+                <div className="mb-2">
+                    <h2 className="text-lg font-bold text-slate-800 dark:text-white">Quick Actions</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <QuickAction label="Create Invoice" icon={Receipt} color="indigo" onClick={() => onAction?.('billing')} />

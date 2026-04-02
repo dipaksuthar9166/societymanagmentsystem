@@ -160,6 +160,31 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
         }
     };
 
+    const handleAddInterest = async (invoiceId) => {
+        const interestStr = prompt('Enter interest amount to set for this invoice:');
+        if (interestStr === null || interestStr === '') return;
+        const interest = Number(interestStr);
+        if (isNaN(interest) || interest < 0) return alert('Invalid interest amount');
+        
+        try {
+            const res = await fetch(`${API_BASE_URL}/invoices/${invoiceId}/interest`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ interest })
+            });
+
+            if (res.ok) {
+                alert('Interest updated successfully!');
+                refresh();
+            } else {
+                alert('Failed to update interest');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Network Error');
+        }
+    };
+
     // --- PDF Logic (Updated) ---
     const downloadInvoice = async (bill) => {
         // ... (Same as before)
@@ -559,11 +584,19 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
                                 <tr key={inv._id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                     <td className="p-3 font-mono font-bold">#{inv._id.slice(-6).toUpperCase()}</td>
                                     <td className="p-3 font-bold">{inv.customerName}</td>
-                                    <td className="p-3 text-right font-mono">₹{inv.totalAmount.toLocaleString()}</td>
+                                    <td className="p-3 text-right font-mono">
+                                        ₹{inv.totalAmount.toLocaleString()}
+                                        {inv.interest > 0 && <span className="block text-[10px] text-orange-500">(+₹{inv.interest} Int)</span>}
+                                    </td>
                                     <td className="p-3 text-center">
                                         {inv.status === 'Paid'
                                             ? <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded text-[10px] font-bold uppercase">Paid</span>
-                                            : <button onClick={() => handleMarkPaid(inv._id)} className="bg-slate-100 hover:bg-[#005496] hover:text-white text-slate-500 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-blue-600 dark:hover:text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors">Mark Paid</button>
+                                            : (
+                                                <div className="flex gap-1 justify-center">
+                                                    <button onClick={() => handleMarkPaid(inv._id)} className="bg-slate-100 hover:bg-[#005496] hover:text-white text-slate-500 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-blue-600 dark:hover:text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors">Mark Paid</button>
+                                                    <button onClick={() => handleAddInterest(inv._id)} className="bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-600 dark:hover:text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors">+ Interest</button>
+                                                </div>
+                                            )
                                         }
                                     </td>
                                     <td className="p-3 text-right">
