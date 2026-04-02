@@ -160,17 +160,23 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
         }
     };
 
-    const handleAddInterest = async (invoiceId) => {
-        const interestStr = prompt('Enter interest amount to set for this invoice:');
-        if (interestStr === null || interestStr === '') return;
-        const interest = Number(interestStr);
-        if (isNaN(interest) || interest < 0) return alert('Invalid interest amount');
+    const handleAddInterest = async (invoiceId, billTotalAmount, currentInterest) => {
+        const rateStr = prompt('Enter interest percentage (e.g. 5) to charge for this invoice:');
+        if (rateStr === null || rateStr === '') return;
+        const rate = Number(rateStr);
+        if (isNaN(rate) || rate < 0) return alert('Invalid interest percentage');
+        
+        // Calculate Principal (Total minus existing interest) to avoid compounding interest on interest
+        const principal = billTotalAmount - (currentInterest || 0);
+        const interestAmount = Math.round(principal * (rate / 100));
+
+        if (!confirm(`This will apply ₹${interestAmount} (${rate}%) as interest on the principal of ₹${principal}. Continue?`)) return;
         
         try {
             const res = await fetch(`${API_BASE_URL}/invoices/${invoiceId}/interest`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ interest })
+                body: JSON.stringify({ interest: interestAmount })
             });
 
             if (res.ok) {
@@ -628,7 +634,7 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
                                             : (
                                                 <div className="flex gap-1 justify-center">
                                                     <button onClick={() => handleMarkPaid(inv._id)} className="bg-slate-100 hover:bg-[#005496] hover:text-white text-slate-500 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-blue-600 dark:hover:text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors">Mark Paid</button>
-                                                    <button onClick={() => handleAddInterest(inv._id)} className="bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-600 dark:hover:text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors">+ Interest</button>
+                                                    <button onClick={() => handleAddInterest(inv._id, inv.totalAmount, inv.interest)} className="bg-orange-50 hover:bg-orange-500 hover:text-white text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 dark:hover:bg-orange-600 dark:hover:text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors">+ Interest</button>
                                                 </div>
                                             )
                                         }
