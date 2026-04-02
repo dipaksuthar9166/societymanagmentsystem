@@ -7,7 +7,7 @@ import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import {
     ShieldCheck, Zap, BarChart3, Users,
     ArrowRight, Star, Heart, Building2, Phone,
-    CheckCircle, Settings, Clock, ChevronDown, Rocket, Smartphone, Globe, Lock
+    CheckCircle, Settings, Clock, ChevronDown, Rocket, Smartphone, Globe, Lock, MapPin
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
