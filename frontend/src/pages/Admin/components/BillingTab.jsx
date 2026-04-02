@@ -18,6 +18,7 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
     const closeDialog = () => setDialogConfig({ isOpen: false });
 
     // Form State
+    const [searchQuery, setSearchQuery] = useState('');
     const [mode, setMode] = useState('manual'); // 'manual' | 'bulk'
     const [selectedTenantId, setSelectedTenantId] = useState('');
     const [selectedTenant, setSelectedTenant] = useState(null);
@@ -465,23 +466,93 @@ const BillingTab = ({ invoices, tenants, refresh, token, societyDetails }) => {
                             <h3 className="text-xs font-bold uppercase tracking-widest mb-4 opacity-70 border-b border-white/20 pb-2">Service To:</h3>
 
                             {mode === 'manual' ? (
-                                <div className="relative z-10">
+                                <div className="relative z-10 w-full flex flex-col gap-3">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter ID, Name or Flat No..."
+                                        className="w-full bg-white/10 border border-white/20 text-white placeholder:text-white/50 font-bold p-3 text-sm outline-none focus:bg-white/20 focus:border-white/40 transition-colors rounded"
+                                        value={searchQuery}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setSearchQuery(val);
+                                            const term = val.toLowerCase();
+                                            const found = tenants.find(t => 
+                                                (t._id && t._id.toLowerCase() === term) ||
+                                                (t.flatNo && t.flatNo.toLowerCase() === term) ||
+                                                (t.name && t.name.toLowerCase() === term) ||
+                                                (t.mobile && t.mobile.includes(term))
+                                            );
+                                            
+                                            if (found) {
+                                                setSelectedTenantId(found._id);
+                                            } else if (val === '') {
+                                                setSelectedTenantId('');
+                                            }
+                                        }}
+                                    />
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <div className="h-[1px] flex-1 bg-white/20"></div>
+                                        <span className="text-[9px] uppercase tracking-[0.2em] text-white/50 font-black block text-center">OR SELECT</span>
+                                        <div className="h-[1px] flex-1 bg-white/20"></div>
+                                    </div>
+
                                     <select
-                                        className="w-full bg-white/10 border border-white/20 text-white font-bold p-2 text-sm outline-none focus:bg-white/20 transition-colors cursor-pointer mb-2"
+                                        className="w-full bg-white/5 border border-white/10 text-white font-bold p-2 text-sm outline-none focus:bg-white/20 transition-colors cursor-pointer rounded"
                                         value={selectedTenantId}
-                                        onChange={(e) => setSelectedTenantId(e.target.value)}
+                                        onChange={(e) => {
+                                            setSelectedTenantId(e.target.value);
+                                            setSearchQuery(""); // Clear search so they dont conflict conceptually
+                                        }}
                                     >
                                         <option value="" className="text-slate-800">Select Resident...</option>
                                         {tenants.map(t => (
                                             <option key={t._id} value={t._id} className="text-slate-800">{t.name} (Flat {t.flatNo})</option>
                                         ))}
                                     </select>
+
                                     {selectedTenant && (
-                                        <div className="text-sm space-y-1 pl-1 opacity-90">
-                                            <p>{selectedTenant.name}</p>
-                                            <p>Flat {selectedTenant.flatNo}, Tower A</p>
-                                            <p>{selectedTenant.mobile}</p>
-                                            <p className="text-xs opacity-50 mt-2">Bill Period: {new Date(billingPeriod.from).toLocaleDateString()} - {new Date(billingPeriod.to).toLocaleDateString()}</p>
+                                        <div className="mt-4 bg-white/5 border border-white/10 p-5 rounded-lg text-xs space-y-2 relative overflow-hidden group">
+                                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 scale-150 rotate-12 rounded-full transform group-hover:scale-110 transition-transform blur-xl"></div>
+                                            <div className="grid grid-cols-2 gap-x-4 gap-y-4 relative z-10 w-full">
+                                                <div className="col-span-2 flex items-center gap-3 border-b border-white/10 pb-3">
+                                                    <div className="w-10 h-10 rounded bg-white/20 flex items-center justify-center font-bold text-lg">{selectedTenant.name?.[0] || 'U'}</div>
+                                                    <div>
+                                                        <p className="text-white/50 uppercase tracking-widest text-[8px] font-black">Resident Name</p>
+                                                        <p className="font-bold text-base tracking-wide">{selectedTenant.name}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div>
+                                                    <p className="text-white/50 uppercase tracking-widest text-[8px] font-black">Flat No.</p>
+                                                    <p className="font-bold text-amber-400 text-sm">{selectedTenant.flatNo || 'N/A'}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-white/50 uppercase tracking-widest text-[8px] font-black">Mobile</p>
+                                                    <p className="font-mono text-sm">{selectedTenant.mobile || 'N/A'}</p>
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <p className="text-white/50 uppercase tracking-widest text-[8px] font-black">Email Address</p>
+                                                    <p className="text-blue-300 font-medium">{selectedTenant.email || 'N/A'}</p>
+                                                </div>
+                                                <div className="col-span-2">
+                                                    <p className="text-white/50 uppercase tracking-widest text-[8px] font-black">Account ID</p>
+                                                    <p className="font-mono text-[10px] text-indigo-300 truncate">{selectedTenant._id}</p>
+                                                </div>
+
+                                                <div className="col-span-2 border-t border-white/10 pt-3 mt-1 flex justify-between items-end">
+                                                    <div>
+                                                        <p className="text-white/50 uppercase tracking-widest text-[8px] font-black">Bill Period</p>
+                                                        <p className="text-white/70 text-[10px]">{new Date(billingPeriod.from).toLocaleDateString()} - {new Date(billingPeriod.to).toLocaleDateString()}</p>
+                                                    </div>
+                                                    {arrears > 0 && (
+                                                        <div className="text-right">
+                                                            <p className="text-red-300/80 uppercase tracking-widest text-[8px] font-black">Prior Dues</p>
+                                                            <p className="text-red-400 font-black text-sm">₹{arrears.toLocaleString()}</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
