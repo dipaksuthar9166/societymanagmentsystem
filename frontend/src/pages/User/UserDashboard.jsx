@@ -174,7 +174,7 @@ const QuickAction = ({ label, icon: Icon, onClick, color = 'indigo' }) => (
 
 const UserDashboard = () => {
     const { user, logout } = useAuth();
-    const { showSuccess, showInfo, showWarning } = useToast();
+    const { showSuccess, showInfo, showWarning, showError } = useToast();
     const [activeTab, setActiveTab] = useState('home');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -940,7 +940,14 @@ const UserDashboard = () => {
             const json = await res.json();
 
             if (!res.ok) {
-                alert(json.message || 'Failed to generate payment link');
+                // If it's the recurring digits error, give a specifically helpful tip
+                let title = 'Payment Link Error';
+                let msg = json.message || 'Failed to generate payment link';
+                if (msg.includes('Recurring digits') || msg.includes('customer contact')) {
+                    title = 'Update Mobile Number';
+                    msg = 'Razorpay blocked dummy numbers (e.g. 1111111111). Please go to "My Profile" tab and update your mobile number to a real 10-digit number before paying!';
+                }
+                showError(title, msg);
                 return;
             }
 
@@ -950,7 +957,7 @@ const UserDashboard = () => {
             }
         } catch (error) {
             console.error("Payment Link Error:", error);
-            alert('Something went wrong while initiating payment.');
+            showError('Connection Error', 'Something went wrong while initiating payment.');
         }
     };
 

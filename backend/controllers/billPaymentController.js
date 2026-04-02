@@ -104,7 +104,15 @@ const generatePaymentLink = async (req, res) => {
 
     } catch (error) {
         console.error("Payment Link Generation Error:", error);
-        res.status(500).json({ message: 'Server Error creating payment link' });
+        
+        let errorMessage = 'Server Error creating payment link';
+        if (error && error.error && error.error.description) {
+            errorMessage = error.error.description;
+        } else if (error && error.message) {
+            errorMessage = error.message;
+        }
+
+        res.status(500).json({ message: errorMessage, details: error });
     }
 };
 
