@@ -27,7 +27,8 @@ import {
     Video,
     Zap,
     Scale,
-    UserCheck
+    UserCheck,
+    Search
 } from 'lucide-react';
 
 // Components
@@ -58,6 +59,7 @@ import CommunicationTab from './components/CommunicationTab';
 import PaymentSettingsTab from './components/PaymentSettingsTab';
 import LegalNoticeTab from './components/LegalNoticeTab';
 import SkillAdmin from './SkillAdmin';
+import ResidentLookupTab from './components/ResidentLookupTab';
 import ParkingSystem from './ParkingSystem';
 import ConfirmationModal from '../../components/ConfirmationModal';
 
@@ -154,6 +156,7 @@ const AdminDashboard = () => {
     const menuItems = [
         { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'user-analytics', label: 'User Analytics', icon: BarChart3 },
+        { id: 'lookup', label: 'Resident Lookup', icon: Search },
         { id: 'rooms', label: 'Flat Management', icon: Building },
         { id: 'tenants', label: 'Residents', icon: Users },
         { id: 'communication', label: 'Communication & Email', icon: Mail },
@@ -187,6 +190,7 @@ const AdminDashboard = () => {
         switch (activeTab) {
             case 'overview': return <OverviewTab stats={stats} invoices={invoices} user={user} complaints={complaints} onAction={setActiveTab} />;
             case 'user-analytics': return <UserAnalyticsTab />;
+            case 'lookup': return <ResidentLookupTab tenants={tenants} invoices={invoices} complaints={complaints} flats={flats} />;
             case 'rooms': return <RoomsTab flats={flats} refresh={fetchData} token={user?.token} complaints={complaints} />;
             case 'tenants': return <TenantsTab tenants={tenants} flats={flats} refresh={fetchData} token={user?.token} />;
             case 'billing': return <BillingTab invoices={invoices} tenants={tenants} refresh={fetchData} token={user?.token} societyDetails={societyDetails} />;
