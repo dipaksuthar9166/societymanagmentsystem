@@ -57,7 +57,7 @@ const generatePaymentLink = async (req, res) => {
             description: `Payment for Bill #${invoiceId.toString().slice(-6).toUpperCase()}`,
             customer: {
                 name: user.name || "Customer",
-                contact: user.mobile || user.contactNumber || "+919999999999", // Fallback if missing
+                contact: user.mobile || user.contactNumber || "+919876543210", // Valid-looking fallback
                 email: user.email || "support@societymanagement.com"
             },
             notify: {
