@@ -930,6 +930,17 @@ const UserDashboard = () => {
         }
     };
 
+    const loadRazorpay = () => {
+        return new Promise((resolve) => {
+            if (window.Razorpay) { resolve(true); return; }
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
+            document.body.appendChild(script);
+        });
+    };
+
     const handleOnlinePayment = async (invoiceId, amount) => {
         try {
             const res = await fetch(`${API_BASE_URL}/bills/pay/link`, {
@@ -940,19 +951,68 @@ const UserDashboard = () => {
             const json = await res.json();
 
             if (!res.ok) {
-                // If it's the recurring digits error, give a specifically helpful tip
-                let title = 'Payment Link Error';
-                let msg = json.message || 'Failed to generate payment link';
+                let title = 'Payment Error';
+                let msg = json.message || 'Failed to generate payment intent';
                 if (msg.includes('Recurring digits') || msg.includes('customer contact')) {
                     title = 'Update Mobile Number';
-                    msg = 'Razorpay blocked dummy numbers (e.g. 1111111111). Please go to "My Profile" tab and update your mobile number to a real 10-digit number before paying!';
+                    msg = 'Razorpay needs a valid 10-digit mobile number. Please go to "My Profile" tab and update it before paying.';
                 }
                 showError(title, msg);
                 return;
             }
 
-            if (json.paymentLink) {
-                // Redirect to Razorpay Payment Link
+            if (json.orderId) {
+                const isLoaded = await loadRazorpay();
+                if (!isLoaded) {
+                    showError("Error", "Razorpay failed to load. Check your internet connection.");
+                    return;
+                }
+
+                const options = {
+                    key: json.keyId,
+                    amount: json.amount,
+                    currency: json.currency,
+                    name: data?.society?.name || "Society Management",
+                    description: `Bill Payment - #${invoiceId.slice(-6).toUpperCase()}`,
+                    order_id: json.orderId,
+                    handler: async function (response) {
+                        try {
+                            const verifyRes = await fetch(`${API_BASE_URL}/bills/pay/verify`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    invoiceId,
+                                    amount
+                                })
+                            });
+                            const verifyJson = await verifyRes.json();
+                            if (verifyJson.success) {
+                                showSuccess("Payment Successful", "Your bill has been set to Paid!");
+                                fetchDashboard();
+                            } else {
+                                showError("Payment Failed", "Verification failed. Please contact support.");
+                            }
+                        } catch (error) {
+                            showError("Network Error", "Failed to verify payment with server.");
+                        }
+                    },
+                    prefill: {
+                        name: json.userConfig?.name,
+                        contact: json.userConfig?.contact,
+                        email: json.userConfig?.email
+                    },
+                    theme: {
+                        color: "#4f46e5"
+                    }
+                };
+
+                const paymentObject = new window.Razorpay(options);
+                paymentObject.open();
+            } else if (json.paymentLink) {
+                // Fallback for older endpoints
                 window.location.href = json.paymentLink;
             }
         } catch (error) {

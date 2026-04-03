@@ -46,60 +46,46 @@ const generatePaymentLink = async (req, res) => {
         // 2. Fetch User Details for Link Pre-fill
         const user = await User.findById(req.user._id);
 
-        // 3. Create Payment Link
-        const frontendUrl = req.headers.origin || req.headers.referer?.split('?')[0].replace(/\/$/, '') || "http://localhost:5173";
-        const userContact = user.mobile || user.contactNumber;
-        if (!userContact || userContact.toString().length < 10) {
-             return res.status(400).json({ message: 'Valid mobile number is required in your profile to process payments online.' });
-        }
-
-        const linkOptions = {
-            amount: Math.round(amount * 100), // amount in paise, prevent floating point errors
+        const orderOptions = {
+            amount: Math.round(amount * 100), // amount in paise
             currency: "INR",
-            accept_partial: false,
-            // expire_by: 1691097057, // Optional expiry
-            reference_id: `inv_${invoiceId.toString().slice(-8)}_${Date.now()}`,
-            description: `Payment for Bill #${invoiceId.toString().slice(-6).toUpperCase()}`,
-            customer: {
-                name: user.name || "Customer",
-                contact: userContact,
-                email: user.email || "support@societymanagement.com"
-            },
-            notify: {
-                sms: true,
-                email: true
-            },
-            reminder_enable: true,
+            receipt: `inv_${invoiceId.toString().slice(-8)}_${Date.now()}`,
             notes: {
                 companyId: req.user.company.toString(),
                 invoiceId: invoiceId,
                 userId: req.user._id.toString()
-            },
-            // Redirect user back to valid frontend app after payment (User Dashboard)
-            callback_url: `${frontendUrl}/user-dashboard?payment=success&invoice=${invoiceId}`,
-            callback_method: "get"
+            }
         };
 
-        const paymentLink = await razorpay.paymentLink.create(linkOptions);
+        const order = await razorpay.orders.create(orderOptions);
 
-        if (!paymentLink) {
-            return res.status(500).json({ message: 'Error creating payment link' });
+        if (!order) {
+            return res.status(500).json({ message: 'Error creating payment order' });
         }
 
         await logActivity({
             userId: req.user._id,
             societyId: req.user.company,
-            action: 'PAYMENT_LINK_GENERATED',
+            action: 'PAYMENT_ORDER_GENERATED',
             category: 'INFO',
-            description: `Payment Link Generated for ₹${amount}`,
-            metadata: { invoiceId, amount, short_url: paymentLink.short_url },
+            description: `Payment Order Generated for ₹${amount}`,
+            metadata: { invoiceId, amount, orderId: order.id },
             req
         });
 
+        const userContact = user.mobile || user.contactNumber || "";
+
         res.json({
             success: true,
-            paymentLink: paymentLink.short_url,
-            id: paymentLink.id
+            orderId: order.id,
+            amount: orderOptions.amount,
+            currency: orderOptions.currency,
+            keyId: keyId,
+            userConfig: {
+                name: user.name || "Customer",
+                contact: userContact,
+                email: user.email || ""
+            }
         });
 
     } catch (error) {
