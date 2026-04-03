@@ -157,19 +157,26 @@ const updateFlat = async (req, res) => {
 
         // DOUBLE BOOKING CHECK
         if (flat.tenantId) {
-            const isAssigningDifferent = (resolvedTenantId && resolvedTenantId.toString() !== flat.tenantId.toString());
-            const isTryingToCreateNewOverExisting = (newUser && newUser.email && (!resolvedTenantId || resolvedTenantId.toString() !== flat.tenantId.toString()));
-            
-            // If the admin is providing 'newUser' but that user's email belongs to the SAME resident, allow it (as an update).
-            if (newUser && newUser.email) {
-                const existingUserWithEmail = await User.findOne({ email: newUser.email });
-                if (existingUserWithEmail && existingUserWithEmail._id.toString() === flat.tenantId.toString()) {
-                    // It's the same person, allow update
-                } else if (isTryingToCreateNewOverExisting || isAssigningDifferent) {
-                    return res.status(400).json({ message: 'Room is already occupied! Please "Vacate" it first before re-assigning to a different person.' });
+            // Check if the current tenant ACTUALLY exists in the database
+            const currentTenantExists = await User.findById(flat.tenantId);
+            if (!currentTenantExists) {
+                // Orphaned tenant! (User was deleted before cascade delete was implemented)
+                flat.tenantId = null;
+            } else {
+                const isAssigningDifferent = (resolvedTenantId && resolvedTenantId.toString() !== flat.tenantId.toString());
+                const isTryingToCreateNewOverExisting = (newUser && newUser.email && (!resolvedTenantId || resolvedTenantId.toString() !== flat.tenantId.toString()));
+                
+                // If the admin is providing 'newUser' but that user's email belongs to the SAME resident, allow it (as an update).
+                if (newUser && newUser.email) {
+                    const existingUserWithEmail = await User.findOne({ email: newUser.email });
+                    if (existingUserWithEmail && existingUserWithEmail._id.toString() === flat.tenantId.toString()) {
+                        // It's the same person, allow update
+                    } else if (isTryingToCreateNewOverExisting || isAssigningDifferent) {
+                        return res.status(400).json({ message: 'Room is already occupied! Please "Vacate" it first before re-assigning to a different person.' });
+                    }
+                } else if (isAssigningDifferent) {
+                    return res.status(400).json({ message: 'Room is already occupied! Please "Vacate" it first before re-assigning.' });
                 }
-            } else if (isAssigningDifferent) {
-                return res.status(400).json({ message: 'Room is already occupied! Please "Vacate" it first before re-assigning.' });
             }
         }
 
