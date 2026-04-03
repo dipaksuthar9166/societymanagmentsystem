@@ -65,6 +65,23 @@ const deleteCustomer = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        // Vacate any flat occupied by this user
+        const Flat = require('../models/Flat');
+        await Flat.updateMany(
+            { tenantId: user._id },
+            { 
+                $set: { 
+                    tenantId: null, 
+                    status: 'Vacant',
+                    maintenanceAmount: 0,
+                    parkingSlot: '',
+                    shareCertificateNo: '',
+                    possessionDate: null
+                }
+            }
+        );
+
         await user.deleteOne();
         res.json({ message: 'User removed' });
     } catch (error) {

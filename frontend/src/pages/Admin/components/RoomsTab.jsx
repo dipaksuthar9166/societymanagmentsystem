@@ -215,7 +215,7 @@ const RoomsTab = ({ flats, refresh, token, complaints }) => {
                             <div className="text-center py-1">
                                 <h3 className="text-lg font-bold text-slate-700 dark:text-slate-200 group-hover:scale-110 transition-transform origin-center">{flat.flatNo}</h3>
                                 <p className="text-[9px] text-slate-500 font-medium truncate max-w-full">
-                                    {flat.residencyType === 'Owner' ? (flat.ownerName || 'Owner') : 'Rented'}
+                                    {flat.status === 'Vacant' ? 'Vacant' : (flat.residencyType === 'Owner' ? (flat.ownerName || 'Owner') : 'Rented')}
                                 </p>
                             </div>
 
