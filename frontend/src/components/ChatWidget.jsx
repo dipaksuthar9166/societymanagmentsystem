@@ -257,12 +257,15 @@ const ChatWidget = () => {
     }, []);
 
     const filteredUsers = users.filter(u =>
-        u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.flatNo?.toLowerCase().includes(searchQuery.toLowerCase())
+        u && u.name && (
+            u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.flatNo?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
     );
 
     const filteredConversations = conversations.filter(conv =>
+        conv && conv.otherUser && conv.otherUser.name &&
         conv.otherUser.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
