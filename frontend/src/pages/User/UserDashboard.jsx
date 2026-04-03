@@ -24,7 +24,8 @@ import {
     XCircle,
     Wallet,
     Zap,
-    Video
+    Video,
+    Phone
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -69,6 +70,7 @@ import SubscriptionLock from '../../components/SubscriptionLock';
 import AdminSubscription from '../Admin/AdminSubscription';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import ResidentCCTV from './components/ResidentCCTV';
+import IntercomCallTab from '../Guard/components/IntercomCallTab';
 
 // --- Shared Components for Admin-like Look ---
 
@@ -897,10 +899,11 @@ const UserDashboard = () => {
     const menuItems = [
         { id: 'home', label: 'Home', icon: Home },
         { id: 'bills', label: 'My Bills', icon: Receipt },
-        { id: 'skills', label: 'Skill Connect', icon: User }, // New
-        { id: 'parking', label: 'Smart Parking', icon: Zap }, // New
+        { id: 'skills', label: 'Skill Connect', icon: User },
+        { id: 'parking', label: 'Smart Parking', icon: Zap },
         { id: 'complaints', label: 'Complaints', icon: AlertCircle },
         { id: 'directory', label: 'Neighbors', icon: Building },
+        { id: 'intercom', label: 'Intercom Calling', icon: Phone },
         { id: 'notices', label: 'Notices', icon: Bell },
         { id: 'community', label: 'Committee', icon: Shield },
         { id: 'gatepass', label: 'Gate Pass', icon: QrCode },
@@ -915,10 +918,11 @@ const UserDashboard = () => {
         switch (activeTab) {
             case 'home': return <HomePage />;
             case 'bills': return <BillsTab />;
-            case 'skills': return <SkillMarketplace />; // New
-            case 'parking': return <EVParking />; // New
+            case 'skills': return <SkillMarketplace />;
+            case 'parking': return <EVParking />;
             case 'complaints': return <ComplaintsTab token={user.token} refresh={fetchDashboard} complaints={data?.complaints || []} />;
             case 'directory': return <SocietyDirectory />;
+            case 'intercom': return <IntercomCallTab user={user} />;
             case 'notices': return <NoticesTab />;
             case 'community': return <CommunityTab />;
             case 'gatepass': return <GatePass />;

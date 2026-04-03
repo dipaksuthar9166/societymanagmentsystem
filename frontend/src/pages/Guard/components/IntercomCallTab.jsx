@@ -47,15 +47,15 @@ const IntercomCallTab = ({ user }) => {
     const fetchResidents = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_BASE_URL}/admin/customers`, {
+            const res = await fetch(`${API_BASE_URL}/community/directory`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             if (res.ok) {
                 const data = await res.json();
-                // Extract only users and format data
-                setResidents(data.filter(r => r.role === 'user' && r.flatNo).map(r => ({
+                // Filter out self and format
+                setResidents(data.filter(r => r._id !== user._id && r._id !== user.id).map(r => ({
                     ...r,
-                    sortFlat: parseInt(r.flatNo.replace(/\D/g, '') || 0)
+                    sortFlat: parseInt((r.flatNo || '').replace(/\D/g, '') || 0)
                 })).sort((a,b) => a.sortFlat - b.sortFlat));
             }
         } catch (error) {

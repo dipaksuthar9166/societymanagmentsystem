@@ -32,6 +32,20 @@ router.post('/posts', protect, async (req, res) => {
     }
 });
 
+// --- DIRECTORY ---
+router.get('/directory', protect, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const users = await User.find({
+            company: req.user.company,
+            role: { $in: ['user', 'guard'] }
+        }).select('name flatNo role status isOnline');
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
+
 // --- POLLS ---
 router.get('/polls', protect, async (req, res) => {
     try {
