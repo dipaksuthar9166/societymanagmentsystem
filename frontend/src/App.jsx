@@ -128,6 +128,7 @@ const AnimatedRoutes = () => {
 import { EventThemeProvider } from './context/EventThemeContext';
 import DynamicEventBackground from './components/DynamicEventBackground';
 import { App as CapApp } from '@capacitor/app'; // <--- Capacitor App Plugin
+import JitsiCallHandler from './components/JitsiCallHandler';
 
 function App() {
   useEffect(() => {
@@ -176,6 +177,7 @@ function App() {
               <ToastProvider>
                 <AlertProvider>
                   <AnimatedRoutes />
+                  <JitsiCallHandler />
                 </AlertProvider>
               </ToastProvider>
             </div>

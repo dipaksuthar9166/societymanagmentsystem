@@ -281,6 +281,22 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Jitsi API Calling Intercom Events
+    socket.on('initiate-call', (data) => {
+        console.log(`[Call] Initiating Call from ${data.from} to ${data.to} (Room: ${data.roomName})`);
+        io.to(data.to).emit('incoming-call', data);
+    });
+
+    socket.on('call-accepted', (data) => {
+        console.log(`[Call] Call Accepted. Room: ${data.roomName}`);
+        io.to(data.to).emit('call-accepted', data);
+    });
+
+    socket.on('call-rejected', (data) => {
+        console.log(`[Call] Call Rejected. Emitting to ${data.to}`);
+        io.to(data.to).emit('call-rejected', data);
+    });
+
     // WebRTC Signaling for calls
     socket.on('webrtc_offer', (data) => {
         io.to(data.to).emit('webrtc_offer', {

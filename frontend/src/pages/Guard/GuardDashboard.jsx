@@ -14,7 +14,8 @@ import {
     CreditCard,
     Search,
     Zap,
-    Video
+    Video,
+    Phone
 } from 'lucide-react';
 import SOSButton from '../../components/SOSButton';
 import SubscriptionLock from '../../components/SubscriptionLock';
@@ -43,6 +44,7 @@ import GuardParking from './components/GuardParking';
 import AdminSubscription from '../Admin/AdminSubscription';
 import ChatWidget from '../../components/ChatWidget';
 import CCTVTab from '../Admin/components/CCTVTab';
+import IntercomCallTab from './components/IntercomCallTab';
 
 ChartJS.register(
     CategoryScale,
@@ -355,6 +357,7 @@ const GuardDashboard = () => {
         { id: 'parcel', label: 'Parcels Management', icon: Box },
         { id: 'parking', label: 'Parking Status', icon: Activity },
         { id: 'staff', label: 'Service Staff', icon: Users },
+        { id: 'intercom', label: 'Intercom Calling', icon: Phone },
         { id: 'cctv', label: 'CCTV View', icon: Video },
         { id: 'subscription', label: 'Subscription', icon: CreditCard },
     ];
@@ -367,6 +370,7 @@ const GuardDashboard = () => {
             case 'staff': return <StaffTab user={user} />;
             case 'parking': return <GuardParking user={user} />;
             case 'scan': return <ScanTab user={user} GoHome={() => setActiveTab('overview')} />;
+            case 'intercom': return <IntercomCallTab user={user} />;
             case 'cctv': return <CCTVTab />;
             case 'subscription': return <AdminSubscription token={user?.token} user={user} />;
             default: return <OverviewTab />;
