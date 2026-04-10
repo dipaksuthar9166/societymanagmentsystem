@@ -44,7 +44,7 @@ const ApprovalsTab = ({ token, refresh }) => {
 
     const handleApproval = async (userId, isApproved) => {
         try {
-            const res = await fetch(`${API_BASE_URL}/admin/user/${userId}/status`, {
+            const res = await fetch(`${API_BASE_URL}/admin/customers/${userId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

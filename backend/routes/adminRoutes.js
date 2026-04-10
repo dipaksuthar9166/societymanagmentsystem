@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 
-const { getCustomers, createCustomer, deleteCustomer, updateCustomer, getSMSBalance, saveTwilioConfig, verifyCustomerManually, verifyCustomerOTP } = require('../controllers/adminController');
+const { 
+    getCustomers, createCustomer, deleteCustomer, updateCustomer, 
+    getSMSBalance, saveTwilioConfig, verifyCustomerManually, verifyCustomerOTP,
+    updateUserStatus
+} = require('../controllers/adminController');
 const { getAdminStats, getAdminDetailedAnalytics } = require('../controllers/analyticsController');
 const { getExpenses, createExpense, deleteExpense } = require('../controllers/expenseController');
 const { getMyCompany, updateMyCompany } = require('../controllers/companyController');
@@ -36,6 +40,7 @@ router.route('/customers/:id')
 
 router.post('/customers/:id/verify-manually', protect, authorize('admin', 'superadmin'), verifyCustomerManually);
 router.post('/customers/:id/verify-otp', protect, authorize('admin', 'superadmin'), verifyCustomerOTP);
+router.patch('/customers/:id/status', protect, authorize('admin', 'superadmin'), updateUserStatus);
 
 // Expense Management
 router.route('/expenses')

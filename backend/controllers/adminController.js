@@ -242,7 +242,34 @@ const getSMSBalance = async (req, res) => {
     }
 };
 
+// @desc    Update user approval status
+// @route   PATCH /api/admin/customers/:id/status
+const updateUserStatus = async (req, res) => {
+    try {
+        const { status, isApproved } = req.body;
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Ensure admin belongs to same society
+        if (req.user.role !== 'superadmin' && user.company?.toString() !== req.user.company?.toString()) {
+            return res.status(401).json({ message: 'Not authorized for this society' });
+        }
+
+        if (status) user.status = status.toLowerCase();
+        if (isApproved !== undefined) {
+            user.isApproved = isApproved;
+            user.isVerified = isApproved; // Verification and approval are linked here
+        }
+
+        await user.save();
+        res.json({ success: true, message: `User status updated to ${status}` });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error: ' + error.message });
+    }
+};
+
 module.exports = {
     getCustomers, createCustomer, deleteCustomer, updateCustomer,
-    getSMSBalance, saveTwilioConfig, verifyCustomerManually, verifyCustomerOTP
+    getSMSBalance, saveTwilioConfig, verifyCustomerManually, verifyCustomerOTP,
+    updateUserStatus
 };
