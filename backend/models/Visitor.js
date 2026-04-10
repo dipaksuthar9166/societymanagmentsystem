@@ -16,7 +16,9 @@ const visitorSchema = new mongoose.Schema({
     photo: { type: String },
     enteredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     status: { type: String, enum: ['In', 'Out', 'Denied', 'Expected'], default: 'In' },
-    qrCode: { type: String } // Unique code for verify
+    qrCode: { type: String }, // Unique code for verify
+    deliveryInstruction: { type: String, default: '' }, // e.g. 'Leave at gate'
+    denyReason: { type: String, default: '' } // e.g. 'Wrong entry', 'Unexpected'
 }, { timestamps: true });
 
 module.exports = mongoose.model('Visitor', visitorSchema);

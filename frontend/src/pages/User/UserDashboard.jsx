@@ -205,6 +205,7 @@ const UserDashboard = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showMoreSheet, setShowMoreSheet] = useState(false);
+    const [visitorApprovalData, setVisitorApprovalData] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
     useEffect(() => {
@@ -271,10 +272,8 @@ const UserDashboard = () => {
 
         socket.on('new_visitor', (data) => {
             console.log("🔔 New Visitor Event:", data);
-            // Re-fetch dashboard to update activity feed/visitor list if showing
             fetchDashboard();
-
-            showInfo(data.title, data.message);
+            setVisitorApprovalData(data);
         });
 
         socket.on('child_exit_request', (data) => {
@@ -1015,8 +1014,11 @@ const UserDashboard = () => {
     const menuItems = [
         { id: 'home', label: 'Home', icon: Home },
         { id: 'bills', label: 'My Bills', icon: Receipt },
+        { id: 'rent', label: 'Pay Rent', icon: Wallet },
         { id: 'skills', label: 'Skill Connect', icon: User },
         { id: 'parking', label: 'Smart Parking', icon: Zap },
+        { id: 'forum', label: 'Society Forum', icon: Megaphone },
+        { id: 'polls', label: 'Daily Polls', icon: ClipboardList },
         { id: 'complaints', label: 'Complaints', icon: AlertCircle },
         { id: 'directory', label: 'Neighbors', icon: Building },
         { id: 'intercom', label: 'Intercom Calling', icon: Phone },
@@ -1041,7 +1043,10 @@ const UserDashboard = () => {
             case 'directory': return <SocietyDirectory isMobile={isMobile} />;
             case 'intercom': return <IntercomCallTab user={user} isMobile={isMobile} />;
             case 'notices': return <NoticesTab isMobile={isMobile} />;
-            case 'community': return <CommunityTab isMobile={isMobile} />;
+            case 'community': return <CommitteeTab isMobile={isMobile} />;
+            case 'forum': return <div className="p-4"><h3 className="text-xl font-bold mb-4">Society Forum</h3><p className="text-slate-500">Discussion board coming soon...</p></div>;
+            case 'polls': return <div className="p-4"><h3 className="text-xl font-bold mb-4">Daily Polls</h3><p className="text-slate-500">Active polls will appear here.</p></div>;
+            case 'rent': return <BillsTab title="Rent Payment" token={user.token} isMobile={isMobile} />;
             case 'gatepass': return <GatePass isMobile={isMobile} />;
             case 'facility': return <UserFacilityBooking isMobile={isMobile} />;
             case 'profile': return <ProfileTab initialData={data?.user} isMobile={isMobile} />;
@@ -1051,6 +1056,95 @@ const UserDashboard = () => {
             case 'subscription': return <AdminSubscription token={user.token} user={user} isMobile={isMobile} />;
             default: return <HomePage isMobile={isMobile} />;
         }
+    };
+
+    const VisitorApprovalModal = () => {
+        if (!visitorApprovalData) return null;
+        
+        const handleResponse = async (status, instruction = '', reason = '') => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/visitor/${visitorApprovalData.visitorId}/respond`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user.token}`
+                    },
+                    body: JSON.stringify({ 
+                        status, 
+                        deliveryInstruction: instruction,
+                        denyReason: reason
+                    })
+                });
+                if (response.ok) {
+                    showSuccess('Response Recorded', `Visitor ${status.toLowerCase()} successfully.`);
+                    setVisitorApprovalData(null);
+                }
+            } catch (err) {
+                console.error(err);
+                // Fallback socket emit if API not ready
+                const socket = io(BACKEND_URL);
+                socket.emit('visitor_response', { 
+                    visitorId: visitorApprovalData.visitorId, 
+                    status,
+                    instruction,
+                    reason
+                });
+                setVisitorApprovalData(null);
+            }
+        };
+
+        return (
+            <div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl"></div>
+                <div className="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-[45px] p-8 shadow-2xl text-center animate-in zoom-in-95 duration-300 border border-white/10">
+                    <div className="w-24 h-24 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <Users size={45} className="text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-2 uppercase tracking-tighter">Visitor Request</h3>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold mb-8">{visitorApprovalData.message}</p>
+
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => handleResponse('Approved')}
+                            className="w-full py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 transition-all uppercase tracking-widest text-xs"
+                        >
+                            Approve Entry
+                        </button>
+                        
+                        {visitorApprovalData.visitorType === 'Delivery' && (
+                            <button
+                                onClick={() => handleResponse('Approved', 'Leave at Gate')}
+                                className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl hover:bg-indigo-700 shadow-lg shadow-indigo-600/20 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                            >
+                                <Zap size={16} /> Leave at Gate
+                            </button>
+                        )}
+
+                        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+                            <button
+                                onClick={() => handleResponse('Denied', '', 'Unexpected Visitor')}
+                                className="py-4 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 font-black rounded-2xl text-[10px] uppercase tracking-widest"
+                            >
+                                Unexpected
+                            </button>
+                            <button
+                                onClick={() => handleResponse('Denied', '', 'Wrong Entry')}
+                                className="py-4 bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 font-black rounded-2xl text-[10px] uppercase tracking-widest"
+                            >
+                                Wrong Flat
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button 
+                        onClick={() => setVisitorApprovalData(null)}
+                        className="mt-6 text-slate-400 dark:text-slate-600 text-[10px] font-black uppercase tracking-[0.2em]"
+                    >
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        );
     };
 
     const IncomingCallModal = () => {
@@ -1476,6 +1570,7 @@ const UserDashboard = () => {
                 )}
 
                 <IncomingCallModal />
+                <VisitorApprovalModal />
                 {incomingCall && (
                     <audio src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" autoPlay loop />
                 )}

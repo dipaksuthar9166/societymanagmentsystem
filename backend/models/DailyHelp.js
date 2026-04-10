@@ -44,7 +44,20 @@ const dailyHelpSchema = mongoose.Schema({
         ref: 'Flat'
     }],
     aadharNumber: String,
-    address: String
+    address: String,
+    reviews: [{
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        rating: Number,
+        comment: String,
+        date: { type: Date, default: Date.now }
+    }],
+    salaryLogs: [{
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        amount: Number,
+        month: String,
+        status: { type: String, enum: ['Paid', 'Pending'], default: 'Paid' },
+        date: { type: Date, default: Date.now }
+    }]
 }, {
     timestamps: true
 });
