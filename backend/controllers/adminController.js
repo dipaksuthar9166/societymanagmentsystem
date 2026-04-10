@@ -27,7 +27,7 @@ const createCustomer = async (req, res) => {
         const societyId = req.user.company;
 
         const userExists = await User.findOne({ email: cleanEmail });
-        if (userExists) return res.status(400).json({ message: 'User already exists' });
+        if (userExists) return res.status(400).json({ message: `A user with email ${cleanEmail} already exists in the system.` });
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);

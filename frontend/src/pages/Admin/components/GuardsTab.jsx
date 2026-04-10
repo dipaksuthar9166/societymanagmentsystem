@@ -61,7 +61,15 @@ const GuardsTab = ({ token, refresh, flats }) => {
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify(guardForm)
             });
-            if (res.ok) { alert('Guard Added'); setShowAdd(false); setGuardForm({ name: '', email: '', password: '123', mobile: '', role: 'guard', flatNo: 'Main Gate' }); fetchGuards(); }
+            if (res.ok) { 
+                alert('Guard Added Successfully'); 
+                setShowAdd(false); 
+                setGuardForm({ name: '', email: '', password: '123', mobile: '', role: 'guard', flatNo: 'Main Gate' }); 
+                fetchGuards(); 
+            } else {
+                const err = await res.json();
+                alert(`Error: ${err.message || 'Failed to add guard'}`);
+            }
         } catch (e) { console.error(e); }
     };
 
