@@ -349,12 +349,37 @@ io.on('connection', (socket) => {
         }
     });
 
-    // 👶 Child Exit Response (Back to Guard)
+    //  Baby Child Exit Response (Back to Guard)
     socket.on('child_exit_response', (data) => {
         // Send parent's decision back to the specific guard
         if (data.guardId) {
             io.to(data.guardId).emit('child_exit_result', data);
         }
+    });
+
+    // 📞 INTERCOM CALL SIGNALLING
+    socket.on('initiate-call', (data) => {
+        // Relay call signal to recipient's personal room
+        console.log(`Relaying call from ${data.from} to ${data.to}`);
+        io.to(data.to).emit('incoming-call', {
+            from: data.from,
+            fromId: data.fromId,
+            roomName: data.roomName
+        });
+    });
+
+    socket.on('call-accepted', (data) => {
+        // Relay acceptance back to caller
+        console.log(`Call accepted by recipient, notifying caller ${data.to}`);
+        io.to(data.to).emit('call-accepted', {
+            roomName: data.roomName
+        });
+    });
+
+    socket.on('call-rejected', (data) => {
+        // Relay rejection back to caller
+        console.log(`Call rejected by recipient, notifying caller ${data.to}`);
+        io.to(data.to).emit('call-rejected');
     });
 
     socket.on('disconnect', () => {
