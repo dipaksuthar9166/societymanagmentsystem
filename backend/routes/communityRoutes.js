@@ -1,29 +1,36 @@
 const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
-const CommunityPost = require('../models/CommunityPost');
+const ForumPost = require('../models/ForumPost');
 const Poll = require('../models/Poll');
-const ServiceProvider = require('../models/ServiceProvider');
+const User = require('../models/User');
 
-// --- MARKETPLACE & LOST-FOUND ---
-router.get('/posts', protect, async (req, res) => {
+// --- SOCIETY FORUM (Discussions) ---
+
+// @desc    Get all forum posts for a society
+// @route   GET /api/community/forum
+router.get('/forum', protect, async (req, res) => {
     try {
-        const posts = await CommunityPost.find({
-            societyId: req.user.company,
-            status: 'Active'
-        }).populate('postedBy', 'name flatNo block').sort({ createdAt: -1 });
+        const posts = await ForumPost.find({ company: req.user.company })
+            .populate('author', 'name flatNo')
+            .sort({ createdAt: -1 });
         res.json(posts);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-router.post('/posts', protect, async (req, res) => {
+// @desc    Create a new forum post
+// @route   POST /api/community/forum
+router.post('/forum', protect, async (req, res) => {
     try {
-        const post = new CommunityPost({
-            ...req.body,
-            postedBy: req.user._id,
-            societyId: req.user.company
+        const { title, content, category } = req.body;
+        const post = new ForumPost({
+            title,
+            content,
+            category,
+            author: req.user._id,
+            company: req.user.company
         });
         await post.save();
         res.status(201).json(post);
@@ -32,27 +39,36 @@ router.post('/posts', protect, async (req, res) => {
     }
 });
 
-// --- DIRECTORY ---
-router.get('/directory', protect, async (req, res) => {
+// @desc    Like/Unlike a forum post
+// @route   PATCH /api/community/forum/:id/like
+router.patch('/forum/:id/like', protect, async (req, res) => {
     try {
-        const User = require('../models/User');
-        const users = await User.find({
-            company: req.user.company,
-            role: { $in: ['user', 'guard'] }
-        }).select('name flatNo role status isOnline');
-        res.json(users);
+        const post = await ForumPost.findById(req.params.id);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+
+        const index = post.likes.indexOf(req.user._id);
+        if (index === -1) {
+            post.likes.push(req.user._id);
+        } else {
+            post.likes.splice(index, 1);
+        }
+
+        await post.save();
+        res.json(post);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// --- POLLS ---
+// --- DAILY POLLS ---
+
+// @desc    Get active polls for a society
+// @route   GET /api/community/polls
 router.get('/polls', protect, async (req, res) => {
     try {
-        // Fetch active polls
-        const polls = await Poll.find({
-            societyId: req.user.company,
-            isActive: true
+        const polls = await Poll.find({ 
+            company: req.user.company,
+            status: 'Open' 
         }).sort({ createdAt: -1 });
         res.json(polls);
     } catch (err) {
@@ -60,58 +76,52 @@ router.get('/polls', protect, async (req, res) => {
     }
 });
 
+// @desc    Vote on a poll
+// @route   POST /api/community/polls/:id/vote
 router.post('/polls/:id/vote', protect, async (req, res) => {
     try {
         const { optionIndex } = req.body;
         const poll = await Poll.findById(req.params.id);
 
         if (!poll) return res.status(404).json({ message: 'Poll not found' });
-        if (poll.votedBy.includes(req.user._id)) {
-            return res.status(400).json({ message: 'You have already voted' });
+        
+        // Check if user already voted in the votes array
+        const hasVoted = poll.votes.some(v => v.user.toString() === req.user._id.toString());
+        if (hasVoted) {
+            return res.status(400).json({ message: 'You have already participated in this poll' });
         }
 
-        poll.options[optionIndex].votes += 1;
-        poll.votedBy.push(req.user._id);
-        await poll.save();
+        if (poll.status === 'Closed') {
+            return res.status(400).json({ message: 'This poll is closed' });
+        }
 
+        // Add vote to analytics
+        poll.votes.push({
+            user: req.user._id,
+            optionIndex,
+            votedAt: new Date()
+        });
+
+        // Increment computed count for faster frontend reading
+        if (poll.options[optionIndex]) {
+            poll.options[optionIndex].votes = (poll.options[optionIndex].votes || 0) + 1;
+        }
+
+        await poll.save();
         res.json(poll);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 });
 
-// --- SERVICE PROVIDERS ---
-router.get('/services', protect, async (req, res) => {
+// --- SOCIETY DIRECTORY ---
+router.get('/directory', protect, async (req, res) => {
     try {
-        const providers = await ServiceProvider.find({ societyId: req.user.company });
-        res.json(providers);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
-
-router.post('/services/:id/rate', protect, async (req, res) => {
-    try {
-        const { rating, review } = req.body;
-        const provider = await ServiceProvider.findById(req.params.id);
-
-        if (!provider) return res.status(404).json({ message: 'Provider not found' });
-
-        const existingRating = provider.ratings.find(r => r.user.toString() === req.user._id.toString());
-        if (existingRating) {
-            existingRating.rating = rating;
-            existingRating.review = review;
-            existingRating.date = Date.now();
-        } else {
-            provider.ratings.push({ user: req.user._id, rating, review });
-        }
-
-        // Recalculate average
-        const total = provider.ratings.reduce((sum, r) => sum + r.rating, 0);
-        provider.averageRating = total / provider.ratings.length;
-
-        await provider.save();
-        res.json(provider);
+        const users = await User.find({
+            company: req.user.company,
+            role: { $in: ['user', 'guard', 'admin'] }
+        }).select('name flatNo role status isOnline');
+        res.json(users);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
