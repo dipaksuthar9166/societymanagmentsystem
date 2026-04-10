@@ -48,14 +48,14 @@ const IntercomCallTab = ({ user }) => {
             setRoomName(call.roomName);
             setCurrentCall({ name: call.from, _id: call.fromId });
 
-            // Notify caller that we accepted
+            // Notify caller that we accepted IMMEDIATELY
             socketRef.current.emit('call-accepted', {
                 to: call.fromId,
                 roomName: call.roomName
             });
 
-            // Start meeting shortly after render
-            setTimeout(() => startJitsiCall(call.roomName), 800);
+            // Start meeting with minimal delay
+            setTimeout(() => startJitsiCall(call.roomName), 200);
         }
 
         return () => {
