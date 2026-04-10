@@ -130,10 +130,10 @@ const IntercomCallTab = ({ user, isMobile }) => {
     };
 
     const startJitsiCall = (roomName) => {
-        // Essential DOM Check: Ensure the container exists before mounting Jitsi
-        if (!jitsiContainerRef.current) {
-            console.warn("Jitsi container div not found. Retrying in 500ms...");
-            setTimeout(() => startJitsiCall(roomName), 500);
+        // Advanced DOM Validation: Ensure the container is not only referenced but also present in the active document
+        if (!jitsiContainerRef.current || !document.contains(jitsiContainerRef.current)) {
+            console.warn("Jitsi container node is not attached to the document yet. Retrying...");
+            setTimeout(() => startJitsiCall(roomName), 400); // Wait for React to finish mounting the div
             return;
         }
 
