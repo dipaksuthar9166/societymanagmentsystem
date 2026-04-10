@@ -276,49 +276,53 @@ const GuardDashboard = () => {
         if (isMobile) {
             return (
                 <div className="pb-32 animate-in fade-in duration-500">
-                    {/* Hero Header */}
-                    <div className="relative h-64 -mx-6 -mt-6 mb-20 overflow-hidden">
+                    {/* Hero Header - Scaled Down */}
+                    <div className="relative h-56 -mx-6 -mt-6 mb-16 overflow-hidden">
                         <img 
                             src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" 
                             className="w-full h-full object-cover"
                             alt="Society Header"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
-                        <div className="absolute bottom-10 left-6">
-                            <div className="flex items-center gap-2 mb-2">
-                                <span className="p-1 px-2 bg-red-500 text-[10px] font-black text-white rounded-md uppercase tracking-wider animate-pulse">Live</span>
-                                <span className="text-white/80 text-xs font-bold uppercase tracking-widest">{societyDetails?.name || 'Gate Station'}</span>
+                        <div className="absolute bottom-6 left-6">
+                            <div className="flex items-center gap-2 mb-1.5">
+                                <span className="p-1 px-2 bg-red-500 text-[9px] font-black text-white rounded-md uppercase tracking-wider animate-pulse">Live</span>
+                                <span className="text-white/80 text-[10px] font-bold uppercase tracking-widest">{societyDetails?.name || 'Gate Station'}</span>
                             </div>
-                            <h2 className="text-3xl font-black text-white tracking-tighter uppercase leading-none mb-1">Security Dashboard</h2>
-                            <p className="text-white/60 text-sm font-bold tracking-tight">Officer: <span className="text-indigo-400">{user?.name}</span></p>
+                            <h2 className="text-2xl font-black text-white tracking-tighter uppercase leading-none mb-1">Security Dashboard</h2>
+                            <p className="text-white/60 text-xs font-bold tracking-tight">Officer: <span className="text-indigo-400">{user?.name}</span></p>
                         </div>
                     </div>
 
-                    {/* Quick Stats Overlapping Header */}
-                    <div className="grid grid-cols-2 gap-4 -mt-20 relative z-10 px-4 mb-8">
-                        <div className="bg-white p-5 rounded-[32px] shadow-xl shadow-slate-200 border border-slate-50">
-                            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
-                                <Users size={20} />
+                    {/* Quick Stats - More Compact */}
+                    <div className="grid grid-cols-2 gap-3 -mt-14 relative z-10 px-4 mb-6">
+                        <div className="bg-white p-4 rounded-[28px] shadow-xl shadow-slate-200 border border-slate-50 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <Users size={18} />
                             </div>
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Entry Today</h3>
-                            <p className="text-2xl font-black text-slate-800 tracking-tighter">{stats.weekly[6] || 0}</p>
+                            <div>
+                                <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Entries</h3>
+                                <p className="text-xl font-black text-slate-800 tracking-tighter leading-none">{stats.weekly[6] || 0}</p>
+                            </div>
                         </div>
-                        <div className="bg-white p-5 rounded-[32px] shadow-xl shadow-slate-200 border border-slate-50">
-                            <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mb-4">
-                                <ShieldAlert size={20} className="animate-pulse" />
+                        <div className="bg-white p-4 rounded-[28px] shadow-xl shadow-slate-200 border border-slate-50 flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                                <ShieldAlert size={18} className="animate-pulse" />
                             </div>
-                            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">SOS Alerts</h3>
-                            <p className="text-2xl font-black text-slate-800 tracking-tighter">0</p>
+                            <div>
+                                <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Alerts</h3>
+                                <p className="text-xl font-black text-slate-800 tracking-tighter leading-none">0</p>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Society Actions Grid */}
+                    {/* Society Actions Grid - Tightened */}
                     <div className="px-4">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-lg font-black text-slate-800 uppercase tracking-tighter">Guard Actions</h3>
-                            <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-black uppercase tracking-widest">Station Center</span>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-md font-black text-slate-800 uppercase tracking-tighter">Guard Actions</h3>
+                            <span className="text-[9px] bg-slate-100 text-slate-500 px-2 py-1 rounded-lg font-black uppercase tracking-widest">Station Center</span>
                         </div>
-                        <div className="grid grid-cols-4 gap-4 mb-10">
+                        <div className="grid grid-cols-4 gap-3 mb-8">
                             {[
                                 { id: 'visitor', label: 'New Entry', icon: UserPlus, color: 'text-orange-600', bg: 'bg-orange-50' },
                                 { id: 'scan', label: 'Scan Pass', icon: ScanLine, color: 'text-indigo-600', bg: 'bg-indigo-50' },
