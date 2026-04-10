@@ -391,6 +391,9 @@ const AdminDashboard = () => {
                 </div>
 
                 <IncomingCallModal />
+                {incomingCall && (
+                    <audio src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" autoPlay loop />
+                )}
                 <ChatWidget />
                 <ConfirmationModal
                     isOpen={showLogoutConfirm}
