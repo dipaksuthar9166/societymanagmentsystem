@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
+const Poll = require('../models/Poll');
 
 const { 
     getCustomers, createCustomer, deleteCustomer, updateCustomer, 
@@ -60,5 +61,32 @@ router.post('/society/twilio', protect, authorize('admin', 'superadmin'), saveTw
 router.route('/society')
     .get(protect, getMyCompany)
     .put(protect, authorize('admin'), upload.single('logo'), updateMyCompany);
+
+// Community Management (Polls)
+router.post('/community/polls', protect, authorize('admin'), async (req, res) => {
+    try {
+        const { title, options, expiresAt } = req.body;
+        const poll = new Poll({
+            title,
+            options,
+            expiresAt,
+            company: req.user.company,
+            status: 'Open'
+        });
+        await poll.save();
+        res.status(201).json(poll);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
+router.delete('/community/polls/:id', protect, authorize('admin', 'superadmin'), async (req, res) => {
+    try {
+        await Poll.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Poll deleted' });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+});
 
 module.exports = router;

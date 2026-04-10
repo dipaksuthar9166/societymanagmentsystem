@@ -69,6 +69,7 @@ import ChildSafetyAdmin from './components/ChildSafetyAdmin';
 import usePreventBack from '../../hooks/usePreventBack';
 import IntercomCallTab from '../Guard/components/IntercomCallTab';
 import ApprovalsTab from './components/ApprovalsTab';
+import CommunityAdmin from './components/CommunityAdmin';
 
 const AdminDashboard = () => {
     usePreventBack();
@@ -201,6 +202,7 @@ const AdminDashboard = () => {
         { id: 'legal-notice', label: 'Legal Notice', icon: Scale },
         { id: 'payment-settings', label: 'Payment Gateway', icon: CreditCard },
         { id: 'intercom', label: 'Intercom Calling', icon: Phone },
+        { id: 'community-admin', label: 'Engagement Hub', icon: Users },
     ];
 
     const renderContent = () => {
@@ -239,6 +241,7 @@ const AdminDashboard = () => {
             case 'legal-notice': return <LegalNoticeTab society={societyDetails} />;
             case 'cctv': return <CCTVTab />;
             case 'intercom': return <IntercomCallTab user={user} />;
+            case 'community-admin': return <CommunityAdmin />;
             default: return <OverviewTab stats={stats} invoices={invoices} user={user} />;
         }
     };
