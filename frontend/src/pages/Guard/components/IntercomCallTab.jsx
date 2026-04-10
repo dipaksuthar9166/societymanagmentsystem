@@ -130,7 +130,16 @@ const IntercomCallTab = ({ user, isMobile }) => {
     };
 
     const startJitsiCall = (roomName) => {
-        if (!jitsiContainerRef.current) return;
+        // Essential DOM Check: Ensure the container exists before mounting Jitsi
+        if (!jitsiContainerRef.current) {
+            console.warn("Jitsi container div not found. Retrying in 500ms...");
+            setTimeout(() => startJitsiCall(roomName), 500);
+            return;
+        }
+
+        if (jitsiApiRef.current) {
+            jitsiApiRef.current.dispose();
+        }
 
         const domain = "meet.jit.si";
         const options = {
@@ -141,10 +150,12 @@ const IntercomCallTab = ({ user, isMobile }) => {
             configOverwrite: { 
                 startWithAudioMuted: false,
                 startWithVideoMuted: false,
-                disableDeepLinking: true
+                disableDeepLinking: true,
+                prejoinPageEnabled: false
             },
             interfaceConfigOverwrite: {
-                TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'videoquality', 'participants-pane']
+                MOBILE_APP_PROMO: false,
+                TOOLBAR_BUTTONS: ['microphone', 'camera', 'hangup', 'videoquality', 'fittoscreen']
             },
             userInfo: {
                 displayName: user.name
