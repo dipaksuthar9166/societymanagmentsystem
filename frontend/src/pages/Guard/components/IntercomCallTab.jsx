@@ -47,6 +47,14 @@ const IntercomCallTab = ({ user, isMobile }) => {
         
         socketRef.current = io(BACKEND_URL, { transports: ['polling', 'websocket'] });
         
+        if (user) {
+            socketRef.current.emit('join_room', user._id || user.id);
+            socketRef.current.emit('join_role', { 
+                societyId: user.company || user.societyId, 
+                role: user.role 
+            });
+        }
+
         socketRef.current.on('call-accepted', (data) => {
             console.log("Call accepted!", data);
             showSuccess('Call Connected', 'Connected successfully.');
@@ -111,6 +119,7 @@ const IntercomCallTab = ({ user, isMobile }) => {
             to: recipient._id,
             from: user.name,
             fromId: user._id || user.id,
+            societyId: user.company || user.societyId,
             roomName: generatedRoom
         });
     };

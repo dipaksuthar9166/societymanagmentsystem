@@ -212,6 +212,13 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('join_role', (data) => {
+        // data: { societyId, role }
+        const roleRoom = `${data.societyId}_${data.role}`;
+        socket.join(roleRoom);
+        console.log(`Socket ${socket.id} joined role room: ${roleRoom}`);
+    });
+
     socket.on('typing_status', (data) => {
         // data: { receiverId, conversationId, isTyping }
         io.to(data.receiverId).emit('typing_status', {
@@ -359,13 +366,16 @@ io.on('connection', (socket) => {
 
     // 📞 INTERCOM CALL SIGNALLING
     socket.on('initiate-call', (data) => {
-        // Relay call signal to recipient's personal room
-        console.log(`Relaying call from ${data.from} to ${data.to}`);
-        io.to(data.to).emit('incoming-call', {
-            from: data.from,
-            fromId: data.fromId,
-            roomName: data.roomName
-        });
+        // Relay call signal to recipient's room
+        // If 'to' is 'guard' or 'admin', relay to society role room
+        if (data.to === 'guard' || data.to === 'admin') {
+            const roleRoom = `${data.societyId}_${data.to}`;
+            console.log(`Relaying call from ${data.from} to role room: ${roleRoom}`);
+            io.to(roleRoom).emit('incoming-call', data);
+        } else {
+            console.log(`Relaying call from ${data.from} to personal room: ${data.to}`);
+            io.to(data.to).emit('incoming-call', data);
+        }
     });
 
     socket.on('call-accepted', (data) => {
