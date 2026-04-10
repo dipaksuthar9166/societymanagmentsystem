@@ -204,6 +204,7 @@ const UserDashboard = () => {
     const [incomingCall, setIncomingCall] = useState(null);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showMoreSheet, setShowMoreSheet] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
 
     useEffect(() => {
@@ -1334,7 +1335,7 @@ const UserDashboard = () => {
                             ].map((item, idx) => (
                                 <button 
                                     key={idx}
-                                    onClick={() => item.isMore ? setIsMobileMenuOpen(true) : setActiveTab(item.id)}
+                                    onClick={() => item.isMore ? setShowMoreSheet(true) : setActiveTab(item.id)}
                                     className="flex flex-col items-center gap-2"
                                 >
                                     <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-all`}>
@@ -1375,7 +1376,39 @@ const UserDashboard = () => {
                     />
                 </div>
 
-                {/* Simple Mobile Sidebar */}
+                {/* --- NEW STYLE: FEATURE GRID BOTTOM SHEET --- */}
+                {showMoreSheet && (
+                    <div className="fixed inset-0 z-[100] animate-in fade-in duration-300">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMoreSheet(false)}></div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[40px] p-6 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500">
+                            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8"></div>
+                            
+                            <div className="flex items-center justify-between mb-8 px-2">
+                                <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase">Society Command</h2>
+                                <button onClick={() => setShowMoreSheet(false)} className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+                                    <XCircle size={20} />
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-y-8 gap-x-4">
+                                {menuItems.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => { setActiveTab(item.id); setShowMoreSheet(false); }}
+                                        className="flex flex-col items-center gap-3 active:scale-95 transition-all"
+                                    >
+                                        <div className="w-16 h-16 rounded-[30px] bg-slate-50 flex items-center justify-center text-indigo-600 border border-slate-100 shadow-sm group-hover:bg-indigo-50 transition-colors">
+                                            <item.icon size={26} strokeWidth={2.5} />
+                                        </div>
+                                        <span className="text-[10px] font-black text-slate-500 text-center uppercase tracking-tight leading-tight">{item.label}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Simple Mobile Sidebar (Main menu only) */}
                 {isMobileMenuOpen && (
                     <div className="fixed inset-0 z-[60]">
                         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
