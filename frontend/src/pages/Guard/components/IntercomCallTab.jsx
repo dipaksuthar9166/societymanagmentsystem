@@ -47,14 +47,6 @@ const IntercomCallTab = ({ user, isMobile }) => {
         
         socketRef.current = io(BACKEND_URL, { transports: ['polling', 'websocket'] });
         
-        if (user) {
-            socketRef.current.emit('join_room', user._id || user.id);
-            socketRef.current.emit('join_role', { 
-                societyId: user.company || user.societyId, 
-                role: user.role 
-            });
-        }
-
         socketRef.current.on('call-accepted', (data) => {
             console.log("Call accepted!", data);
             showSuccess('Call Connected', 'Connected successfully.');
@@ -67,21 +59,34 @@ const IntercomCallTab = ({ user, isMobile }) => {
             endCall();
         });
 
-        if (window.pendingIncomingCall) {
-            const call = window.pendingIncomingCall;
-            window.pendingIncomingCall = null;
-            
-            setCallingStatus('in-call');
-            setRoomName(call.roomName);
-            setCurrentCall({ name: call.from, _id: call.fromId });
+        socketRef.current.on('connect', () => {
+            console.log("Socket connected, processing initial room joins...");
+            if (user) {
+                socketRef.current.emit('join_room', user._id || user.id);
+                socketRef.current.emit('join_role', { 
+                    societyId: user.company || user.societyId, 
+                    role: user.role 
+                });
+            }
 
-            socketRef.current.emit('call-accepted', {
-                to: call.fromId,
-                roomName: call.roomName
-            });
+            // Process pending call ONLY AFTER socket is ready
+            if (window.pendingIncomingCall) {
+                const call = window.pendingIncomingCall;
+                window.pendingIncomingCall = null;
+                
+                console.log("Auto-accepting pending call after socket connect:", call);
+                setCallingStatus('in-call');
+                setRoomName(call.roomName);
+                setCurrentCall({ name: call.from, _id: call.fromId });
 
-            setTimeout(() => startJitsiCall(call.roomName), 200);
-        }
+                socketRef.current.emit('call-accepted', {
+                    to: call.fromId,
+                    roomName: call.roomName
+                });
+
+                setTimeout(() => startJitsiCall(call.roomName), 300);
+            }
+        });
 
         return () => {
             if (jitsiApiRef.current) jitsiApiRef.current.dispose();
