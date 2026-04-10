@@ -39,7 +39,9 @@ import {
     PartyPopper,
     Search,
     Camera,
-    Trash2
+    Trash2,
+    ShieldAlert,
+    Activity
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -254,7 +256,7 @@ const UserDashboard = () => {
 
     // Socket Listener for Real-time events
     useEffect(() => {
-        const socket = io(BACKEND_URL, { 
+        const socket = io(BACKEND_URL, {
             transports: ['polling', 'websocket']
         });
         if (user) {
@@ -286,8 +288,8 @@ const UserDashboard = () => {
         });
 
         socket.on('call-rejected', () => {
-             setCallingStatus(null);
-             showError('Call Ended', 'The call was disconnected or rejected.');
+            setCallingStatus(null);
+            showError('Call Ended', 'The call was disconnected or rejected.');
         });
 
         return () => socket.disconnect();
@@ -948,11 +950,11 @@ const UserDashboard = () => {
                             </div>
                         </div>
                     )) || (
-                        <div className="text-center py-20 bg-white rounded-[30px] border border-dashed border-slate-200">
-                            <Megaphone size={48} className="mx-auto text-slate-200 mb-4" />
-                            <p className="text-slate-400 font-bold">No Announcements Yet</p>
-                        </div>
-                    )}
+                            <div className="text-center py-20 bg-white rounded-[30px] border border-dashed border-slate-200">
+                                <Megaphone size={48} className="mx-auto text-slate-200 mb-4" />
+                                <p className="text-slate-400 font-bold">No Announcements Yet</p>
+                            </div>
+                        )}
                 </div>
             );
         }
@@ -971,7 +973,7 @@ const UserDashboard = () => {
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{new Date(notice.createdAt).toLocaleDateString()}</p>
                         <h4 className="text-xl font-black text-slate-800 dark:text-white mb-3 leading-tight">{notice.title}</h4>
                         <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-4">{notice.content}</p>
-                        
+
                         <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700 flex items-center justify-between">
                             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic flex items-center gap-1">
                                 <Clock size={12} /> Recent Broadcast
@@ -980,10 +982,10 @@ const UserDashboard = () => {
                         </div>
                     </div>
                 )) || (
-                    <div className="col-span-full text-center py-20 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200">
-                        <p className="text-slate-400 font-bold italic">The announcement board is currently empty.</p>
-                    </div>
-                )}
+                        <div className="col-span-full text-center py-20 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200">
+                            <p className="text-slate-400 font-bold italic">The announcement board is currently empty.</p>
+                        </div>
+                    )}
             </div>
         );
     };
@@ -1062,9 +1064,9 @@ const UserDashboard = () => {
                     </div>
                     <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-1 uppercase tracking-tighter">Incoming Call</h3>
                     <p className="text-slate-500 dark:text-slate-400 font-bold mb-8">{incomingCall.from} - {incomingCall.type === 'video' ? 'Video Intercom' : 'Voice Call'}</p>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
-                        <button 
+                        <button
                             onClick={() => {
                                 const socket = io(BACKEND_URL);
                                 socket.emit('call-rejected', { to: incomingCall.fromId });
@@ -1074,12 +1076,12 @@ const UserDashboard = () => {
                         >
                             Decline
                         </button>
-                        <button 
+                        <button
                             onClick={() => {
                                 // Accept Logic
                                 setActiveTab('intercom');
                                 // We'll pass the call data to the Intercom tab via a temporary storage or state
-                                window.pendingIncomingCall = incomingCall; 
+                                window.pendingIncomingCall = incomingCall;
                                 setIncomingCall(null);
                             }}
                             className="py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
@@ -1105,9 +1107,9 @@ const UserDashboard = () => {
                     <p className="text-slate-500 dark:text-slate-400 text-center text-sm font-bold mb-8">
                         {childApprovalData.childName || 'Your child'} is trying to leave via <span className="text-indigo-600">Gate {childApprovalData.gateNo || '1'}</span>.
                     </p>
-                    
+
                     <div className="grid grid-cols-2 gap-4">
-                        <button 
+                        <button
                             onClick={() => {
                                 window.io?.emit('child_exit_response', { ...childApprovalData, approved: false });
                                 setChildApprovalData(null);
@@ -1116,7 +1118,7 @@ const UserDashboard = () => {
                         >
                             Deny Exit
                         </button>
-                        <button 
+                        <button
                             onClick={() => {
                                 window.io?.emit('child_exit_response', { ...childApprovalData, approved: true });
                                 showSuccess("Exit Approved", "Gate security has been notified.");
@@ -1250,9 +1252,9 @@ const UserDashboard = () => {
                     {/* Integrated Search Bar */}
                     <div className="relative group">
                         <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
-                        <input 
-                            type="text" 
-                            placeholder="Find Bills, Help, or Booking..." 
+                        <input
+                            type="text"
+                            placeholder="Find Bills, Help, or Booking..."
                             className="w-full bg-[#0F172A]/50 border border-slate-700/50 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-[#0F172A] transition-all"
                         />
                     </div>
@@ -1261,7 +1263,7 @@ const UserDashboard = () => {
                 <main className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth pb-32">
                     {activeTab === 'home' ? (
                         <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
-                            
+
                             {/* Resident Stats Dashboard */}
                             <div className="grid grid-cols-3 gap-3">
                                 {[
@@ -1278,7 +1280,7 @@ const UserDashboard = () => {
 
                             {/* 2x2 Resident Command Panel */}
                             <div className="grid grid-cols-2 gap-3">
-                                <button 
+                                <button
                                     onClick={() => setActiveTab('gatepass')}
                                     className="bg-indigo-600 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-600/20"
                                 >
@@ -1287,8 +1289,8 @@ const UserDashboard = () => {
                                     </div>
                                     <span className="text-xs font-black uppercase tracking-widest text-white">Pre-Approve</span>
                                 </button>
-                                
-                                <button 
+
+                                <button
                                     onClick={() => setActiveTab('bills')}
                                     className="bg-emerald-600 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-emerald-600/20"
                                 >
@@ -1298,7 +1300,7 @@ const UserDashboard = () => {
                                     <span className="text-xs font-black uppercase tracking-widest text-white">Pay Bills</span>
                                 </button>
 
-                                <button 
+                                <button
                                     onClick={() => setActiveTab('intercom')}
                                     className="bg-[#1E293B] p-6 rounded-[35px] border border-slate-700 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-lg"
                                 >
@@ -1308,7 +1310,7 @@ const UserDashboard = () => {
                                     <span className="text-xs font-black uppercase tracking-widest text-slate-300">Intercom</span>
                                 </button>
 
-                                <button 
+                                <button
                                     onClick={() => {
                                         setShowSOS(true);
                                         window.dispatchEvent(new CustomEvent('triggerSOS'));
