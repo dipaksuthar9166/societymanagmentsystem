@@ -1330,11 +1330,11 @@ const UserDashboard = () => {
                                 { id: 'notices', label: 'Notices', icon: Megaphone, color: 'text-sky-500', bg: 'bg-sky-50' },
                                 { id: 'gatepass', label: 'Gate Pass', icon: QrCode, color: 'text-indigo-500', bg: 'bg-indigo-50' },
                                 { id: 'cctv', label: 'CCTV View', icon: Video, color: 'text-rose-500', bg: 'bg-rose-50' },
-                                { id: 'more', label: 'More', icon: MoreHorizontal, color: 'text-slate-500', bg: 'bg-slate-50' },
+                                { id: 'more', label: 'More', icon: MoreHorizontal, color: 'text-slate-500', bg: 'bg-slate-50', isMore: true },
                             ].map((item, idx) => (
                                 <button 
                                     key={idx}
-                                    onClick={() => setActiveTab(item.id)}
+                                    onClick={() => item.isMore ? setIsMobileMenuOpen(true) : setActiveTab(item.id)}
                                     className="flex flex-col items-center gap-2"
                                 >
                                     <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-all`}>
