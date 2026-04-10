@@ -31,6 +31,8 @@ app.use('/api/committee', require('./routes/committeeRoutes'));
 app.use('/api/config', require('./routes/configRoutes')); // Global Config Routes
 app.use('/api/legal-notices', require('./routes/legalNoticeRoutes'));
 app.use('/api/features', require('./routes/featureRoutes')); // Smart Feature Routes for Residents
+app.use('/api/staff', require('./routes/staffRoutes'));
+app.use('/api/security', require('./routes/securityRoutes'));
 
 // Society Management Routes
 app.use('/api/flats', require('./routes/flatRoutes'));
@@ -326,6 +328,32 @@ io.on('connection', (socket) => {
         if (global.onlineUsers) {
             const onlineList = Array.from(global.onlineUsers.keys());
             socket.emit('online_users_list', onlineList);
+        }
+    });
+
+    // --- NEW FEATURE SOCKET EVENTS ---
+
+    // 🎙️ Security Walkie-Talkie (Push-To-Talk)
+    socket.on('walkie_broadcast', (data) => {
+        // Broadcast voice data to all guards/admins in the society
+        if (data.societyId) {
+            socket.to(data.societyId).emit('walkie_receive', data);
+        }
+    });
+
+    // 👶 Child Exit Authorization Flow
+    socket.on('child_exit_request', (data) => {
+        // Send alert to the specific parent's room
+        if (data.parentId) {
+            io.to(data.parentId).emit('child_exit_alert', data);
+        }
+    });
+
+    // 👶 Child Exit Response (Back to Guard)
+    socket.on('child_exit_response', (data) => {
+        // Send parent's decision back to the specific guard
+        if (data.guardId) {
+            io.to(data.guardId).emit('child_exit_result', data);
         }
     });
 
