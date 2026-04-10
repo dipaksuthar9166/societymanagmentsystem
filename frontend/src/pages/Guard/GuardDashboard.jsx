@@ -69,6 +69,13 @@ const GuardDashboard = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [incomingCall, setIncomingCall] = useState(null);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Vehicle Search State
     const [plateNo, setPlateNo] = useState('');
@@ -442,7 +449,7 @@ const GuardDashboard = () => {
             case 'staff': return <StaffTab user={user} />;
             case 'parking': return <GuardParking user={user} />;
             case 'scan': return <ScanTab user={user} GoHome={() => setActiveTab('overview')} />;
-            case 'intercom': return <IntercomCallTab user={user} />;
+            case 'intercom': return <IntercomCallTab user={user} isMobile={isMobile} />;
             case 'walkie': return <WalkieTab user={user} />;
             case 'cctv': return <CCTVTab />;
             case 'subscription': return <AdminSubscription token={user?.token} user={user} />;
