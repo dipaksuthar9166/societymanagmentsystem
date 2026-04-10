@@ -122,7 +122,8 @@ const IntercomCallTab = ({ user }) => {
             },
             configOverwrite: { 
                 startWithAudioMuted: false,
-                startWithVideoMuted: false 
+                startWithVideoMuted: false,
+                disableDeepLinking: true // This prevents the "Download App" popup on mobile
             },
         };
         
