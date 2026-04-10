@@ -1444,6 +1444,7 @@ const UserDashboard = () => {
                     </div>
                 )}
 
+                <IncomingCallModal />
                 <ChildApprovalModal />
                 <SOSButton />
                 <ChatWidget />
