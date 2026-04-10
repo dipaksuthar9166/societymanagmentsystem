@@ -1064,8 +1064,14 @@ const UserDashboard = () => {
         if (!visitorApprovalData) return null;
         
         const handleResponse = async (status, instruction = '', reason = '') => {
+            const vid = visitorApprovalData._id || visitorApprovalData.visitorId;
+            if (!vid) {
+                console.error("No visitor ID found in data:", visitorApprovalData);
+                showError("Error", "Visitor ID missing. Please refresh.");
+                return;
+            }
             try {
-                const response = await fetch(`${API_BASE_URL}/visitor/${visitorApprovalData.visitorId}/respond`, {
+                const response = await fetch(`${API_BASE_URL}/visitors/${vid}/respond`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1083,10 +1089,10 @@ const UserDashboard = () => {
                 }
             } catch (err) {
                 console.error(err);
-                // Fallback socket emit if API not ready
+                // Fallback socket emit if API failed
                 const socket = io(BACKEND_URL);
                 socket.emit('visitor_response', { 
-                    visitorId: visitorApprovalData.visitorId, 
+                    visitorId: vid, 
                     status,
                     instruction,
                     reason
