@@ -18,6 +18,8 @@ import {
     Phone,
     Radio
 } from 'lucide-react';
+import { io } from 'socket.io-client';
+import { BACKEND_URL } from '../../config';
 import SOSButton from '../../components/SOSButton';
 import SubscriptionLock from '../../components/SubscriptionLock';
 import ConfirmationModal from '../../components/ConfirmationModal';
@@ -66,6 +68,7 @@ const GuardDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [incomingCall, setIncomingCall] = useState(null);
 
     // Vehicle Search State
     const [plateNo, setPlateNo] = useState('');
@@ -82,7 +85,71 @@ const GuardDashboard = () => {
 
     // --- DATA FETCHING ---
     useEffect(() => {
-        const fetchStats = async () => {
+        // Socket Listener for Intercom Calls
+    useEffect(() => {
+        const socket = io(BACKEND_URL, { 
+            transports: ['polling', 'websocket']
+        });
+        
+        if (user) {
+            socket.emit('join_room', user.id || user._id);
+        }
+
+        socket.on('incoming-call', (data) => {
+            console.log("📞 Incoming Intercom Call for Guard:", data);
+            setIncomingCall(data);
+        });
+
+        socket.on('call-rejected', () => {
+             // If we were the caller, handle rejection (handled in children components mostly)
+        });
+
+        return () => socket.disconnect();
+    }, [user]);
+
+    const IncomingCallModal = () => {
+        if (!incomingCall) return null;
+        return (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+                <div className="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-[40px] p-8 shadow-2xl text-center animate-in zoom-in-95 duration-300">
+                    <div className="w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6 relative border-4 border-indigo-500/20">
+                        <Phone size={40} className="text-indigo-600 dark:text-indigo-400 animate-bounce" />
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-500 animate-ping"></div>
+                    </div>
+                    <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-1 uppercase tracking-tighter">Incoming Call</h1>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold mb-8 uppercase tracking-widest text-xs">
+                        From: <span className="text-indigo-600 dark:text-indigo-400">{incomingCall.from}</span>
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={() => {
+                                const socket = io(BACKEND_URL);
+                                socket.emit('call-rejected', { to: incomingCall.fromId });
+                                setIncomingCall(null);
+                            }}
+                            className="py-4 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-black rounded-2xl hover:bg-slate-200 transition-all uppercase tracking-widest text-[10px]"
+                        >
+                            Decline
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setActiveTab('intercom'); // Change to intercom tab
+                                window.pendingIncomingCall = incomingCall; 
+                                setIncomingCall(null);
+                            }}
+                            className="py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                        >
+                            <Phone size={14} /> Accept Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const fetchStats = async () => {
             try {
                 const res = await fetch(`${API_BASE_URL}/guard/visitors`, {
                     headers: { Authorization: `Bearer ${user.token}` }
@@ -486,6 +553,7 @@ const GuardDashboard = () => {
                     <SOSButton />
                 </div>
 
+                <IncomingCallModal />
                 <ChatWidget />
 
                 <ConfirmationModal

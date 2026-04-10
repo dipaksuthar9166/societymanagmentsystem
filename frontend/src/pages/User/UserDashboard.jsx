@@ -199,6 +199,7 @@ const UserDashboard = () => {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [showSOS, setShowSOS] = useState(false);
     const [childApprovalData, setChildApprovalData] = useState(null);
+    const [incomingCall, setIncomingCall] = useState(null);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
@@ -276,6 +277,17 @@ const UserDashboard = () => {
         socket.on('child_exit_request', (data) => {
             console.log("⚠️ Child Exit Request:", data);
             setChildApprovalData(data);
+        });
+
+        socket.on('incoming-call', (data) => {
+            console.log("📞 Incoming Call:", data);
+            setIncomingCall(data);
+            // Optional: Play ringtone here
+        });
+
+        socket.on('call-rejected', () => {
+             setCallingStatus(null);
+             showError('Call Ended', 'The call was disconnected or rejected.');
         });
 
         return () => socket.disconnect();
@@ -1036,6 +1048,48 @@ const UserDashboard = () => {
             case 'subscription': return <AdminSubscription token={user.token} user={user} isMobile={isMobile} />;
             default: return <HomePage isMobile={isMobile} />;
         }
+    };
+
+    const IncomingCallModal = () => {
+        if (!incomingCall) return null;
+        return (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+                <div className="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-[40px] p-8 shadow-2xl text-center animate-in zoom-in-95 duration-300">
+                    <div className="w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6 relative">
+                        <Phone size={40} className="text-indigo-600 dark:text-indigo-400 animate-bounce" />
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-500 animate-ping"></div>
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-800 dark:text-white mb-1 uppercase tracking-tighter">Incoming Call</h3>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold mb-8">{incomingCall.from} - {incomingCall.type === 'video' ? 'Video Intercom' : 'Voice Call'}</p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={() => {
+                                const socket = io(BACKEND_URL);
+                                socket.emit('call-rejected', { to: incomingCall.fromId });
+                                setIncomingCall(null);
+                            }}
+                            className="py-4 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-black rounded-2xl hover:bg-slate-200 transition-all uppercase tracking-widest text-xs"
+                        >
+                            Decline
+                        </button>
+                        <button 
+                            onClick={() => {
+                                // Accept Logic
+                                setActiveTab('intercom');
+                                // We'll pass the call data to the Intercom tab via a temporary storage or state
+                                window.pendingIncomingCall = incomingCall; 
+                                setIncomingCall(null);
+                            }}
+                            className="py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all uppercase tracking-widest text-xs flex items-center justify-center gap-2"
+                        >
+                            <Phone size={16} /> Accept
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     const ChildApprovalModal = () => {

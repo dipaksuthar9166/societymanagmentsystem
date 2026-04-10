@@ -38,6 +38,26 @@ const IntercomCallTab = ({ user }) => {
             endCall();
         });
 
+        // CHECK FOR PENDING INCOMING CALL FROM MODAL
+        if (window.pendingIncomingCall) {
+            const call = window.pendingIncomingCall;
+            window.pendingIncomingCall = null;
+            
+            console.log("Auto-accepting pending call:", call);
+            setCallingStatus('in-call');
+            setRoomName(call.roomName);
+            setCurrentCall({ name: call.from, _id: call.fromId });
+
+            // Notify caller that we accepted
+            socketRef.current.emit('call-accepted', {
+                to: call.fromId,
+                roomName: call.roomName
+            });
+
+            // Start meeting shortly after render
+            setTimeout(() => startJitsiCall(call.roomName), 800);
+        }
+
         return () => {
             if (jitsiApiRef.current) jitsiApiRef.current.dispose();
             if (socketRef.current) socketRef.current.disconnect();
