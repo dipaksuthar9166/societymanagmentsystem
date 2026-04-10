@@ -595,46 +595,46 @@ const GuardDashboard = () => {
                 <main className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth pb-32">
                     {activeTab === 'overview' ? (
                         <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
-                            {/* 2x2 Command Tiles */}
-                            <div className="grid grid-cols-2 gap-4">
+                             {/* 2x2 Command Tiles - Responsive Scaling */}
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
                                 <button 
                                     onClick={() => setActiveTab('scan')}
-                                    className="bg-[#1F2937] p-8 rounded-[40px] border-b-4 border-emerald-500/50 flex flex-col items-center justify-center gap-4 group active:scale-95 transition-all shadow-xl"
+                                    className="bg-[#1F2937] p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-emerald-500/50 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-xl aspect-square sm:aspect-auto"
                                 >
-                                    <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shadow-inner">
-                                        <ScanLine size={32} strokeWidth={2.5} />
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shadow-inner">
+                                        <ScanLine size={24} sm:size={32} strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-sm font-black uppercase tracking-widest">Scan QR</span>
+                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest">Scan QR</span>
                                 </button>
                                 
                                 <button 
                                     onClick={() => setActiveTab('visitor')}
-                                    className="bg-[#1F2937] p-8 rounded-[40px] border-b-4 border-indigo-500/50 flex flex-col items-center justify-center gap-4 group active:scale-95 transition-all shadow-xl"
+                                    className="bg-[#1F2937] p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-indigo-500/50 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-xl aspect-square sm:aspect-auto"
                                 >
-                                    <div className="w-16 h-16 rounded-3xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shadow-inner">
-                                        <UserPlus size={32} strokeWidth={2.5} />
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shadow-inner">
+                                        <UserPlus size={24} sm:size={32} strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-sm font-black uppercase tracking-widest">Visitor Entry</span>
+                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest">Visitor Entry</span>
                                 </button>
 
                                 <button 
                                     onClick={() => setActiveTab('parcel')}
-                                    className="bg-[#1F2937] p-8 rounded-[40px] border-b-4 border-orange-500/50 flex flex-col items-center justify-center gap-4 group active:scale-95 transition-all shadow-xl"
+                                    className="bg-[#1F2937] p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-orange-500/50 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-xl aspect-square sm:aspect-auto"
                                 >
-                                    <div className="w-16 h-16 rounded-3xl bg-orange-500/10 text-orange-400 flex items-center justify-center shadow-inner">
-                                        <BoxIcon size={32} strokeWidth={2.5} />
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-orange-500/10 text-orange-400 flex items-center justify-center shadow-inner">
+                                        <BoxIcon size={24} sm:size={32} strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-sm font-black uppercase tracking-widest text-center leading-tight">Delivery/Cab</span>
+                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest text-center leading-tight">Delivery/Cab</span>
                                 </button>
 
                                 <button 
                                     onClick={() => setActiveTab('walkie')}
-                                    className="bg-red-500 p-8 rounded-[40px] border-b-4 border-red-700 flex flex-col items-center justify-center gap-4 group active:scale-95 transition-all shadow-2xl shadow-red-500/20"
+                                    className="bg-red-500 p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-red-700 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-2xl shadow-red-500/20 aspect-square sm:aspect-auto"
                                 >
-                                    <div className="w-16 h-16 rounded-3xl bg-white/20 text-white flex items-center justify-center shadow-inner">
-                                        <Radio size={32} strokeWidth={2.5} className="animate-pulse" />
+                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-white/20 text-white flex items-center justify-center shadow-inner">
+                                        <Radio size={24} sm:size={32} strokeWidth={2.5} className="animate-pulse" />
                                     </div>
-                                    <span className="text-sm font-black uppercase tracking-widest text-white">SOS/Alert</span>
+                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest text-white">SOS/Alert</span>
                                 </button>
                             </div>
 
