@@ -777,6 +777,16 @@ const GuardDashboard = () => {
                     <audio src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" autoPlay loop />
                 )}
                 <SOSButton />
+                <ConfirmationModal
+                    isOpen={showLogoutConfirm}
+                    onClose={() => setShowLogoutConfirm(false)}
+                    onConfirm={logout}
+                    title="Sign Out?"
+                    message="Are you sure you want to end your shift?"
+                    confirmText="Sign Out"
+                    cancelText="Cancel"
+                    type="danger"
+                />
             </div>
         );
     }
