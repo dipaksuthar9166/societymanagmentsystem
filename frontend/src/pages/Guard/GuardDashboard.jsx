@@ -83,9 +83,7 @@ const GuardDashboard = () => {
     });
     const [societyDetails, setSocietyDetails] = useState(null);
 
-    // --- DATA FETCHING ---
-    useEffect(() => {
-        // Socket Listener for Intercom Calls
+    // Socket Listener for Intercom Calls
     useEffect(() => {
         const socket = io(BACKEND_URL, { 
             transports: ['polling', 'websocket']
@@ -101,7 +99,7 @@ const GuardDashboard = () => {
         });
 
         socket.on('call-rejected', () => {
-             // If we were the caller, handle rejection (handled in children components mostly)
+             // Rejection handling
         });
 
         return () => socket.disconnect();
@@ -135,7 +133,7 @@ const GuardDashboard = () => {
                         </button>
                         <button 
                             onClick={() => {
-                                setActiveTab('intercom'); // Change to intercom tab
+                                setActiveTab('intercom');
                                 window.pendingIncomingCall = incomingCall; 
                                 setIncomingCall(null);
                             }}
@@ -149,7 +147,9 @@ const GuardDashboard = () => {
         );
     };
 
-    const fetchStats = async () => {
+    // --- DATA FETCHING ---
+    useEffect(() => {
+        const fetchStats = async () => {
             try {
                 const res = await fetch(`${API_BASE_URL}/guard/visitors`, {
                     headers: { Authorization: `Bearer ${user.token}` }
