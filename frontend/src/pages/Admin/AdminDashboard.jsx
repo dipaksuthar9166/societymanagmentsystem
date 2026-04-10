@@ -67,6 +67,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import DailyHelpAdmin from './components/DailyHelpAdmin';
 import ChildSafetyAdmin from './components/ChildSafetyAdmin';
 import usePreventBack from '../../hooks/usePreventBack';
+import IntercomCallTab from '../Guard/components/IntercomCallTab';
 
 const AdminDashboard = () => {
     usePreventBack();
@@ -76,6 +77,7 @@ const AdminDashboard = () => {
     const [flats, setFlats] = useState([]);
     const [tenants, setTenants] = useState([]);
     const [complaints, setComplaints] = useState([]);
+    const [notices, setNotices] = useState([]);
     const [incomingCall, setIncomingCall] = useState(null);
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
