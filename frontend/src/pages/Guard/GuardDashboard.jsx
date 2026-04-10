@@ -562,125 +562,153 @@ const GuardDashboard = () => {
         }
     };
 
-    // Mobile specific layout - MYGATE GUARD STYLE
+    // Mobile specific layout - ADVANCED TECH GUARD OPS UI
     if (isMobile) {
         return (
-            <div className="flex flex-col h-screen bg-[#111827] overflow-hidden text-white font-sans">
-                {/* Mobile Header */}
-                <div className="flex items-center justify-between px-6 py-5 bg-[#1F2937] border-b border-gray-800">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                            <Shield size={18} className="text-white" />
+            <div className="flex flex-col h-screen bg-[#0F172A] overflow-hidden text-white font-sans selection:bg-indigo-500">
+                {/* Top Status Bar & Search */}
+                <div className="px-6 pt-6 pb-4 bg-[#1E293B] border-b border-white/5 space-y-4 shadow-xl">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                                <Shield size={20} className="text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg font-black tracking-tight leading-none">Security Station</h1>
+                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">{societyDetails?.name || 'Main Gate'}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-lg font-black tracking-tighter uppercase leading-none">Guard Panel</h1>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{societyDetails?.name || 'Smart Gate'}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-end">
-                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Live
-                            </span>
-                            <span className="text-[9px] text-gray-500 font-bold">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        </div>
-                        <div className="w-10 h-10 rounded-full border-2 border-gray-700 p-0.5">
-                            <div className="w-full h-full rounded-full bg-slate-700 flex items-center justify-center text-xs font-black">
-                                {user?.name?.[0]}
+                        <div className="flex items-center gap-2">
+                             <div className="flex flex-col items-end">
+                                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Service Active
+                                </span>
+                                <span className="text-[10px] text-slate-500 font-bold">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                         </div>
                     </div>
+
+                    {/* Integrated Search Bar */}
+                    <div className="relative group">
+                        <SearchIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
+                        <input 
+                            type="text" 
+                            placeholder="Find Flat, Resident, or Vehicle..." 
+                            className="w-full bg-[#0F172A]/50 border border-slate-700/50 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-[#0F172A] transition-all"
+                        />
+                    </div>
                 </div>
 
-                <main className="flex-1 overflow-y-auto p-6 space-y-8 scroll-smooth pb-32">
+                <main className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth pb-32">
                     {activeTab === 'overview' ? (
-                        <div className="animate-in fade-in slide-in-from-bottom-5 duration-500">
-                             {/* 2x2 Command Tiles - Responsive Scaling */}
-                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                                <button 
-                                    onClick={() => setActiveTab('scan')}
-                                    className="bg-[#1F2937] p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-emerald-500/50 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-xl aspect-square sm:aspect-auto"
-                                >
-                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shadow-inner">
-                                        <ScanLine size={24} sm:size={32} strokeWidth={2.5} />
+                        <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
+                            
+                            {/* NEW: Statistics Dashboard */}
+                            <div className="grid grid-cols-3 gap-3">
+                                {[
+                                    { label: 'Inside', value: stats.weekly[6] || 0, color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+                                    { label: 'Deliveries', value: stats.types[1], color: 'text-orange-400', bg: 'bg-orange-500/10' },
+                                    { label: 'Staff', value: stats.types[2], color: 'text-emerald-400', bg: 'bg-emerald-500/10' }
+                                ].map((stat, i) => (
+                                    <div key={i} className={`${stat.bg} p-3 rounded-2xl border border-white/5 text-center`}>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-1">{stat.label}</p>
+                                        <h4 className={`text-xl font-black ${stat.color}`}>{stat.value}</h4>
                                     </div>
-                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest">Scan QR</span>
+                                ))}
+                            </div>
+
+                            {/* 2x2 High-Contrast Action Panel */}
+                            <div className="grid grid-cols-2 gap-3">
+                                <button 
+                                    onClick={() => setActiveTab('visitor')}
+                                    className="bg-indigo-600 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-600/20"
+                                >
+                                    <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+                                        <UserPlus size={28} className="text-white" strokeWidth={2.5} />
+                                    </div>
+                                    <span className="text-xs font-black uppercase tracking-widest text-white">Visitor Entry</span>
                                 </button>
                                 
                                 <button 
-                                    onClick={() => setActiveTab('visitor')}
-                                    className="bg-[#1F2937] p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-indigo-500/50 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-xl aspect-square sm:aspect-auto"
+                                    onClick={() => setActiveTab('scan')}
+                                    className="bg-[#1E293B] p-6 rounded-[35px] border border-slate-700 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-lg"
                                 >
-                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center shadow-inner">
-                                        <UserPlus size={24} sm:size={32} strokeWidth={2.5} />
+                                    <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-emerald-400 border border-slate-700">
+                                        <ScanLine size={28} strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest">Visitor Entry</span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-slate-300">Scan QR</span>
                                 </button>
 
                                 <button 
                                     onClick={() => setActiveTab('parcel')}
-                                    className="bg-[#1F2937] p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-orange-500/50 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-xl aspect-square sm:aspect-auto"
+                                    className="bg-[#1E293B] p-6 rounded-[35px] border border-slate-700 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-lg"
                                 >
-                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-orange-500/10 text-orange-400 flex items-center justify-center shadow-inner">
-                                        <BoxIcon size={24} sm:size={32} strokeWidth={2.5} />
+                                    <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-orange-400 border border-slate-700">
+                                        <BoxIcon size={28} strokeWidth={2.5} />
                                     </div>
-                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest text-center leading-tight">Delivery/Cab</span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-slate-300">Log Delivery</span>
                                 </button>
 
                                 <button 
                                     onClick={() => setActiveTab('walkie')}
-                                    className="bg-red-500 p-5 sm:p-8 rounded-[30px] sm:rounded-[40px] border-b-4 border-red-700 flex flex-col items-center justify-center gap-3 sm:gap-4 group active:scale-95 transition-all shadow-2xl shadow-red-500/20 aspect-square sm:aspect-auto"
+                                    className="bg-red-500 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl shadow-red-500/30"
                                 >
-                                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl sm:rounded-3xl bg-white/20 text-white flex items-center justify-center shadow-inner">
-                                        <Radio size={24} sm:size={32} strokeWidth={2.5} className="animate-pulse" />
+                                    <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white">
+                                        <ShieldAlert size={28} strokeWidth={2.5} className="animate-pulse" />
                                     </div>
-                                    <span className="text-[10px] sm:text-sm font-black uppercase tracking-widest text-white">SOS/Alert</span>
+                                    <span className="text-xs font-black uppercase tracking-widest text-white">Emergency SOS</span>
                                 </button>
                             </div>
 
-                            {/* Recent Activity Section */}
-                            <div className="mt-10">
-                                <div className="flex items-center justify-between mb-5">
-                                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">Recent Activity</h3>
-                                    <button onClick={() => setActiveTab('visitor')} className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">View All</button>
+                            {/* Enhanced Activity Feed */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between px-2">
+                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Activity Stream</h3>
+                                    <span className="text-[10px] font-bold text-indigo-400">Live Updates</span>
                                 </div>
-                                <div className="space-y-4">
-                                    {stats.notifications.length > 0 ? stats.notifications.slice(0, 3).map((note, i) => (
-                                        <div key={i} className="bg-[#1F2937]/50 border border-gray-800 p-5 rounded-[30px] flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-slate-700 flex items-center justify-center text-lg font-black shrink-0 uppercase">
+                                <div className="space-y-3">
+                                    {stats.notifications.length > 0 ? stats.notifications.slice(0, 4).map((note, i) => (
+                                        <div key={i} className="bg-[#1E293B] border border-white/5 p-4 rounded-3xl flex items-center gap-4 hover:border-indigo-500/30 transition-all">
+                                            <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-lg font-black shrink-0 text-indigo-400">
                                                 {note.title.split(' ')[0][0]}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <h4 className="text-sm font-black text-white truncate">{note.title}</h4>
-                                                    <span className="text-[9px] font-bold text-gray-500">{note.time}</span>
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="text-sm font-black text-slate-100 truncate">{note.title}</h4>
+                                                    <span className="text-[9px] font-bold text-slate-500">{note.time}</span>
                                                 </div>
-                                                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Entered: Gate 1</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded-md uppercase tracking-wider">Permitted</span>
+                                                    <span className="text-[10px] font-black text-slate-500 tracking-tighter">FLAT B-204</span>
+                                                </div>
                                             </div>
-                                            <ChevronRight size={16} className="text-gray-600" />
+                                            <ChevronRight size={16} className="text-slate-700" />
                                         </div>
                                     )) : (
-                                        <div className="text-center py-10 bg-gray-900 rounded-[30px] border border-dashed border-gray-800">
-                                            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">No recent entries today</p>
+                                        <div className="text-center py-12 bg-slate-900/50 rounded-[40px] border border-dashed border-slate-800">
+                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Awaiting visitor logs...</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         </div>
                     ) : (
-                        /* Sub-Tab View */
-                        <div className="fixed inset-0 bg-[#111827] z-[100] flex flex-col">
-                            <div className="p-6 bg-[#1F2937] border-b border-gray-800 flex items-center gap-4">
-                                <button onClick={() => setActiveTab('overview')} className="p-3 bg-gray-900 rounded-2xl">
-                                    <ChevronRight className="rotate-180" size={20} />
-                                </button>
-                                <div>
-                                    <h2 className="text-lg font-black uppercase tracking-tighter">{activeTab}</h2>
-                                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Gate Security Operation</p>
+                        /* Sub-Tab Immersive View */
+                        <div className="fixed inset-0 bg-[#0F172A] z-[100] flex flex-col">
+                            <div className="px-6 py-6 bg-[#1E293B] border-b border-white/5 flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <button onClick={() => setActiveTab('overview')} className="p-3 bg-slate-900 rounded-2xl text-slate-300">
+                                        <ChevronRight className="rotate-180" size={20} />
+                                    </button>
+                                    <div>
+                                        <h2 className="text-lg font-black uppercase tracking-tight">{activeTab.replace('-', ' ')}</h2>
+                                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none">High Priority Operation</p>
+                                    </div>
                                 </div>
+                                <Activity size={20} className="text-emerald-500 animate-pulse" />
                             </div>
-                            <div className="flex-1 overflow-y-auto p-4 pb-20 text-slate-800">
-                                <div className="bg-white rounded-[40px] p-6 shadow-2xl min-h-full">
+                            <div className="flex-1 overflow-y-auto p-4 pb-24">
+                                <div className="bg-white rounded-[45px] p-6 shadow-2xl min-h-full">
                                     <SubscriptionLock societyDetails={societyDetails}>
                                         {renderContent()}
                                     </SubscriptionLock>
@@ -690,55 +718,55 @@ const GuardDashboard = () => {
                     )}
                 </main>
 
-                {/* Bottom Navigation */}
-                <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#1F2937]/95 backdrop-blur-xl border-t border-gray-800 flex items-center justify-around px-4 z-[90]">
+                {/* Modern Floating Bottom Nav */}
+                <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#1E293B]/90 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around px-4 z-[90]">
                     {[
-                        { id: 'overview', label: 'Home', icon: LayoutDashboard },
-                        { id: 'visitor', label: 'Visitor', icon: Users },
-                        { id: 'staff', label: 'Staff', icon: Shield },
-                        { id: 'intercom', label: 'Call', icon: Phone }
+                        { id: 'overview', label: 'Monitor', icon: Activity },
+                        { id: 'visitor', label: 'Logs', icon: Users },
+                        { id: 'cctv', label: 'CCTV', icon: Camera },
+                        { id: 'intercom', label: 'Intercom', icon: Phone }
                     ].map((btn) => (
                         <button
                             key={btn.id}
                             onClick={() => setActiveTab(btn.id)}
-                            className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === btn.id ? 'text-indigo-400' : 'text-gray-500'}`}
+                            className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === btn.id ? 'text-indigo-400' : 'text-slate-500'}`}
                         >
-                            <div className={`p-2.5 rounded-2xl transition-all ${activeTab === btn.id ? 'bg-indigo-500/10' : ''}`}>
+                            <div className={`p-3 rounded-2xl transition-all ${activeTab === btn.id ? 'bg-indigo-500/10' : ''}`}>
                                 <btn.icon size={22} className={activeTab === btn.id ? 'stroke-[3px]' : 'stroke-[2px]'} />
                             </div>
-                            <span className="text-[10px] font-black uppercase tracking-tight">{btn.label}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest">{btn.label}</span>
                         </button>
                     ))}
-                    <button onClick={() => setIsMobileMenuOpen(true)} className="flex flex-col items-center gap-1.5 text-gray-500">
-                        <div className="p-2.5 rounded-2xl border-2 border-dashed border-gray-700">
+                    <button onClick={() => setIsMobileMenuOpen(true)} className="flex flex-col items-center gap-1.5 text-slate-500">
+                        <div className="p-3 rounded-2xl bg-white/5">
                             <MoreHorizontal size={22} />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-tight">More</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest">More</span>
                     </button>
                 </div>
 
-                {/* Mobile More Menu */}
+                {/* Advanced Bottom Sheet Menu */}
                 {isMobileMenuOpen && (
                     <div className="fixed inset-0 z-[200] animate-in fade-in duration-300">
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)}></div>
-                        <div className="absolute inset-x-0 bottom-0 max-h-[80vh] bg-[#1F2937] rounded-t-[50px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500">
-                            <div className="w-12 h-1.5 bg-gray-700 rounded-full mx-auto mb-8"></div>
-                            <div className="grid grid-cols-3 gap-6">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)}></div>
+                        <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-[#1E293B] rounded-t-[60px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 border-t border-white/5">
+                            <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-10"></div>
+                            <div className="grid grid-cols-3 gap-8">
                                 {menuItems.map(item => (
                                     <button
                                         key={item.id}
                                         onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
                                         className="flex flex-col items-center gap-3 active:scale-95 transition-all"
                                     >
-                                        <div className="w-16 h-16 rounded-[25px] bg-slate-800 flex items-center justify-center text-indigo-400 shadow-xl">
+                                        <div className="w-16 h-16 rounded-[28px] bg-slate-800 flex items-center justify-center text-indigo-400 shadow-xl border border-white/5">
                                             <item.icon size={24} />
                                         </div>
-                                        <span className="text-[9px] font-black uppercase text-gray-400 tracking-tighter text-center">{item.label}</span>
+                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight text-center">{item.label}</span>
                                     </button>
                                 ))}
                             </div>
-                            <div className="mt-10 pt-8 border-t border-gray-800">
-                                <button onClick={() => setShowLogoutConfirm(true)} className="w-full py-5 bg-red-500 text-white rounded-[30px] font-black text-xs uppercase tracking-widest shadow-xl shadow-red-500/20">End Shift / Log Out</button>
+                            <div className="mt-10 pt-10 border-t border-white/5">
+                                <button onClick={() => setShowLogoutConfirm(true)} className="w-full py-5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-[35px] font-black text-xs uppercase tracking-widest">End Shift & Sign Out</button>
                             </div>
                         </div>
                     </div>
