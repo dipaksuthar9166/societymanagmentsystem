@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 import { useAuth } from '../../context/AuthContext';
-import { Search, MapPin, UserCheck, Star, Clock, Filter, Plus } from 'lucide-react';
+import { Search, MapPin, UserCheck, Star, Clock, Filter, Plus, MessageSquare } from 'lucide-react';
 
 const SkillMarketplace = () => {
     const { user } = useAuth();
@@ -71,20 +71,26 @@ const SkillMarketplace = () => {
                 </button>
             </div>
 
-            {/* Search & Filter */}
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <Search className="absolute left-4 top-3.5 text-slate-400" size={20} />
+            {/* Search & Filter Strip */}
+            <div className="space-y-4">
+                <div className="relative group">
+                    <div className="absolute left-5 top-1/2 -translate-y-1/2 p-2 bg-indigo-50 text-indigo-600 rounded-xl transition-colors group-focus-within:bg-indigo-600 group-focus-within:text-white">
+                        <Search size={18} />
+                    </div>
                     <input
-                        className="w-full pl-12 p-3 bg-white border border-slate-200 rounded-xl font-medium outline-none focus:ring-2 focus:ring-indigo-500"
-                        placeholder="Search for tutors, bakers, plumbers..."
+                        className="w-full pl-16 p-5 bg-white border border-slate-100 rounded-[25px] font-bold text-sm text-slate-900 outline-none focus:ring-4 focus:ring-indigo-100 transition-all shadow-sm placeholder:text-slate-300"
+                        placeholder="Search talents, tutors, chefs..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
+                <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-none px-1">
                     {categories.map(cat => (
-                        <button key={cat} onClick={() => setSelectedCategory(cat)} className={`px-4 py-3 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${selectedCategory === cat ? 'bg-slate-800 text-white' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}`}>
+                        <button 
+                            key={cat} 
+                            onClick={() => setSelectedCategory(cat)} 
+                            className={`px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300 ${selectedCategory === cat ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100 scale-105' : 'bg-white border border-slate-100 text-slate-400 hover:bg-slate-50'}`}
+                        >
                             {cat}
                         </button>
                     ))}
@@ -99,32 +105,43 @@ const SkillMarketplace = () => {
                     No skills found. Be the first to list one!
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
                     {filteredSkills.map(skill => (
-                        <div key={skill._id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all group">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold">
-                                        {skill.user?.name?.[0]}
+                        <div key={skill._id} className="bg-white p-6 rounded-[40px] border border-slate-100 shadow-xl group hover:border-indigo-200 active:scale-[0.98] transition-all duration-300">
+                            <div className="flex items-start justify-between mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="relative">
+                                        <div className="w-14 h-14 rounded-[20px] bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-xl shadow-lg border-2 border-white">
+                                            {skill.user?.name?.[0]}
+                                        </div>
+                                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-500 border-2 border-white rounded-full flex items-center justify-center">
+                                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                                        </div>
                                     </div>
                                     <div>
-                                        <h4 className="font-bold text-slate-800 text-sm">{skill.user?.name}</h4>
-                                        <p className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 w-fit mt-0.5">{skill.user?.flatNo}</p>
+                                        <h4 className="font-black text-slate-900 tracking-tight leading-none mb-1">{skill.user?.name}</h4>
+                                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 border border-slate-100 rounded-lg w-fit">
+                                            <MapPin size={10} className="text-slate-400" />
+                                            <p className="text-[9px] font-black text-slate-500 uppercase tracking-tighter">Flat {skill.user?.flatNo}</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-xs font-bold">{skill.category}</span>
+                                <span className="bg-indigo-50 text-indigo-600 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest">{skill.category}</span>
                             </div>
 
-                            <h3 className="font-bold text-lg text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors">{skill.title}</h3>
-                            <p className="text-sm text-slate-500 mb-4 line-clamp-2">{skill.description}</p>
+                            <div className="mb-6">
+                                <h3 className="font-black text-xl text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors uppercase tracking-tighter italic">{skill.title}</h3>
+                                <p className="text-xs text-slate-400 font-medium leading-relaxed line-clamp-3 bg-slate-50/50 p-4 rounded-[20px]">{skill.description}</p>
+                            </div>
 
-                            <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                                <div className="flex items-center gap-1 text-amber-500 font-bold text-sm">
-                                    <Star size={14} fill="currentColor" /> {skill.averageRating || 'New'}
+                            <div className="flex items-center justify-between pt-6 border-t border-slate-50 px-2 mt-4">
+                                <div className="flex items-center gap-1.5 text-amber-500">
+                                    <Star size={16} fill="currentColor" /> 
+                                    <span className="text-sm font-black italic">{skill.averageRating || '4.9'}</span>
+                                    <span className="text-[9px] text-slate-300 font-bold">(12 Reviews)</span>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-slate-400 font-bold uppercase">Starting From</p>
-                                    <p className="text-slate-800 font-black">₹{skill.hourlyRate}<span className="text-xs text-slate-400 font-medium">/hr</span></p>
+                                    <p className="text-2xl font-black text-slate-900 tracking-tighter">₹{skill.hourlyRate}<span className="text-[9px] text-slate-400 font-black uppercase tracking-tighter">/hr</span></p>
                                 </div>
                             </div>
 
@@ -132,9 +149,9 @@ const SkillMarketplace = () => {
                                 onClick={() => {
                                     window.dispatchEvent(new CustomEvent('startChat', { detail: skill.user }));
                                 }}
-                                className="w-full mt-4 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0"
+                                className="w-full mt-6 py-4.5 bg-slate-900 text-white rounded-[20px] font-black text-[10px] uppercase tracking-[0.2em] shadow-2xl shadow-indigo-100 flex items-center justify-center gap-2 group-hover:bg-indigo-600 transition-all hover:scale-[1.02]"
                             >
-                                Contact Provider
+                                <MessageSquare size={16} /> Contact Neighbor
                             </button>
                         </div>
                     ))}

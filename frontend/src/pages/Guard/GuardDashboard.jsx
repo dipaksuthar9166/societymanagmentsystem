@@ -45,6 +45,8 @@ import AdminSubscription from '../Admin/AdminSubscription';
 import ChatWidget from '../../components/ChatWidget';
 import CCTVTab from '../Admin/components/CCTVTab';
 import IntercomCallTab from './components/IntercomCallTab';
+import WalkieTab from './components/WalkieTab';
+import usePreventBack from '../../hooks/usePreventBack';
 
 ChartJS.register(
     CategoryScale,
@@ -57,6 +59,7 @@ ChartJS.register(
 );
 
 const GuardDashboard = () => {
+    usePreventBack();
     const { user, logout } = useAuth();
     const { showSuccess, showWarning } = useToast();
     const [activeTab, setActiveTab] = useState('overview');
@@ -358,6 +361,7 @@ const GuardDashboard = () => {
         { id: 'parking', label: 'Parking Status', icon: Activity },
         { id: 'staff', label: 'Service Staff', icon: Users },
         { id: 'intercom', label: 'Intercom Calling', icon: Phone },
+        { id: 'walkie', label: 'Guard Talky', icon: Radio },
         { id: 'cctv', label: 'CCTV View', icon: Video },
         { id: 'subscription', label: 'Subscription', icon: CreditCard },
     ];
@@ -371,6 +375,7 @@ const GuardDashboard = () => {
             case 'parking': return <GuardParking user={user} />;
             case 'scan': return <ScanTab user={user} GoHome={() => setActiveTab('overview')} />;
             case 'intercom': return <IntercomCallTab user={user} />;
+            case 'walkie': return <WalkieTab user={user} />;
             case 'cctv': return <CCTVTab />;
             case 'subscription': return <AdminSubscription token={user?.token} user={user} />;
             default: return <OverviewTab />;

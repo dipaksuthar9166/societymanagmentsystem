@@ -65,6 +65,31 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   return children;
 };
 
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) return (
+    <div className="h-screen w-screen flex items-center justify-center bg-slate-900 text-white font-black tracking-widest uppercase italic">
+      <motion.div
+        animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+      >
+        Checking Session...
+      </motion.div>
+    </div>
+  );
+
+  if (user) {
+    if (user.role === 'superadmin') return <Navigate to="/super-admin-dashboard" replace />;
+    if (user.role === 'admin') return <Navigate to="/admin-dashboard" replace />;
+    if (user.role === 'guard') return <Navigate to="/gate-pass" replace />;
+    if (['chairman', 'secretary', 'treasurer', 'committee_member'].includes(user.role)) return <Navigate to="/committee-dashboard" replace />;
+    return <Navigate to="/user-dashboard" replace />;
+  }
+
+  return children;
+};
+
 import usePageTracking from './hooks/usePageTracking';
 
 // --- Animated Routes Component ---
@@ -82,12 +107,12 @@ const AnimatedRoutes = () => {
         <Route path="/contact" element={<PageWrapper><ContactUsPage /></PageWrapper>} />
         <Route path="/security" element={<PageWrapper><SecurityPage /></PageWrapper>} />
         <Route path="/demo" element={<PageWrapper><DemoPortal /></PageWrapper>} />
-        <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
-        <Route path="/login-otp" element={<PageWrapper><OTPLogin /></PageWrapper>} />
-        <Route path="/register" element={<PageWrapper><OTPRegistration /></PageWrapper>} />
-        <Route path="/verify-account/:token" element={<PageWrapper><VerifyAccount /></PageWrapper>} />
-        <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
-        <Route path="/reset-password/:resetToken" element={<PageWrapper><ResetPassword /></PageWrapper>} />
+        <Route path="/login" element={<PublicRoute><PageWrapper><Login /></PageWrapper></PublicRoute>} />
+        <Route path="/login-otp" element={<PublicRoute><PageWrapper><OTPLogin /></PageWrapper></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><PageWrapper><OTPRegistration /></PageWrapper></PublicRoute>} />
+        <Route path="/verify-account/:token" element={<PublicRoute><PageWrapper><VerifyAccount /></PageWrapper></PublicRoute>} />
+        <Route path="/forgot-password" element={<PublicRoute><PageWrapper><ForgotPassword /></PageWrapper></PublicRoute>} />
+        <Route path="/reset-password/:resetToken" element={<PublicRoute><PageWrapper><ResetPassword /></PageWrapper></PublicRoute>} />
 
         <Route path="/super-admin-dashboard" element={
           <ProtectedRoute allowedRoles={['superadmin']}>

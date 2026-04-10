@@ -8,7 +8,7 @@ import { API_BASE_URL } from '../config';
 
 // Derive Socket URL from API URL (remove /api)
 const socketUrl = API_BASE_URL.replace('/api', '');
-const socket = io(socketUrl, { transports: ['websocket'] });
+const socket = io(socketUrl, { transports: ['polling', 'websocket'] });
 
 const SOSButton = () => {
     const { user } = useAuth();
@@ -124,9 +124,9 @@ const SOSButton = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleInitialClick}
-                className="fixed bottom-6 right-6 z-50 bg-red-600 text-white font-bold p-4 rounded-full shadow-2xl flex items-center gap-2 border-4 border-red-200 animate-pulse hover:animate-none"
+                className="fixed bottom-24 md:bottom-6 right-4 md:right-6 z-[60] bg-red-600 text-white font-bold p-3.5 md:p-4 rounded-full shadow-2xl flex items-center gap-2 border-4 border-red-200 animate-pulse hover:animate-none"
             >
-                <span className="text-xl">🆘</span> SOS
+                <span className="text-lg md:text-xl">🆘</span> SOS
             </motion.button>
 
             {/* Step 1: Type Selector */}

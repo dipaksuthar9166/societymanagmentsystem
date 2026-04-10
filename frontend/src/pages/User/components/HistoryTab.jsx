@@ -26,40 +26,47 @@ const HistoryTab = ({ invoices }) => {
     };
 
     return (
-        <div className="bg-white dark:bg-slate-800 p-10 rounded-[3rem] shadow-sm border border-slate-200 dark:border-slate-700 animate-in fade-in duration-500 transition-colors">
-            <h3 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tighter mb-10 italic">Past Disbursements</h3>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="text-slate-400 dark:text-slate-500 text-[11px] font-black uppercase tracking-widest border-b border-slate-50 dark:border-slate-700">
-                            <th className="pb-6 px-6">Billing Cycle</th>
-                            <th className="pb-6 px-6">Auth Reference</th>
-                            <th className="pb-6 px-6">Amount</th>
-                            <th className="pb-6 px-6">Status</th>
-                            <th className="pb-6 px-6 text-right">Receipt</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
-                        {history.map(inv => (
-                            <tr key={inv._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                <td className="py-8 px-6">
-                                    <div className="text-lg font-bold text-slate-800 dark:text-white italic uppercase">{new Date(inv.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })} Cycle</div>
-                                </td>
-                                <td className="py-8 px-6 font-mono text-sm text-slate-400 dark:text-slate-500 font-bold">#{inv._id.slice(-10).toUpperCase()}</td>
-                                <td className="py-8 px-6 font-black text-slate-900 dark:text-white text-lg">₹{inv.totalAmount}</td>
-                                <td className="py-8 px-6">
-                                    <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-4 py-1 rounded-full text-[10px] font-black uppercase border border-green-200 dark:border-green-900/50">Cleared</span>
-                                </td>
-                                <td className="py-8 px-6 text-right">
-                                    <button onClick={() => handleDownload(inv)} className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 rounded-2xl hover:bg-blue-600 dark:hover:bg-blue-600 hover:text-white transition-all shadow-sm">
-                                        <Download size={18} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {history.length === 0 && <p className="text-center text-slate-400 dark:text-slate-500 italic py-10">No disbursement history detected.</p>}
+        <div className="space-y-6 animate-in fade-in duration-500">
+            <div className="flex items-center justify-between px-2">
+                 <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Disbursements</h3>
+                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{history.length} Record(s)</span>
+            </div>
+            
+            <div className="space-y-4">
+                {history.map(inv => (
+                    <div key={inv._id} className="bg-white p-6 rounded-[35px] border border-slate-50 shadow-xl flex items-center justify-between group active:scale-[0.98] transition-all">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner font-black text-xs uppercase italic">
+                                {new Date(inv.createdAt).toLocaleDateString('en-IN', { month: 'short' })}
+                            </div>
+                            <div>
+                                <h4 className="font-black text-slate-900 tracking-tight leading-none mb-1 text-base uppercase italic">
+                                    {new Date(inv.createdAt).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' })} Cycle
+                                </h4>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[9px] font-mono text-slate-400 uppercase font-bold tracking-tighter">REF: #{inv._id.slice(-8).toUpperCase()}</span>
+                                    <div className="w-1 h-1 bg-slate-200 rounded-full" />
+                                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Cleared</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-3">
+                             <p className="text-xl font-black text-slate-900 tracking-tighter leading-none italic">₹{inv.totalAmount}</p>
+                             <button 
+                                onClick={() => handleDownload(inv)} 
+                                className="p-2 bg-slate-900 text-white rounded-xl shadow-lg active:scale-90 transition-all"
+                             >
+                                <Download size={16} />
+                             </button>
+                        </div>
+                    </div>
+                ))}
+                
+                {history.length === 0 && (
+                     <div className="text-center py-20 bg-white rounded-[50px] border-4 border-dashed border-slate-50">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Transaction history idle</p>
+                    </div>
+                )}
             </div>
         </div>
     );

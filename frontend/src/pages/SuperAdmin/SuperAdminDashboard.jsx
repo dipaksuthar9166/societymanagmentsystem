@@ -28,8 +28,10 @@ import SupportTickets from './SupportTickets';
 import AuditLogs from './AuditLogs';
 import CommunityFeatures from './CommunityFeatures';
 import Inquiries from './Inquiries';
+import usePreventBack from '../../hooks/usePreventBack';
 
 const SuperAdminDashboard = () => {
+    usePreventBack();
     const [activeTab, setActiveTab] = useState('dashboard');
     const [notifications, setNotifications] = useState(3);
     const { user, logout } = useAuth();

@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
         let socket;
         if (user) {
             socket = io(getSocketURL(), {
-                transports: ['websocket'],
+                transports: ['polling', 'websocket'],
                 upgrade: false
             });
             window.io = socket; // Expose to window for other components like TrafficAnalytics

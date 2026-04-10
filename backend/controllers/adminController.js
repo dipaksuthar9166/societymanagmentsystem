@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Company = require('../models/Company');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 // In-memory cache for SMS balance to reduce loading times
 const balanceCache = new Map();
@@ -22,13 +23,25 @@ const getCustomers = async (req, res) => {
 const createCustomer = async (req, res) => {
     try {
         const { name, email, password, role, flatNo, mobile } = req.body;
+        const cleanEmail = email ? email.trim().toLowerCase() : '';
         const societyId = req.user.company;
 
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: cleanEmail });
         if (userExists) return res.status(400).json({ message: 'User already exists' });
 
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const user = await User.create({
-            name, email, password, role, flatNo, contactNumber: mobile, company: societyId, status: 'inactive', isVerified: false
+            name: name ? name.trim() : '', 
+            email: cleanEmail, 
+            password: hashedPassword, 
+            role, 
+            flatNo, 
+            contactNumber: mobile ? mobile.trim() : '', 
+            company: societyId, 
+            status: 'active', 
+            isVerified: true
         });
 
         res.status(201).json(user);
@@ -50,7 +63,10 @@ const updateCustomer = async (req, res) => {
         user.role = role || user.role;
         user.flatNo = flatNo || user.flatNo;
         user.contactNumber = contactNumber || user.contactNumber;
-        if (password) user.password = password;
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(password, salt);
+        }
 
         await user.save();
         res.json(user);

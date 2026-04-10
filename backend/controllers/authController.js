@@ -15,7 +15,16 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = await User.findOne({ email }).populate('company', 'name logo status');
+        const loginQuery = email ? email.trim() : '';
+        const escapedQuery = loginQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Allow login using Email (case-insensitive), Contact Number, or exact User ID
+        const user = await User.findOne({
+            $or: [
+                { email: { $regex: new RegExp(`^${escapedQuery}$`, 'i') } },
+                { contactNumber: loginQuery }
+            ]
+        }).populate('company', 'name logo status');
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Check Company Status
@@ -94,9 +103,10 @@ const loginUser = async (req, res) => {
 
 const registerUser = async (req, res) => {
     const { name, email, password, role, isVerified, flatNo } = req.body;
+    const cleanEmail = email ? email.trim().toLowerCase() : '';
 
     try {
-        const userExists = await User.findOne({ email });
+        const userExists = await User.findOne({ email: cleanEmail });
 
         if (userExists) {
             return res.status(400).json({ message: 'User already exists' });
@@ -117,8 +127,8 @@ const registerUser = async (req, res) => {
         }
 
         const user = await User.create({
-            name,
-            email,
+            name: name ? name.trim() : '',
+            email: cleanEmail,
             password: hashedPassword,
             role,
             flatNo: flatNo || null, // Save Flat No

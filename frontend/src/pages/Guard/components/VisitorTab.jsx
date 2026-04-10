@@ -31,6 +31,20 @@ const VisitorTab = ({ user }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            if (formData.visitorType === 'Child') {
+                // Real-time socket request for child safety
+                if (window.io) {
+                    window.io.emit('child_exit_request', {
+                        childName: formData.name,
+                        flatId: formData.flatNo,
+                        mobile: formData.mobile,
+                        gateNo: '1'
+                    });
+                    alert('Parent approval requested. Please wait.');
+                }
+                return;
+            }
+
             const res = await fetch(`${API_BASE_URL}/guard/entry`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` },
@@ -103,8 +117,8 @@ const VisitorTab = ({ user }) => {
                             {/* Visitor Type Selection */}
                             <div>
                                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Visitor Type</label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    {['Guest', 'Delivery', 'Service', 'Cab'].map(t => (
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                    {['Guest', 'Delivery', 'Service', 'Cab', 'Child'].map(t => (
                                         <button
                                             type="button"
                                             key={t}
@@ -246,7 +260,12 @@ const VisitorTab = ({ user }) => {
                                                         {v.name[0]}
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-slate-800 dark:text-white text-sm">{v.name}</p>
+                                                        <p className="font-bold text-slate-800 dark:text-white text-sm flex items-center gap-2">
+                                                            {v.name}
+                                                            {!v.checkOutTime && (Date.now() - new Date(v.checkInTime).getTime() > 30 * 60000) && (v.visitorType === 'Delivery' || v.visitorType === 'Cab') && (
+                                                                <span className="px-1.5 py-0.5 rounded bg-red-500 text-white text-[8px] font-black uppercase animate-pulse">Overstay</span>
+                                                            )}
+                                                        </p>
                                                         <p className="text-xs text-slate-400">{v.mobile || 'No Contact'}</p>
                                                     </div>
                                                 </div>

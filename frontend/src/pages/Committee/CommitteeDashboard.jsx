@@ -50,8 +50,10 @@ import FinancialReportsTab from './components/FinancialReportsTab';
 import VotingTab from './components/VotingTab';
 import SubscriptionLock from '../../components/SubscriptionLock';
 import AdminSubscription from '../Admin/AdminSubscription';
+import usePreventBack from '../../hooks/usePreventBack';
 
 const CommitteeDashboard = () => {
+    usePreventBack();
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
     const [flats, setFlats] = useState([]);
@@ -103,7 +105,7 @@ const CommitteeDashboard = () => {
 
     // Socket.io for SOS Alerts
     useEffect(() => {
-        const socket = io(API_BASE_URL.replace('/api', ''), { transports: ['websocket'] });
+        const socket = io(API_BASE_URL.replace('/api', ''), { transports: ['polling', 'websocket'] });
         socket.on('connect', () => {
             console.log("Committee connected to socket");
             socket.emit('join_room', 'committee');

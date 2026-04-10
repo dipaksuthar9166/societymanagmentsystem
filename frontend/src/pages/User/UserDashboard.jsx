@@ -25,7 +25,21 @@ import {
     Wallet,
     Zap,
     Video,
-    Phone
+    Phone,
+    ClipboardList,
+    Megaphone,
+    Hammer,
+    Umbrella,
+    CreditCard,
+    FileText,
+    MoreHorizontal,
+    Smile,
+    MapPin,
+    Users,
+    PartyPopper,
+    Search,
+    Camera,
+    Trash2
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -71,6 +85,8 @@ import AdminSubscription from '../Admin/AdminSubscription';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import ResidentCCTV from './components/ResidentCCTV';
 import IntercomCallTab from '../Guard/components/IntercomCallTab';
+import DailyHelpTab from './components/DailyHelpTab';
+import usePreventBack from '../../hooks/usePreventBack';
 
 // --- Shared Components for Admin-like Look ---
 
@@ -175,13 +191,23 @@ const QuickAction = ({ label, icon: Icon, onClick, color = 'indigo' }) => (
 );
 
 const UserDashboard = () => {
+    usePreventBack();
     const { user, logout } = useAuth();
     const { showSuccess, showInfo, showWarning, showError } = useToast();
     const [activeTab, setActiveTab] = useState('home');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [showSOS, setShowSOS] = useState(false);
+    const [childApprovalData, setChildApprovalData] = useState(null);
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 1024);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const fetchDashboard = async () => {
         if (user?.isDemo) {
@@ -227,7 +253,9 @@ const UserDashboard = () => {
 
     // Socket Listener for Real-time events
     useEffect(() => {
-        const socket = io(BACKEND_URL, { transports: ['websocket'] });
+        const socket = io(BACKEND_URL, { 
+            transports: ['polling', 'websocket']
+        });
         if (user) {
             if (user.company) socket.emit('join_society', user.company);
             socket.emit('join_room', user.id || user._id);
@@ -243,6 +271,11 @@ const UserDashboard = () => {
             fetchDashboard();
 
             showInfo(data.title, data.message);
+        });
+
+        socket.on('child_exit_request', (data) => {
+            console.log("⚠️ Child Exit Request:", data);
+            setChildApprovalData(data);
         });
 
         return () => socket.disconnect();
@@ -775,105 +808,173 @@ const UserDashboard = () => {
         );
     };
 
-    // Bills Tab
-    const BillsTab = () => (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">My Bills</h2>
-
-            {data?.invoices?.length > 0 ? (
-                <div className="grid gap-4">
-                    {data.invoices.map(bill => {
-                        const isPaid = bill.status === 'Paid';
-                        const hasArrears = bill.oldArrears > 0;
-
-                        return (
-                            <div key={bill._id} className={`bg-white dark:bg-slate-800 border rounded-xl p-6 shadow-sm hover:shadow-md transition-all ${hasArrears && !isPaid ? 'border-red-300 dark:border-red-900/50' : 'border-slate-200 dark:border-slate-700'}`}>
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <Receipt className={isPaid ? 'text-green-500' : 'text-blue-500'} size={24} />
-                                            <div>
-                                                <h3 className="font-bold text-lg text-slate-800 dark:text-white">{bill.type || 'Maintenance Bill'}</h3>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                    #{bill._id.slice(-6)} • {new Date(bill.createdAt).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-wrap gap-2 mt-3">
-                                            {bill.items.map((item, idx) => (
-                                                <span key={idx} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded">
-                                                    {item.name}
-                                                </span>
-                                            ))}
-                                            {bill.gstAmount > 0 && (
-                                                <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs rounded font-semibold">
-                                                    GST: ₹{bill.gstAmount.toLocaleString()}
-                                                </span>
-                                            )}
-                                            {hasArrears && (
-                                                <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-xs rounded font-semibold">
-                                                    Arrears: ₹{bill.oldArrears.toLocaleString()}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <button onClick={() => downloadInvoice(bill)} className="mt-3 text-sm text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
-                                            <Download size={14} /> Download PDF
-                                        </button>
-                                    </div>
-
-                                    <div className="text-right ml-4">
-                                        <div className={`text-2xl font-bold ${hasArrears && !isPaid ? 'text-red-600 dark:text-red-400' : 'text-slate-800 dark:text-white'}`}>
-                                            ₹{bill.totalAmount.toLocaleString()}
-                                        </div>
-                                        {isPaid ? (
-                                            <span className="inline-block mt-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">
-                                                PAID
-                                            </span>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleOnlinePayment(bill._id, bill.totalAmount)}
-                                                className={`mt-2 px-4 py-2 rounded-lg text-white font-semibold text-sm ${hasArrears ? 'bg-red-600 hover:bg-red-700' : 'bg-indigo-600 hover:bg-indigo-700'}`}
-                                            >
-                                                Pay Now
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+    const BillsTab = () => {
+        if (isMobile) {
+            return (
+                <div className="space-y-4">
+                    <div className="bg-blue-50 p-4 rounded-2xl mb-4 border border-blue-100">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-500 rounded-xl text-white">
+                                <Wallet size={20} />
                             </div>
-                        );
-                    })}
-                </div>
-            ) : (
-                <div className="text-center py-20 bg-slate-50 dark:bg-slate-800 rounded-xl transition-colors">
-                    <Receipt size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
-                    <p className="text-slate-500 dark:text-slate-400">No invoices found</p>
-                </div>
-            )}
-        </div>
-    );
-
-    // Notices Tab
-    const NoticesTab = () => (
-        <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Community Notices</h2>
-            <div className="grid gap-4">
-                {data?.notices?.map((notice, i) => (
-                    <div key={i} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-6 rounded-xl transition-colors">
-                        <div className="flex gap-4">
-                            <Bell className="text-amber-500" size={24} />
-                            <div className="flex-1">
-                                <h4 className="font-bold text-lg text-slate-800 dark:text-white">{notice.title}</h4>
-                                <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">{new Date(notice.createdAt).toLocaleDateString()}</p>
-                                <p className="text-slate-600 dark:text-slate-300 mt-3">{notice.content}</p>
+                            <div>
+                                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Total Outstanding</p>
+                                <h3 className="text-xl font-black text-slate-800">₹{(data?.invoices?.filter(i => i.status !== 'Paid').reduce((sum, i) => sum + i.totalAmount, 0) || 0).toLocaleString()}</h3>
                             </div>
                         </div>
                     </div>
-                )) || <p className="text-center text-slate-400 dark:text-slate-500 py-10">No notices</p>}
+
+                    {data?.invoices?.length > 0 ? (
+                        <div className="grid gap-4">
+                            {data.invoices.map(bill => {
+                                const isPaid = bill.status === 'Paid';
+                                return (
+                                    <div key={bill._id} className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 relative overflow-hidden group">
+                                        {isPaid && <div className="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-bl-full flex items-center justify-center pt-2 pr-2"><CheckCircle size={16} className="text-green-500" /></div>}
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-3 rounded-2xl ${isPaid ? 'bg-green-50 text-green-500' : 'bg-orange-50 text-orange-500'}`}>
+                                                    <Receipt size={24} />
+                                                </div>
+                                                <div>
+                                                    <h3 className="font-black text-slate-800 leading-tight">{bill.type || 'Maintenance'}</h3>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{new Date(bill.createdAt).toLocaleDateString('en-GB')}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className={`text-xl font-black ${isPaid ? 'text-slate-800' : 'text-blue-600'}`}>₹{bill.totalAmount.toLocaleString()}</div>
+                                                <p className="text-[9px] text-slate-400 font-bold uppercase">ID: #{bill._id.slice(-6)}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                                            <button onClick={() => downloadInvoice(bill)} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors">
+                                                <Download size={14} /> Invoice PDF
+                                            </button>
+                                            {!isPaid && (
+                                                <button onClick={() => handleOnlinePayment(bill._id, bill.totalAmount)} className="px-6 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md shadow-blue-200 active:scale-95 transition-all">
+                                                    Pay Now
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center py-20 bg-white rounded-[30px] border border-dashed border-slate-200">
+                            <Receipt size={48} className="mx-auto text-slate-200 mb-4" />
+                            <p className="text-slate-400 font-bold">No Invoices Found</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Desktop Bills View (Table)
+        return (
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden transition-colors">
+                <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-white">Maintenance Invoices</h3>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-bold">
+                        <Wallet size={16} /> Total Due: ₹{(data?.invoices?.filter(i => i.status !== 'Paid').reduce((sum, i) => sum + i.totalAmount, 0) || 0).toLocaleString()}
+                    </div>
+                </div>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">ID</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">Date</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">Description</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Amount</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest text-center">Status</th>
+                                <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data?.invoices?.map(inv => (
+                                <tr key={inv._id} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                                    <td className="py-4 px-6 font-mono text-xs text-slate-500">#{inv._id.slice(-6).toUpperCase()}</td>
+                                    <td className="py-4 px-6 text-sm text-slate-600 dark:text-slate-300 font-medium">{new Date(inv.createdAt).toLocaleDateString()}</td>
+                                    <td className="py-4 px-6 text-sm font-bold text-slate-800 dark:text-white">{inv.type || 'Society Maintenance'}</td>
+                                    <td className="py-4 px-6 text-right font-black text-slate-900 dark:text-white">₹{inv.totalAmount.toLocaleString()}</td>
+                                    <td className="py-4 px-6 text-center">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${inv.status === 'Paid' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'}`}>
+                                            {inv.status}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-6 text-right space-x-2">
+                                        <button onClick={() => downloadInvoice(inv)} className="p-2 text-slate-400 hover:text-blue-600 transition-colors" title="Download"><Download size={18} /></button>
+                                        {inv.status !== 'Paid' && (
+                                            <button onClick={() => handleOnlinePayment(inv._id, inv.totalAmount)} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-black uppercase hover:bg-blue-700 transition shadow-lg shadow-blue-100">Pay Now</button>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
+
+    const NoticesTab = () => {
+        if (isMobile) {
+            return (
+                <div className="space-y-4">
+                    {data?.notices?.map((notice, i) => (
+                        <div key={i} className="bg-white rounded-[25px] p-5 shadow-sm border border-slate-100 group active:scale-[0.98] transition-all">
+                            <div className="flex gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 shrink-0">
+                                    <Megaphone size={24} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-1">{new Date(notice.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                                    <h4 className="font-black text-slate-800 text-lg leading-tight mb-2 truncate group-hover:text-blue-600 transition-colors">{notice.title}</h4>
+                                    <p className="text-sm text-slate-500 font-medium line-clamp-3 leading-relaxed">{notice.content}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )) || (
+                        <div className="text-center py-20 bg-white rounded-[30px] border border-dashed border-slate-200">
+                            <Megaphone size={48} className="mx-auto text-slate-200 mb-4" />
+                            <p className="text-slate-400 font-bold">No Announcements Yet</p>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Desktop Notices Board
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {data?.notices?.map((notice, i) => (
+                    <div key={i} className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:border-blue-200 transition-all group relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Bell size={60} />
+                        </div>
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-2xl w-fit mb-4">
+                            <Megaphone size={20} />
+                        </div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{new Date(notice.createdAt).toLocaleDateString()}</p>
+                        <h4 className="text-xl font-black text-slate-800 dark:text-white mb-3 leading-tight">{notice.title}</h4>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-4">{notice.content}</p>
+                        
+                        <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-700 flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic flex items-center gap-1">
+                                <Clock size={12} /> Recent Broadcast
+                            </span>
+                            <button className="text-xs font-black text-blue-600 hover:underline uppercase tracking-wide">Read More</button>
+                        </div>
+                    </div>
+                )) || (
+                    <div className="col-span-full text-center py-20 bg-white dark:bg-slate-800 rounded-[3rem] border border-dashed border-slate-200">
+                        <p className="text-slate-400 font-bold italic">The announcement board is currently empty.</p>
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     // Committee Tab
     const CommunityTab = () => (
@@ -907,31 +1008,74 @@ const UserDashboard = () => {
         { id: 'notices', label: 'Notices', icon: Bell },
         { id: 'community', label: 'Committee', icon: Shield },
         { id: 'gatepass', label: 'Gate Pass', icon: QrCode },
+        { id: 'staff', label: 'Daily Help', icon: Users },
+        { id: 'market', label: 'Marketplace', icon: Hammer },
         { id: 'cctv', label: 'CCTV Feed', icon: Video },
         { id: 'facility', label: 'Book Facility', icon: Calendar },
         { id: 'profile', label: 'My Profile', icon: User },
-        { id: 'subscription', label: 'Plan Upgrade', icon: CheckCircle },
     ];
 
     const renderContent = () => {
         if (loading) return <div className="h-full flex items-center justify-center text-slate-400">Loading...</div>;
         switch (activeTab) {
-            case 'home': return <HomePage />;
-            case 'bills': return <BillsTab />;
-            case 'skills': return <SkillMarketplace />;
-            case 'parking': return <EVParking />;
-            case 'complaints': return <ComplaintsTab token={user.token} refresh={fetchDashboard} complaints={data?.complaints || []} />;
-            case 'directory': return <SocietyDirectory />;
-            case 'intercom': return <IntercomCallTab user={user} />;
-            case 'notices': return <NoticesTab />;
-            case 'community': return <CommunityTab />;
-            case 'gatepass': return <GatePass />;
-            case 'facility': return <UserFacilityBooking />;
-            case 'profile': return <ProfileTab initialData={data?.user} />;
-            case 'cctv': return <ResidentCCTV />;
-            case 'subscription': return <AdminSubscription token={user.token} user={user} />;
-            default: return <HomePage />;
+            case 'home': return <HomePage isMobile={isMobile} />;
+            case 'bills': return <BillsTab isMobile={isMobile} />;
+            case 'skills': return <SkillMarketplace isMobile={isMobile} />;
+            case 'parking': return <EVParking isMobile={isMobile} />;
+            case 'complaints': return <ComplaintsTab token={user.token} refresh={fetchDashboard} complaints={data?.complaints || []} isMobile={isMobile} />;
+            case 'directory': return <SocietyDirectory isMobile={isMobile} />;
+            case 'intercom': return <IntercomCallTab user={user} isMobile={isMobile} />;
+            case 'notices': return <NoticesTab isMobile={isMobile} />;
+            case 'community': return <CommunityTab isMobile={isMobile} />;
+            case 'gatepass': return <GatePass isMobile={isMobile} />;
+            case 'facility': return <UserFacilityBooking isMobile={isMobile} />;
+            case 'profile': return <ProfileTab initialData={data?.user} isMobile={isMobile} />;
+            case 'cctv': return <ResidentCCTV isMobile={isMobile} />;
+            case 'market': return <SkillMarketplace isMobile={isMobile} />;
+            case 'staff': return <DailyHelpTab isMobile={isMobile} />;
+            case 'subscription': return <AdminSubscription token={user.token} user={user} isMobile={isMobile} />;
+            default: return <HomePage isMobile={isMobile} />;
         }
+    };
+
+    const ChildApprovalModal = () => {
+        if (!childApprovalData) return null;
+        return (
+            <div className="fixed inset-0 z-[100] flex items-end md:items-center justify-center p-4">
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setChildApprovalData(null)}></div>
+                <div className="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-[40px] p-8 shadow-2xl animate-in slide-in-from-bottom duration-500">
+                    <div className="w-20 h-20 bg-orange-100 dark:bg-orange-900/30 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <AlertCircle size={40} className="animate-pulse" />
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-800 dark:text-white text-center mb-2 uppercase tracking-tighter">Child Exit Alert</h3>
+                    <p className="text-slate-500 dark:text-slate-400 text-center text-sm font-bold mb-8">
+                        {childApprovalData.childName || 'Your child'} is trying to leave via <span className="text-indigo-600">Gate {childApprovalData.gateNo || '1'}</span>.
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={() => {
+                                window.io?.emit('child_exit_response', { ...childApprovalData, approved: false });
+                                setChildApprovalData(null);
+                            }}
+                            className="py-4 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-black rounded-2xl text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+                        >
+                            Deny Exit
+                        </button>
+                        <button 
+                            onClick={() => {
+                                window.io?.emit('child_exit_response', { ...childApprovalData, approved: true });
+                                showSuccess("Exit Approved", "Gate security has been notified.");
+                                setChildApprovalData(null);
+                            }}
+                            className="py-4 bg-indigo-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-indigo-200 dark:shadow-none hover:bg-indigo-500 active:scale-95 transition-all"
+                        >
+                            Approve
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     const loadRazorpay = () => {
@@ -1024,6 +1168,244 @@ const UserDashboard = () => {
             showError('Connection Error', 'Something went wrong while initiating payment.');
         }
     };
+
+    if (isMobile) {
+        return (
+            <div className="flex flex-col h-screen bg-slate-50 relative overflow-hidden">
+                {/* Scrollable Content Area */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden pt-0 pb-32">
+                    {/* 1. Premium Society Header (MyGate Style) */}
+                    <div className="relative h-64 overflow-hidden">
+                        <img 
+                            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000" 
+                            alt="Society" 
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        
+                        {/* Top Controls */}
+                        <div className="absolute top-10 left-6 right-6 flex items-center justify-between">
+                            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white">
+                                <Menu size={20} />
+                            </button>
+                            <div className="flex items-center gap-3">
+                                <button className="p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white">
+                                    <Search size={20} />
+                                </button>
+                                <div className="w-10 h-10 rounded-full border-2 border-white/50 overflow-hidden bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
+                                    {user?.name?.[0]}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Society Name & Location */}
+                        <div className="absolute bottom-16 left-6">
+                            <div className="flex items-center gap-2 text-white mb-1">
+                                <MapPin size={18} className="text-red-500 fill-red-500" />
+                                <h2 className="text-2xl font-black tracking-tight">{data?.society?.name || 'SSR Residency'}</h2>
+                            </div>
+                            <p className="text-white/70 text-sm font-medium ml-6">Flat No: {user?.flatNo || 'A-101'}</p>
+                        </div>
+                    </div>
+
+                    {/* Quick Access Overlay Cards */}
+                    <div className="px-4 -mt-10 mb-8 relative z-10 grid grid-cols-2 gap-3">
+                        <button onClick={() => setActiveTab('gatepass')} className="bg-white p-4 rounded-3xl shadow-xl flex items-center gap-3 border border-slate-50">
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                                <Users size={24} />
+                            </div>
+                            <div className="text-left">
+                                <span className="block text-xs font-black text-slate-800">My Visitors</span>
+                                <span className="text-[9px] text-slate-400 font-bold uppercase">Approve/Manage</span>
+                            </div>
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setShowSOS(true);
+                                window.dispatchEvent(new CustomEvent('triggerSOS'));
+                            }} 
+                            className="bg-white p-4 rounded-3xl shadow-xl flex items-center gap-3 border border-slate-50 active:scale-95 transition-all"
+                        >
+                            <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+                                <AlertCircle size={24} />
+                            </div>
+                            <div className="text-left">
+                                <span className="block text-xs font-black text-slate-800 uppercase">SOS</span>
+                                <span className="text-[9px] text-slate-400 font-bold uppercase">Security alert</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* 2. Your To-do's Section */}
+                    <div className="px-6 mb-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <h3 className="text-lg font-black text-slate-800 tracking-tighter">Your To-do's</h3>
+                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">2</span>
+                        </div>
+                        
+                        <div className="bg-white p-4 rounded-[25px] border border-slate-100 shadow-sm flex items-center justify-between group active:scale-95 transition-all">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
+                                    <Receipt size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-slate-800">Maintenance Bill</h4>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-black text-slate-900">₹{data?.user?.balance || '45,000'}</span>
+                                        <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-black uppercase">DUE</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => setActiveTab('bills')} className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                                Pay Now <ChevronRight size={14} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 3. Society Actions Grid */}
+                    <div className="px-6 mb-8">
+                         <h3 className="text-lg font-black text-slate-800 tracking-tighter mb-4">Society Actions</h3>
+                         <div className="grid grid-cols-4 gap-4">
+                            {[
+                                { id: 'market', label: 'Market', icon: Hammer, color: 'text-orange-500', bg: 'bg-orange-50' },
+                                { id: 'facility', label: 'Amenities', icon: Umbrella, color: 'text-teal-500', bg: 'bg-teal-50' },
+                                { id: 'bills', label: 'Payments', icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-50' },
+                                { id: 'staff', label: 'Daily Help', icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
+                                { id: 'notices', label: 'Notices', icon: Megaphone, color: 'text-sky-500', bg: 'bg-sky-50' },
+                                { id: 'gatepass', label: 'Gate Pass', icon: QrCode, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                                { id: 'cctv', label: 'CCTV View', icon: Video, color: 'text-rose-500', bg: 'bg-rose-50' },
+                                { id: 'more', label: 'More', icon: MoreHorizontal, color: 'text-slate-500', bg: 'bg-slate-50' },
+                            ].map((item, idx) => (
+                                <button 
+                                    key={idx}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className="flex flex-col items-center gap-2"
+                                >
+                                    <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-all`}>
+                                        <item.icon size={24} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 text-center leading-tight">{item.label}</span>
+                                </button>
+                            ))}
+                         </div>
+                    </div>
+                </div>
+
+                {/* 5. Bottom Navigation Bar (Documentation Style) */}
+                <div className="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                    {[
+                        { id: 'home', label: 'Home', icon: Home },
+                        { id: 'gatepass', label: 'Visitors', icon: Users },
+                        { id: 'bills', label: 'Payments', icon: CreditCard },
+                        { id: 'profile', label: 'Profile', icon: User },
+                    ].map((item) => (
+                        <button 
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-blue-600 scale-105' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            <div className={`p-1.5 rounded-xl ${activeTab === item.id ? 'bg-blue-50' : ''}`}>
+                                <item.icon size={22} className={activeTab === item.id ? 'stroke-[3px]' : 'stroke-[2px]'} />
+                            </div>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                        </button>
+                    ))}
+                    {/* Active Indicator Line */}
+                    <div className="absolute top-0 h-1 bg-blue-600 transition-all duration-300 rounded-full" 
+                        style={{ 
+                            width: '25%', 
+                            left: `${['home', 'gatepass', 'bills', 'profile'].indexOf(activeTab) * 25}%` 
+                        }} 
+                    />
+                </div>
+
+                {/* Simple Mobile Sidebar */}
+                {isMobileMenuOpen && (
+                    <div className="fixed inset-0 z-[60]">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+                        <aside className="absolute top-0 bottom-0 left-0 w-4/5 bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                            <div className="p-6 bg-gradient-to-br from-indigo-600 to-purple-700 text-white rounded-br-[40px] mb-4">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-xl font-bold border-2 border-white/30">
+                                        {user?.name?.[0] || 'U'}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-lg truncate">{user?.name}</h3>
+                                        <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Flat {user?.flatNo}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-widest bg-white/10 p-3 rounded-xl border border-white/10">
+                                    <span>Member Since</span>
+                                    <span>2024</span>
+                                </div>
+                            </div>
+
+                            <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
+                                {menuItems.map((item) => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
+                                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all text-sm font-bold ${activeTab === item.id
+                                            ? 'bg-indigo-50 text-indigo-600'
+                                            : 'text-slate-600 hover:bg-slate-50'
+                                            }`}
+                                    >
+                                        <item.icon size={20} className={activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-[2px]'} />
+                                        <span>{item.label}</span>
+                                    </button>
+                                ))}
+                            </nav>
+
+                            <div className="p-4 border-t border-slate-100">
+                                <button
+                                    onClick={() => setShowLogoutConfirm(true)}
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-50 text-red-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-colors"
+                                >
+                                    <LogOut size={16} /> Sign Out
+                                </button>
+                            </div>
+                        </aside>
+                    </div>
+                )}
+                
+                {/* Secondary Page View Overlay */}
+                {activeTab !== 'home' && (
+                    <div className="fixed inset-0 bg-slate-50 z-[40] overflow-y-auto pb-24 animate-in fade-in slide-in-from-right duration-300">
+                         {/* Secondary Header */}
+                         <div className="bg-white px-5 pt-8 pb-4 border-b border-slate-100 flex items-center justify-between sticky top-0 z-[50] shadow-sm">
+                            <button onClick={() => setActiveTab('home')} className="p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all active:scale-95 text-slate-600">
+                                <ChevronRight className="rotate-180" size={20} />
+                            </button>
+                            <h2 className="text-lg font-black text-slate-800 uppercase tracking-tighter">{activeTab.replace('-', ' ')}</h2>
+                            <div className="w-10 h-10 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-black text-xs">{user?.name?.[0]}</div>
+                            </div>
+                         </div>
+
+                         <div className="px-4 pt-6 pb-32">
+                            <SubscriptionLock societyDetails={data?.society}>
+                                {renderContent()}
+                            </SubscriptionLock>
+                         </div>
+                    </div>
+                )}
+
+                <ChildApprovalModal />
+                <SOSButton />
+                <ChatWidget />
+                <ConfirmationModal
+                    isOpen={showLogoutConfirm}
+                    onClose={() => setShowLogoutConfirm(false)}
+                    onConfirm={logout}
+                    title="Sign Out?"
+                    message="Are you sure you want to end your session?"
+                    confirmText="Sign Out"
+                    cancelText="Keep Browsing"
+                    type="danger"
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="flex h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300">
@@ -1136,6 +1518,7 @@ const UserDashboard = () => {
                     </SubscriptionLock>
                 </div>
 
+                <ChildApprovalModal />
                 <SOSButton />
                 <ChatWidget />
                 <ConfirmationModal

@@ -254,19 +254,19 @@ const Login = () => {
                                 {/* Email Field */}
                                 <div className="group">
                                     <label className="block text-sm font-semibold text-slate-300 mb-2">
-                                        Email Address
+                                        Email / User ID
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                             <Mail size={18} className="text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
                                         </div>
                                         <input
-                                            type="email"
+                                            type="text"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             required
                                             className="w-full pl-12 pr-4 py-4 bg-black/30 border border-indigo-500/20 text-white rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all placeholder-white/30"
-                                            placeholder="your.email@example.com"
+                                            placeholder="Enter your email or user ID"
                                         />
                                     </div>
                                 </div>

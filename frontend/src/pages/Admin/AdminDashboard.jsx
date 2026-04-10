@@ -28,7 +28,8 @@ import {
     Zap,
     Scale,
     UserCheck,
-    Search
+    Search,
+    ShieldCheck
 } from 'lucide-react';
 
 // Components
@@ -62,8 +63,12 @@ import SkillAdmin from './SkillAdmin';
 import ResidentLookupTab from './components/ResidentLookupTab';
 import ParkingSystem from './ParkingSystem';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import DailyHelpAdmin from './components/DailyHelpAdmin';
+import ChildSafetyAdmin from './components/ChildSafetyAdmin';
+import usePreventBack from '../../hooks/usePreventBack';
 
 const AdminDashboard = () => {
+    usePreventBack();
     const [activeTab, setActiveTab] = useState('overview');
     const [stats, setStats] = useState(null);
     const [societyDetails, setSocietyDetails] = useState(null);
@@ -132,7 +137,7 @@ const AdminDashboard = () => {
     useEffect(() => {
         if (!user || !user.company) return;
 
-        const socket = io(BACKEND_URL, { transports: ['websocket'] });
+        const socket = io(BACKEND_URL, { transports: ['polling', 'websocket'] });
         socket.on('connect', () => {
             socket.emit('join_society', user.company);
         });
@@ -164,9 +169,11 @@ const AdminDashboard = () => {
         { id: 'broadcast', label: 'Broadcast', icon: MessageCircle },
         { id: 'expenses', label: 'Expense Tracker', icon: Wallet },
         { id: 'defaulters', label: 'Defaulters', icon: AlertCircle },
-        { id: 'guards', label: 'Security & Staff', icon: Shield },
+        { id: 'guards', label: 'Security Officers', icon: Shield },
+        { id: 'daily-help', label: 'Daily Help Registry', icon: Users },
+        { id: 'child-safety', label: 'Child Safety Logs', icon: ShieldCheck },
         { id: 'cctv', label: 'CCTV Controller', icon: Video },
-        { id: 'skills', label: 'Skill Approvals', icon: UserCheck },
+        { id: 'skills', label: 'Marketplace (Skills)', icon: UserCheck },
         { id: 'parking', label: 'Parking Manager', icon: Zap },
         { id: 'complaints', label: 'Complaints', icon: AlertCircle },
         { id: 'notices', label: 'Notices', icon: Bell },
@@ -174,7 +181,7 @@ const AdminDashboard = () => {
         { id: 'facility', label: 'Facilities', icon: Calendar },
         { id: 'assets', label: 'Assets', icon: Wrench },
         { id: 'reports', label: 'Analytics & Reports', icon: FileText },
-        { id: 'emergency', label: 'Emergency', icon: AlertTriangle },
+        { id: 'emergency', label: 'Emergency & SOS', icon: AlertTriangle },
         { id: 'profile', label: 'Profile', icon: Settings },
         { id: 'subscription', label: 'Plan Upgrade', icon: Shield },
         { id: 'legal-notice', label: 'Legal Notice', icon: Scale },
@@ -198,6 +205,8 @@ const AdminDashboard = () => {
             case 'expenses': return <ExpenseTracker token={user?.token} />;
             case 'defaulters': return <DefaultersTab invoices={invoices} />;
             case 'guards': return <GuardsTab token={user?.token} refresh={fetchData} flats={flats} />;
+            case 'daily-help': return <DailyHelpAdmin token={user?.token} />;
+            case 'child-safety': return <ChildSafetyAdmin />;
             case 'skills': return <SkillAdmin token={user?.token} />;
             case 'parking': return <ParkingSystem token={user?.token} />;
             case 'complaints': return <ComplaintsTab complaints={complaints} refresh={fetchData} token={user?.token} />;

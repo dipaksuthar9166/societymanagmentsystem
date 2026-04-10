@@ -23,7 +23,7 @@ const IntercomCallTab = ({ user }) => {
     useEffect(() => {
         fetchResidents();
         
-        socketRef.current = io(BACKEND_URL, { transports: ['websocket'] });
+        socketRef.current = io(BACKEND_URL, { transports: ['polling', 'websocket'] });
         
         // Listeners for outgoing call states
         socketRef.current.on('call-accepted', (data) => {

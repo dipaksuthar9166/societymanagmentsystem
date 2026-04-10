@@ -113,55 +113,79 @@ const BillsTab = ({ invoices, refresh, token }) => {
 
             {/* Pending List */}
             <div className="space-y-4 mb-10">
-                <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Pending Dues</h3>
+                <div className="flex items-center justify-between px-2 mb-2">
+                    <h3 className="text-sm font-black text-slate-800 uppercase tracking-[0.2em]">Pending Dues</h3>
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-50 text-red-500 rounded-full">
+                        <AlertCircle size={14} className="animate-pulse" />
+                        <span className="text-[10px] font-black">{pendingInvoices.length} Due</span>
+                    </div>
+                </div>
+
                 {pendingInvoices.length > 0 ? (
                     pendingInvoices.map(inv => (
-                        <div key={inv._id} className="bg-white dark:bg-slate-800 p-5 rounded-xl border border-blue-100 dark:border-blue-900/30 shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 hover:border-blue-300 dark:hover:border-blue-800 transition-colors">
-                            <div className="flex items-center gap-4 w-full">
-                                <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                                    <AlertCircle size={20} />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-center w-full">
-                                        <span className="text-sm font-bold text-slate-800 dark:text-white">{inv.type} Bill</span>
-                                        <span className="text-sm font-black text-slate-900 dark:text-white">₹{inv.totalAmount}</span>
+                        <div key={inv._id} className="bg-white p-6 rounded-[35px] border border-slate-100 shadow-xl flex flex-col gap-6 group hover:border-blue-200 transition-all active:scale-[0.98]">
+                            <div className="flex items-start justify-between">
+                                <div className="flex gap-4">
+                                    <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner">
+                                        <Receipt size={28} />
                                     </div>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{inv.items?.[0]?.name} • {new Date(inv.createdAt).toLocaleDateString()}</div>
+                                    <div>
+                                        <h4 className="text-lg font-black text-slate-800 tracking-tight leading-none mb-1">{inv.type}</h4>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{inv.items?.[0]?.name || 'Society Maintenance'}</p>
+                                        <div className="mt-1 flex items-center gap-2">
+                                            <span className="text-[9px] bg-red-100 text-red-600 px-2 py-0.5 rounded font-black uppercase">Due in 5 days</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-2xl font-black text-slate-900 tracking-tighter">₹{inv.totalAmount}</p>
+                                    <p className="text-[10px] text-slate-300 font-bold">{new Date(inv.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setSelectedBill(inv)} className="w-full sm:w-auto bg-blue-600 dark:bg-blue-600 text-white px-6 py-2.5 rounded-lg text-xs font-bold shadow-md hover:bg-blue-700 dark:hover:bg-blue-500 transition">
-                                Pay Now
+
+                            <button 
+                                onClick={() => setSelectedBill(inv)} 
+                                className="w-full bg-slate-900 text-white py-4 rounded-[20px] text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-slate-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+                            >
+                                <CreditCard size={16} /> Pay Securely
                             </button>
                         </div>
                     ))
                 ) : (
-                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 py-12 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 transition-colors">
-                        <CheckCircle size={32} className="text-emerald-400 dark:text-emerald-500 mb-2 opacity-80" />
-                        <span className="text-sm font-bold">No pending bills</span>
+                    <div className="bg-white rounded-[40px] border-4 border-dashed border-slate-50 py-16 flex flex-col items-center justify-center text-slate-300 animate-in fade-in zoom-in duration-500">
+                        <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-4 shadow-inner">
+                            <CheckCircle size={40} />
+                        </div>
+                        <span className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">All Clear! No Dues</span>
                     </div>
                 )}
             </div>
 
             {/* History List */}
-            <div className="space-y-3">
-                <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Payment History</h3>
+            <div className="space-y-4">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] px-2">Payment History</h3>
                 {paidInvoices.length > 0 ? (
                     paidInvoices.map(inv => (
-                        <div key={inv._id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center opacity-75 hover:opacity-100 transition-all">
-                            <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                    <CheckCircle size={14} />
+                        <div key={inv._id} className="bg-white p-5 rounded-[25px] border border-slate-50 flex justify-between items-center shadow-sm group active:scale-95 transition-all">
+                            <div className="flex items-center gap-4">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-sm">
+                                    <CheckCircle size={18} />
                                 </div>
                                 <div>
-                                    <div className="text-xs font-bold text-slate-700 dark:text-white">{inv.type}</div>
-                                    <div className="text-[10px] text-slate-400 dark:text-slate-500">{new Date(inv.updatedAt || inv.createdAt).toLocaleDateString()}</div>
+                                    <div className="text-sm font-black text-slate-800 leading-none mb-1">{inv.type}</div>
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(inv.updatedAt || inv.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</div>
                                 </div>
                             </div>
-                            <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">₹{inv.totalAmount}</div>
+                            <div className="flex flex-col items-end">
+                                <div className="text-sm font-black text-slate-900 tracking-tighter">₹{inv.totalAmount}</div>
+                                <span className="text-[8px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter">Settled</span>
+                            </div>
                         </div>
                     ))
                 ) : (
-                    <p className="text-center text-[10px] text-slate-400 dark:text-slate-500 italic py-4">No history available.</p>
+                    <div className="text-center py-10 bg-slate-50/50 rounded-[30px] border border-dashed border-slate-100 italic">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">No previous payments found</p>
+                    </div>
                 )}
             </div>
         </div>

@@ -42,7 +42,7 @@ const ChatWidget = () => {
 
     // Initialize Socket.IO
     useEffect(() => {
-        const newSocket = io(BACKEND_URL);
+        const newSocket = io(BACKEND_URL, { transports: ['polling', 'websocket'] });
         setSocket(newSocket);
 
         newSocket.on('connect', () => {
@@ -274,7 +274,7 @@ const ChatWidget = () => {
             {/* Floating Chat Button */}
             <motion.button
                 onClick={() => setIsOpen(!isOpen)}
-                className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all"
+                className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-[60] w-12 h-12 md:w-14 md:h-14 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full shadow-2xl flex items-center justify-center transition-all"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
             >
