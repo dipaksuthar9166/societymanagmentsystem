@@ -29,7 +29,8 @@ import {
     Scale,
     UserCheck,
     Search,
-    ShieldCheck
+    ShieldCheck,
+    Phone
 } from 'lucide-react';
 
 // Components
@@ -75,7 +76,7 @@ const AdminDashboard = () => {
     const [flats, setFlats] = useState([]);
     const [tenants, setTenants] = useState([]);
     const [complaints, setComplaints] = useState([]);
-    const [notices, setNotices] = useState([]);
+    const [incomingCall, setIncomingCall] = useState(null);
     const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const { user, logout } = useAuth();
@@ -155,6 +156,15 @@ const AdminDashboard = () => {
             fetchData();
         });
 
+        socket.on('incoming-call', (data) => {
+            console.log("📞 Incoming Call for Admin:", data);
+            setIncomingCall(data);
+        });
+
+        socket.on('call-rejected', () => {
+             showWarning('Call Ended', 'The call was disconnected.');
+        });
+
         return () => socket.disconnect();
     }, [user]);
 
@@ -186,6 +196,7 @@ const AdminDashboard = () => {
         { id: 'subscription', label: 'Plan Upgrade', icon: Shield },
         { id: 'legal-notice', label: 'Legal Notice', icon: Scale },
         { id: 'payment-settings', label: 'Payment Gateway', icon: CreditCard },
+        { id: 'intercom', label: 'Intercom Calling', icon: Phone },
     ];
 
     const renderContent = () => {
@@ -222,8 +233,51 @@ const AdminDashboard = () => {
             case 'payment-settings': return <PaymentSettingsTab token={user?.token} />;
             case 'legal-notice': return <LegalNoticeTab society={societyDetails} />;
             case 'cctv': return <CCTVTab />;
+            case 'intercom': return <IntercomCallTab user={user} />;
             default: return <OverviewTab stats={stats} invoices={invoices} user={user} />;
         }
+    };
+
+    const IncomingCallModal = () => {
+        if (!incomingCall) return null;
+        return (
+            <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md"></div>
+                <div className="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-[40px] p-8 shadow-2xl text-center animate-in zoom-in-95 duration-300">
+                    <div className="w-24 h-24 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-6 relative border-4 border-indigo-500/20">
+                        <Phone size={40} className="text-indigo-600 dark:text-indigo-400 animate-bounce" />
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-500 animate-ping"></div>
+                    </div>
+                    <h1 className="text-2xl font-black text-slate-800 dark:text-white mb-1 uppercase tracking-tighter">Incoming Call</h1>
+                    <p className="text-slate-500 dark:text-slate-400 font-bold mb-8 uppercase tracking-widest text-xs">
+                        From: <span className="text-indigo-600 dark:text-indigo-400">{incomingCall.from}</span>
+                    </p>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <button 
+                            onClick={() => {
+                                const socket = io(BACKEND_URL);
+                                socket.emit('call-rejected', { to: incomingCall.fromId });
+                                setIncomingCall(null);
+                            }}
+                            className="py-4 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-black rounded-2xl hover:bg-slate-200 transition-all uppercase tracking-widest text-[10px]"
+                        >
+                            Decline
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setActiveTab('intercom');
+                                window.pendingIncomingCall = incomingCall; 
+                                setIncomingCall(null);
+                            }}
+                            className="py-4 bg-emerald-500 text-white font-black rounded-2xl hover:bg-emerald-600 shadow-lg shadow-emerald-500/30 transition-all uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
+                        >
+                            <Phone size={14} /> Accept Call
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     return (
@@ -334,6 +388,7 @@ const AdminDashboard = () => {
                     </SubscriptionLock>
                 </div>
 
+                <IncomingCallModal />
                 <ChatWidget />
                 <ConfirmationModal
                     isOpen={showLogoutConfirm}
