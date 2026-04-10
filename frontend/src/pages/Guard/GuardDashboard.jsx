@@ -15,7 +15,8 @@ import {
     Search,
     Zap,
     Video,
-    Phone
+    Phone,
+    Radio
 } from 'lucide-react';
 import SOSButton from '../../components/SOSButton';
 import SubscriptionLock from '../../components/SubscriptionLock';
