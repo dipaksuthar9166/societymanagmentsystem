@@ -68,6 +68,7 @@ import DailyHelpAdmin from './components/DailyHelpAdmin';
 import ChildSafetyAdmin from './components/ChildSafetyAdmin';
 import usePreventBack from '../../hooks/usePreventBack';
 import IntercomCallTab from '../Guard/components/IntercomCallTab';
+import ApprovalsTab from './components/ApprovalsTab';
 
 const AdminDashboard = () => {
     usePreventBack();
@@ -175,6 +176,7 @@ const AdminDashboard = () => {
         { id: 'user-analytics', label: 'User Analytics', icon: BarChart3 },
         { id: 'lookup', label: 'Resident Lookup', icon: Search },
         { id: 'rooms', label: 'Flat Management', icon: Building },
+        { id: 'approvals', label: 'Access Approvals', icon: UserCheck },
         { id: 'tenants', label: 'Residents', icon: Users },
         { id: 'communication', label: 'Communication & Email', icon: Mail },
         { id: 'billing', label: 'Invoices & Billing', icon: Receipt },
@@ -212,6 +214,7 @@ const AdminDashboard = () => {
             case 'user-analytics': return <UserAnalyticsTab />;
             case 'lookup': return <ResidentLookupTab tenants={tenants} invoices={invoices} complaints={complaints} flats={flats} />;
             case 'rooms': return <RoomsTab flats={flats} refresh={fetchData} token={user?.token} complaints={complaints} />;
+            case 'approvals': return <ApprovalsTab token={user?.token} refresh={fetchData} />;
             case 'tenants': return <TenantsTab tenants={tenants} flats={flats} refresh={fetchData} token={user?.token} />;
             case 'billing': return <BillingTab invoices={invoices} tenants={tenants} refresh={fetchData} token={user?.token} societyDetails={societyDetails} />;
             case 'broadcast': return <BroadcastTab />;

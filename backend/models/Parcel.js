@@ -6,10 +6,11 @@ const parcelSchema = new mongoose.Schema({
     courierName: { type: String, required: true }, // Amazon, DHL, etc.
     image: { type: String }, // URL or Base64
     status: { type: String, enum: ['At Gate', 'Collected'], default: 'At Gate' },
+    collectionOTP: { type: String }, // 4-digit secret code for resident
     receivedAt: { type: Date, default: Date.now },
     collectedAt: { type: Date },
     enteredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Guard ID
-    societyId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    societyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Parcel', parcelSchema);

@@ -155,10 +155,13 @@ const ParcelTab = ({ user }) => {
                                         </td>
                                         <td className="p-4 text-right">
                                             <button
-                                                onClick={() => markCollected(p._id)}
+                                                onClick={() => {
+                                                    const otp = window.prompt("Enter 4-digit Collection OTP from Resident:");
+                                                    if (otp) markCollected(p._id, otp);
+                                                }}
                                                 className="px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-900/30 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-600 dark:hover:text-white rounded-lg text-xs font-bold transition-all shadow-sm active:scale-95 flex items-center gap-2 ml-auto"
                                             >
-                                                <span>Handover</span>
+                                                <span>Verify OTP & Handover</span>
                                                 <ArrowRight size={14} />
                                             </button>
                                         </td>
