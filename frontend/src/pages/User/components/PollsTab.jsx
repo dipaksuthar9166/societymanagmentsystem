@@ -60,96 +60,76 @@ const PollsTab = () => {
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 max-w-3xl mx-auto pb-20">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">Active Polls</h2>
-                    <p className="text-slate-500 text-sm font-bold uppercase tracking-widest text-[10px]">Your opinion matters for the community</p>
-                </div>
-                {!loading && (
-                    <div className="hidden md:flex items-center gap-2 text-indigo-600 bg-indigo-50 px-4 py-2 rounded-2xl">
-                        <Users size={18} />
-                        <span className="text-xs font-black uppercase">{polls.length} Polls Live</span>
-                    </div>
-                )}
-            </div>
-
+        <div className="space-y-4 animate-in slide-in-from-bottom duration-500 pb-20">
             {loading ? (
                 <div className="flex justify-center py-20">
-                    <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-2 border-[#0091ea] border-t-transparent rounded-full animate-spin"></div>
                 </div>
             ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
                     {polls.length > 0 ? polls.map((poll) => {
                         const totalVotes = poll.options?.reduce((sum, opt) => sum + (opt.votes || 0), 0) || 0;
                         const hasVoted = poll.votes?.some(v => v.user.toString() === (user?.id || user?._id)?.toString());
 
                         return (
-                            <div key={poll._id} className={`bg-white rounded-[40px] border p-8 shadow-sm transition-all ${poll.status === 'Closed' ? 'opacity-80 border-slate-100' : 'border-indigo-100 shadow-indigo-500/5 hover:shadow-xl'}`}>
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className={`p-2.5 rounded-xl ${poll.status === 'Closed' ? 'bg-slate-100 text-slate-500' : 'bg-indigo-50 text-indigo-600'}`}>
-                                        <BarChart3 size={20} />
-                                    </div>
-                                    <div className="flex-1 flex items-center justify-between">
-                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Official Society Poll</span>
-                                        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                            <Clock size={12} /> {poll.expiresAt ? new Date(poll.expiresAt).toLocaleDateString() : 'Ending Soon'}
-                                        </div>
-                                    </div>
-                                </div>
+                            <div key={poll._id} className="bg-white rounded-[30px] border border-slate-100 p-6 shadow-sm overflow-hidden">
+                                <h3 className="text-sm font-black text-slate-800 mb-6 leading-tight uppercase tracking-tight text-center">
+                                    {poll.title}
+                                </h3>
 
-                                <h3 className="text-xl font-black text-slate-800 mb-8 leading-tight">{poll.title}</h3>
-
-                                <div className="space-y-4 mb-8">
+                                <div className="space-y-3 mb-6">
                                     {poll.options?.map((opt, idx) => {
-                                        const percentage = calculatePercentage(opt.votes, totalVotes);
                                         const isSelected = hasVoted && poll.votes.find(v => v.user.toString() === (user?.id || user?._id)?.toString())?.optionIndex === idx;
-                                        
                                         return (
-                                            <button 
-                                                key={idx}
-                                                disabled={poll.status === 'Closed' || hasVoted}
-                                                onClick={() => handleVote(poll._id, idx)}
-                                                className={`w-full group relative overflow-hidden rounded-[25px] border-2 transition-all p-4 text-left ${
-                                                    isSelected ? 'border-indigo-600 bg-indigo-50' : 
-                                                    poll.status === 'Closed' ? 'border-slate-50' : 'border-slate-100 hover:border-indigo-300'
-                                                }`}
-                                            >
-                                                <div 
-                                                    className={`absolute left-0 top-0 bottom-0 transition-all duration-1000 ${isSelected ? 'bg-indigo-600/10' : 'bg-slate-50'}`} 
-                                                    style={{ width: hasVoted || poll.status === 'Closed' ? `${percentage}%` : '0%' }}
-                                                ></div>
-                                                
-                                                <div className="relative flex justify-between items-center z-10">
-                                                    <span className={`text-sm font-bold ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
-                                                        {opt.text}
-                                                    </span>
-                                                    {(hasVoted || poll.status === 'Closed') && (
-                                                        <div className="flex items-center gap-3">
-                                                            <span className="text-xs font-black text-indigo-600">{percentage}%</span>
-                                                            {isSelected && <CheckCircle2 size={16} className="text-indigo-600" />}
-                                                        </div>
-                                                    )}
+                                            <div key={idx} className="flex items-center gap-3">
+                                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-[#0091ea] bg-[#0091ea]' : 'border-slate-300'}`}>
+                                                    {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                                                 </div>
-                                            </button>
+                                                <span className="text-xs font-bold text-slate-600 uppercase tracking-tighter">{opt.text}</span>
+                                            </div>
                                         );
                                     })}
                                 </div>
 
-                                <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                        <Users size={12} /> {totalVotes} Total Votes Cast
+                                {/* Progress Bar exactly like image */}
+                                <div className="mb-6">
+                                    <div className="flex justify-between items-end mb-1">
+                                        <span className="text-[10px] font-black text-[#0091ea] uppercase">
+                                            {Math.round((totalVotes / 215) * 100)}% Voted
+                                        </span>
+                                        <div className="text-right">
+                                            <p className="text-[9px] font-black text-slate-400 uppercase">{totalVotes} / 215 Votes</p>
+                                            <p className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter flex items-center gap-1 justify-end">
+                                                <Clock size={10} /> Time Left: 2 Days 15 Hrs
+                                            </p>
+                                        </div>
                                     </div>
-                                    {poll.status !== 'Closed' && !hasVoted && (
-                                        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">Choose an option to vote</p>
-                                    )}
+                                    <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                        <div 
+                                            className="h-full bg-[#0091ea] transition-all duration-1000" 
+                                            style={{ width: `${Math.round((totalVotes / 215) * 100)}%` }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Buttons exactly like image */}
+                                <div className="flex gap-3">
+                                    <button 
+                                        disabled={hasVoted}
+                                        className="flex-1 py-3 bg-[#0091ea] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-500/20 active:scale-95 transition-all"
+                                    >
+                                        Vote Now
+                                    </button>
+                                    <button className="flex-1 py-3 border-2 border-slate-200 text-slate-600 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all">
+                                        View Results
+                                    </button>
                                 </div>
                             </div>
                         );
                     }) : (
-                        <div className="text-center py-20 text-slate-400">
-                            <BarChart3 className="mx-auto mb-4 opacity-10" size={60} />
-                            <p className="font-bold">No active polls at the moment.</p>
+                        <div className="text-center py-10 text-slate-400">
+                            <BarChart3 className="mx-auto mb-2 opacity-10" size={40} />
+                            <p className="text-[10px] font-bold uppercase tracking-widest">No active polls</p>
                         </div>
                     )}
                 </div>

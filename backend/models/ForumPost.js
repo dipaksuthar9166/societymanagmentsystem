@@ -11,6 +11,7 @@ const forumPostSchema = new mongoose.Schema({
         default: 'General' 
     },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    views: { type: Number, default: 0 },
     comments: [{
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         text: String,

@@ -88,8 +88,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import ResidentCCTV from './components/ResidentCCTV';
 import IntercomCallTab from '../Guard/components/IntercomCallTab';
 import DailyHelpTab from './components/DailyHelpTab';
-import ForumTab from './components/ForumTab';
-import PollsTab from './components/PollsTab';
+import CommunityHub from './components/CommunityHub';
 import usePreventBack from '../../hooks/usePreventBack';
 
 // --- Shared Components for Admin-like Look ---
@@ -1037,6 +1036,9 @@ const UserDashboard = () => {
     const renderContent = () => {
         if (loading) return <div className="h-full flex items-center justify-center text-slate-400">Loading...</div>;
         switch (activeTab) {
+            case 'forum':
+            case 'polls':
+                return <CommunityHub />;
             case 'home': return <HomePage isMobile={isMobile} />;
             case 'bills': return <BillsTab isMobile={isMobile} />;
             case 'skills': return <SkillMarketplace isMobile={isMobile} />;
@@ -1046,8 +1048,6 @@ const UserDashboard = () => {
             case 'intercom': return <IntercomCallTab user={user} isMobile={isMobile} />;
             case 'notices': return <NoticesTab isMobile={isMobile} />;
             case 'community': return <CommitteeTab isMobile={isMobile} />;
-            case 'forum': return <ForumTab isMobile={isMobile} />;
-            case 'polls': return <PollsTab isMobile={isMobile} />;
             case 'rent': return <BillsTab title="Rent Payment" token={user.token} isMobile={isMobile} />;
             case 'gatepass': return <GatePass isMobile={isMobile} />;
             case 'facility': return <UserFacilityBooking isMobile={isMobile} />;
