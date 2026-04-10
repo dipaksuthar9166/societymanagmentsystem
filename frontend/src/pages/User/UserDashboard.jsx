@@ -1227,220 +1227,218 @@ const UserDashboard = () => {
 
     if (isMobile) {
         return (
-            <div className="flex flex-col h-screen bg-[#0F172A] overflow-hidden text-white font-sans selection:bg-indigo-500">
-                {/* Top Status Bar & Universal Search */}
-                <div className="px-6 pt-6 pb-4 bg-[#1E293B] border-b border-white/5 space-y-4 shadow-xl">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <button onClick={() => setIsMobileMenuOpen(true)} className="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10 active:scale-90 transition-all">
-                                <Menu size={20} className="text-slate-300" />
+            <div className="flex flex-col h-screen bg-slate-50 relative overflow-hidden">
+                {/* Scrollable Content Area */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden pt-0 pb-32">
+                    {/* 1. Premium Society Header (MyGate Style) */}
+                    <div className="relative h-64 overflow-hidden">
+                        <img 
+                            src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1000" 
+                            alt="Society" 
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        
+                        {/* Top Controls */}
+                        <div className="absolute top-10 left-6 right-6 flex items-center justify-between">
+                            <button onClick={() => setIsMobileMenuOpen(true)} className="p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white">
+                                <Menu size={20} />
                             </button>
-                            <div>
-                                <h1 className="text-lg font-black tracking-tight leading-none truncate max-w-[150px]">{data?.society?.name || 'Home Station'}</h1>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">FLAT {user?.flatNo}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full border-2 border-indigo-500/30 p-0.5">
-                                <div className="w-full h-full rounded-full bg-indigo-600 flex items-center justify-center font-black text-xs">
+                            <div className="flex items-center gap-3">
+                                <button className="p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white">
+                                    <Search size={20} />
+                                </button>
+                                <div className="w-10 h-10 rounded-full border-2 border-white/50 overflow-hidden bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
                                     {user?.name?.[0]}
                                 </div>
                             </div>
                         </div>
+
+                        {/* Society Name & Location */}
+                        <div className="absolute bottom-16 left-6">
+                            <div className="flex items-center gap-2 text-white mb-1">
+                                <MapPin size={18} className="text-red-500 fill-red-500" />
+                                <h2 className="text-2xl font-black tracking-tight">{data?.society?.name || 'SSR Residency'}</h2>
+                            </div>
+                            <p className="text-white/70 text-sm font-medium ml-6">Flat No: {user?.flatNo || 'A-101'}</p>
+                        </div>
                     </div>
 
-                    {/* Integrated Search Bar */}
-                    <div className="relative group">
-                        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-indigo-400 transition-colors" />
-                        <input
-                            type="text"
-                            placeholder="Find Bills, Help, or Booking..."
-                            className="w-full bg-[#0F172A]/50 border border-slate-700/50 rounded-2xl py-3 pl-11 pr-4 text-xs font-bold text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 focus:bg-[#0F172A] transition-all"
-                        />
+                    {/* Quick Access Overlay Cards */}
+                    <div className="px-4 -mt-10 mb-8 relative z-10 grid grid-cols-2 gap-3">
+                        <button onClick={() => setActiveTab('gatepass')} className="bg-white p-4 rounded-3xl shadow-xl flex items-center gap-3 border border-slate-50">
+                            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                                <Users size={24} />
+                            </div>
+                            <div className="text-left">
+                                <span className="block text-xs font-black text-slate-800">My Visitors</span>
+                                <span className="text-[9px] text-slate-400 font-bold uppercase">Approve/Manage</span>
+                            </div>
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setShowSOS(true);
+                                window.dispatchEvent(new CustomEvent('triggerSOS'));
+                            }} 
+                            className="bg-white p-4 rounded-3xl shadow-xl flex items-center gap-3 border border-slate-50 active:scale-95 transition-all"
+                        >
+                            <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+                                <AlertCircle size={24} />
+                            </div>
+                            <div className="text-left">
+                                <span className="block text-xs font-black text-slate-800 uppercase">SOS</span>
+                                <span className="text-[9px] text-slate-400 font-bold uppercase">Security alert</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* 2. Your To-do's Section */}
+                    <div className="px-6 mb-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <h3 className="text-lg font-black text-slate-800 tracking-tighter">Your To-do's</h3>
+                            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px] font-bold">2</span>
+                        </div>
+                        
+                        <div className="bg-white p-4 rounded-[25px] border border-slate-100 shadow-sm flex items-center justify-between group active:scale-95 transition-all">
+                            <div className="flex items-center gap-4">
+                                <div className="p-3 bg-red-50 text-red-500 rounded-2xl">
+                                    <Receipt size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-slate-800">Maintenance Bill</h4>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-black text-slate-900">₹{data?.user?.balance || '45,000'}</span>
+                                        <span className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded font-black uppercase">DUE</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onClick={() => setActiveTab('bills')} className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-1">
+                                Pay Now <ChevronRight size={14} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 3. Society Actions Grid */}
+                    <div className="px-6 mb-8">
+                         <h3 className="text-lg font-black text-slate-800 tracking-tighter mb-4">Society Actions</h3>
+                         <div className="grid grid-cols-4 gap-4">
+                            {[
+                                { id: 'market', label: 'Market', icon: Hammer, color: 'text-orange-500', bg: 'bg-orange-50' },
+                                { id: 'facility', label: 'Amenities', icon: Umbrella, color: 'text-teal-500', bg: 'bg-teal-50' },
+                                { id: 'bills', label: 'Payments', icon: CreditCard, color: 'text-blue-500', bg: 'bg-blue-50' },
+                                { id: 'staff', label: 'Daily Help', icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
+                                { id: 'notices', label: 'Notices', icon: Megaphone, color: 'text-sky-500', bg: 'bg-sky-50' },
+                                { id: 'gatepass', label: 'Gate Pass', icon: QrCode, color: 'text-indigo-500', bg: 'bg-indigo-50' },
+                                { id: 'cctv', label: 'CCTV View', icon: Video, color: 'text-rose-500', bg: 'bg-rose-50' },
+                                { id: 'more', label: 'More', icon: MoreHorizontal, color: 'text-slate-500', bg: 'bg-slate-50' },
+                            ].map((item, idx) => (
+                                <button 
+                                    key={idx}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className="flex flex-col items-center gap-2"
+                                >
+                                    <div className={`w-14 h-14 ${item.bg} ${item.color} rounded-2xl flex items-center justify-center shadow-sm active:scale-90 transition-all`}>
+                                        <item.icon size={24} />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 text-center leading-tight">{item.label}</span>
+                                </button>
+                            ))}
+                         </div>
                     </div>
                 </div>
 
-                <main className="flex-1 overflow-y-auto p-4 space-y-6 scroll-smooth pb-32">
-                    {activeTab === 'home' ? (
-                        <div className="animate-in fade-in zoom-in-95 duration-500 space-y-6">
-
-                            {/* Resident Stats Dashboard */}
-                            <div className="grid grid-cols-3 gap-3">
-                                {[
-                                    { label: 'Dues', value: `₹${(data?.user?.balance || 0).toLocaleString()}`, color: 'text-red-400', bg: 'bg-red-500/10' },
-                                    { label: 'Guests', value: '2', color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
-                                    { label: 'Parcels', value: '1', color: 'text-orange-400', bg: 'bg-orange-500/10' }
-                                ].map((stat, i) => (
-                                    <div key={i} className={`${stat.bg} p-3 rounded-2xl border border-white/5 text-center`}>
-                                        <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-1">{stat.label}</p>
-                                        <h4 className={`text-sm font-black truncate ${stat.color}`}>{stat.value}</h4>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* 2x2 Resident Command Panel */}
-                            <div className="grid grid-cols-2 gap-3">
-                                <button
-                                    onClick={() => setActiveTab('gatepass')}
-                                    className="bg-indigo-600 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-indigo-600/20"
-                                >
-                                    <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
-                                        <Users size={28} className="text-white" strokeWidth={2.5} />
-                                    </div>
-                                    <span className="text-xs font-black uppercase tracking-widest text-white">Pre-Approve</span>
-                                </button>
-
-                                <button
-                                    onClick={() => setActiveTab('bills')}
-                                    className="bg-emerald-600 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-xl shadow-emerald-600/20"
-                                >
-                                    <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white">
-                                        <Receipt size={28} strokeWidth={2.5} />
-                                    </div>
-                                    <span className="text-xs font-black uppercase tracking-widest text-white">Pay Bills</span>
-                                </button>
-
-                                <button
-                                    onClick={() => setActiveTab('intercom')}
-                                    className="bg-[#1E293B] p-6 rounded-[35px] border border-slate-700 flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-lg"
-                                >
-                                    <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-slate-300 border border-slate-700">
-                                        <Phone size={28} strokeWidth={2.5} />
-                                    </div>
-                                    <span className="text-xs font-black uppercase tracking-widest text-slate-300">Intercom</span>
-                                </button>
-
-                                <button
-                                    onClick={() => {
-                                        setShowSOS(true);
-                                        window.dispatchEvent(new CustomEvent('triggerSOS'));
-                                    }}
-                                    className="bg-red-500 p-6 rounded-[35px] flex flex-col items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl shadow-red-500/30"
-                                >
-                                    <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center text-white">
-                                        <ShieldAlert size={28} strokeWidth={2.5} className="animate-pulse" />
-                                    </div>
-                                    <span className="text-xs font-black uppercase tracking-widest text-white">Panic SOS</span>
-                                </button>
-                            </div>
-
-                            {/* Resident Activity Timeline */}
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between px-2">
-                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Live Timeline</h3>
-                                    <button onClick={() => setActiveTab('gatepass')} className="text-[10px] font-bold text-indigo-400">Manage All</button>
-                                </div>
-                                <div className="space-y-3">
-                                    {(data?.invoices?.length > 0 || data?.complaints?.length > 0) ? (
-                                        <>
-                                            {data.invoices.slice(0, 2).map((inv, i) => (
-                                                <div key={`inv-${i}`} className="bg-[#1E293B] border border-white/5 p-4 rounded-3xl flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-red-400 shrink-0">
-                                                        <Receipt size={24} />
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <h4 className="text-sm font-black text-slate-100 truncate">Payment Due: ₹{inv.totalAmount}</h4>
-                                                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{inv.type || 'Maintenance'}</p>
-                                                    </div>
-                                                    <ChevronRight size={16} className="text-slate-700" />
-                                                </div>
-                                            ))}
-                                            <div className="bg-[#1E293B] border border-white/5 p-4 rounded-3xl flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center text-indigo-400 shrink-0">
-                                                    <Users size={24} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="text-sm font-black text-slate-100 truncate">Zomato Delivery</h4>
-                                                    <p className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">Enroute to gate</p>
-                                                </div>
-                                                <ChevronRight size={16} className="text-slate-700" />
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="text-center py-12 bg-slate-900/50 rounded-[40px] border border-dashed border-slate-800">
-                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">No recent activity</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        /* Resident Sub-Tab View Overlay */
-                        <div className="fixed inset-0 bg-[#0F172A] z-[100] flex flex-col animate-in slide-in-from-right duration-300">
-                            <div className="px-6 py-6 bg-[#1E293B] border-b border-white/5 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <button onClick={() => setActiveTab('home')} className="p-3 bg-slate-900 rounded-2xl text-slate-300">
-                                        <ChevronRight className="rotate-180" size={20} />
-                                    </button>
-                                    <div>
-                                        <h2 className="text-lg font-black uppercase tracking-tight truncate max-w-[150px]">{activeTab.replace('-', ' ')}</h2>
-                                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none">Resident Service</p>
-                                    </div>
-                                </div>
-                                <Activity size={20} className="text-emerald-500 animate-pulse" />
-                            </div>
-                            <div className="flex-1 overflow-y-auto p-4 pb-24">
-                                <div className="bg-white rounded-[45px] p-6 shadow-2xl min-h-full text-slate-800">
-                                    <SubscriptionLock societyDetails={data?.society}>
-                                        {renderContent()}
-                                    </SubscriptionLock>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </main>
-
-                {/* Modern Resident Bottom Nav */}
-                <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#1E293B]/90 backdrop-blur-2xl border-t border-white/5 flex items-center justify-around px-4 z-[90]">
+                {/* 5. Bottom Navigation Bar */}
+                <div className="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                     {[
                         { id: 'home', label: 'Home', icon: Home },
                         { id: 'gatepass', label: 'Visitors', icon: Users },
-                        { id: 'bills', label: 'My Bills', icon: Receipt },
-                        { id: 'profile', label: 'Profile', icon: User }
-                    ].map((btn) => (
-                        <button
-                            key={btn.id}
-                            onClick={() => setActiveTab(btn.id)}
-                            className={`flex flex-col items-center gap-1.5 transition-all ${activeTab === btn.id ? 'text-indigo-400' : 'text-slate-500'}`}
+                        { id: 'bills', label: 'Payments', icon: CreditCard },
+                        { id: 'profile', label: 'Profile', icon: User },
+                    ].map((item) => (
+                        <button 
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id)}
+                            className={`flex flex-col items-center gap-1 transition-all ${activeTab === item.id ? 'text-blue-600 scale-105' : 'text-slate-400 hover:text-slate-600'}`}
                         >
-                            <div className={`p-3 rounded-2xl transition-all ${activeTab === btn.id ? 'bg-indigo-500/10' : ''}`}>
-                                <btn.icon size={22} className={activeTab === btn.id ? 'stroke-[3px]' : 'stroke-[2px]'} />
+                            <div className={`p-1.5 rounded-xl ${activeTab === item.id ? 'bg-blue-50' : ''}`}>
+                                <item.icon size={22} className={activeTab === item.id ? 'stroke-[3px]' : 'stroke-[2px]'} />
                             </div>
-                            <span className="text-[9px] font-black uppercase tracking-widest">{btn.label}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
                         </button>
                     ))}
-                    <button onClick={() => setIsMobileMenuOpen(true)} className="flex flex-col items-center gap-1.5 text-slate-500">
-                        <div className="p-3 bg-white/5 rounded-2xl">
-                            <MoreHorizontal size={22} />
-                        </div>
-                        <span className="text-[9px] font-black uppercase tracking-widest">More</span>
-                    </button>
+                    {/* Active Indicator Line */}
+                    <div className="absolute top-0 h-1 bg-blue-600 transition-all duration-300 rounded-full" 
+                        style={{ 
+                            width: '25%', 
+                            left: `${['home', 'gatepass', 'bills', 'profile'].indexOf(activeTab) * 25}%` 
+                        }} 
+                    />
                 </div>
 
-                {/* Resident Bottom Sheet Menu */}
+                {/* Simple Mobile Sidebar */}
                 {isMobileMenuOpen && (
-                    <div className="fixed inset-0 z-[200] animate-in fade-in duration-300">
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)}></div>
-                        <div className="absolute inset-x-0 bottom-0 max-h-[85vh] bg-[#1E293B] rounded-t-[60px] p-8 pb-12 shadow-2xl animate-in slide-in-from-bottom duration-500 border-t border-white/5">
-                            <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-10"></div>
-                            <div className="grid grid-cols-3 gap-8">
-                                {menuItems.map(item => (
+                    <div className="fixed inset-0 z-[60]">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)}></div>
+                        <aside className="absolute top-0 bottom-0 left-0 w-4/5 bg-white shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                            <div className="p-6 bg-gradient-to-br from-indigo-600 to-purple-700 text-white rounded-br-[40px] mb-4">
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-xl font-bold border-2 border-white/30">
+                                        {user?.name?.[0] || 'U'}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-lg truncate">{user?.name}</h3>
+                                        <p className="text-xs opacity-80 font-bold uppercase tracking-wider">Flat {user?.flatNo}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
+                                {menuItems.map((item) => (
                                     <button
                                         key={item.id}
                                         onClick={() => { setActiveTab(item.id); setIsMobileMenuOpen(false); }}
-                                        className="flex flex-col items-center gap-3 active:scale-95 transition-all"
+                                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all text-sm font-bold ${activeTab === item.id
+                                            ? 'bg-indigo-50 text-indigo-600'
+                                            : 'text-slate-600 hover:bg-slate-50'
+                                            }`}
                                     >
-                                        <div className="w-16 h-16 rounded-[28px] bg-slate-800 flex items-center justify-center text-indigo-400 shadow-xl border border-white/5">
-                                            <item.icon size={24} />
-                                        </div>
-                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight text-center">{item.label}</span>
+                                        <item.icon size={20} className={activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-[2px]'} />
+                                        <span>{item.label}</span>
                                     </button>
                                 ))}
+                            </nav>
+
+                            <div className="p-4 border-t border-slate-100">
+                                <button
+                                    onClick={() => setShowLogoutConfirm(true)}
+                                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-red-50 text-red-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-red-100 transition-colors"
+                                >
+                                    <LogOut size={16} /> Sign Out
+                                </button>
                             </div>
-                            <div className="mt-10 pt-10 border-t border-white/5">
-                                <button onClick={() => setShowLogoutConfirm(true)} className="w-full py-5 bg-red-500/10 text-red-500 border border-red-500/20 rounded-[35px] font-black text-xs uppercase tracking-widest">Sign Out</button>
+                        </aside>
+                    </div>
+                )}
+                
+                {/* Secondary Page View Overlay */}
+                {activeTab !== 'home' && (
+                    <div className="fixed inset-0 bg-slate-50 z-[40] overflow-y-auto pb-24 animate-in fade-in slide-in-from-right duration-300">
+                         {/* Secondary Header */}
+                         <div className="bg-white px-5 pt-8 pb-4 border-b border-slate-100 flex items-center justify-between sticky top-0 z-[50] shadow-sm">
+                            <button onClick={() => setActiveTab('home')} className="p-3 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all active:scale-95 text-slate-600">
+                                <ChevronRight className="rotate-180" size={20} />
+                            </button>
+                            <h2 className="text-lg font-black text-slate-800 uppercase tracking-tighter">{activeTab.replace('-', ' ')}</h2>
+                            <div className="w-10 h-10 flex items-center justify-center">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-black text-xs">{user?.name?.[0]}</div>
                             </div>
-                        </div>
+                         </div>
+
+                         <div className="px-4 pt-6 pb-32">
+                            <SubscriptionLock societyDetails={data?.society}>
+                                {renderContent()}
+                            </SubscriptionLock>
+                         </div>
                     </div>
                 )}
 
