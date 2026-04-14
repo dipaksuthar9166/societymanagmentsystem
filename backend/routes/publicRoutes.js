@@ -1,159 +1,92 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const Company = require('../models/Company'); // Society
+const Company = require('../models/Company'); 
 const Transaction = require('../models/Transaction');
 const Testimonial = require('../models/Testimonial');
+const Inquiry = require('../models/Inquiry');
 
-// @desc    Get Landing Page Stats
+// @desc    Get Landing Page Stats (Real-time)
 // @route   GET /api/public/stats
-// @access  Public
 router.get('/stats', async (req, res) => {
     try {
         let [userCount, societyCount, totalRevenue] = await Promise.all([
-            User.countDocuments({ role: 'user' }), // Total Residents
-            Company.countDocuments({ status: 'Active' }), // Total Societies
+            User.countDocuments({ role: 'user' }), 
+            Company.countDocuments({ status: 'Active' }), 
             Transaction.aggregate([
                 { $match: { type: 'Maintenance', status: 'Completed' } },
                 { $group: { _id: null, total: { $sum: '$amount' } } }
             ])
         ]);
 
-        // Real-time fallbacks if DB is fresh
-        if (userCount === 0) userCount = 1420;
-        if (societyCount === 0) societyCount = 12;
-        const revenue = totalRevenue[0]?.total || 450000;
+        // Fallbacks for empty database to keep landing page attractive
+        const residents = userCount > 0 ? userCount : 15000;
+        const societies = societyCount > 0 ? societyCount : 500;
+        const revenue = totalRevenue[0]?.total || 5000000;
 
         res.json({
-            societies: societyCount,
-            residents: userCount,
+            societies: societies,
+            residents: residents,
             revenue: revenue,
-            uptime: "99.99%",
-            brands: ['Guru Kripa', 'Skyline', 'Status Sharan', 'Emerald', 'Global Heights']
+            uptime: "99.9%",
+            brands: ['Guru Kripa Bliss', 'Skyline Heritage', 'Emerald Valley', 'Global Heights']
         });
     } catch (err) {
-        console.error('Stats Error:', err);
         res.status(500).json({ error: 'Failed to fetch stats' });
     }
 });
 
-// @desc    Get Active Societies (Projects)
-// @route   GET /api/public/projects
-// @access  Public
-router.get('/projects', async (req, res) => {
+// @desc    Submit Demo Request
+// @route   POST /api/public/demo
+router.post('/demo', async (req, res) => {
     try {
-        let projects = await Company.find({ status: 'Active' })
-            .select('name address logo _id plan')
-            .limit(4)
-            .sort({ createdAt: -1 });
-
-        // Seed some "Real" looking projects if DB is empty
-        if (projects.length === 0) {
-            projects = [
-                { _id: '1', name: 'Guru Kripa Building Site', address: 'Ahmedabad, Gujarat', plan: 'Premium', logo: null },
-                { _id: '2', name: 'Nexus Heights', address: 'Mumbai, Maharashtra', plan: 'Gold', logo: null },
-                { _id: '3', name: 'Emerald Valley', address: 'Pune, Maharashtra', plan: 'Standard', logo: null },
-                { _id: '4', name: 'Skyline Residency', address: 'Delhi, NCR', plan: 'Premium', logo: null }
-            ];
+        const { name, email, phone, societyName } = req.body;
+        if (!phone || !name) {
+            return res.status(400).json({ error: 'Name and Phone are required' });
         }
 
-        // Transform for frontend
-        const formattedProjects = projects.map(p => ({
-            id: p._id,
-            title: p.name,
-            location: p.address || 'Premium Location',
-            img: p.logo || `https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&q=80`,
-            badge: p.plan || 'Premium',
-            price: '98% Occupancy'
-        }));
+        const newDemoRequest = new Inquiry({
+            name,
+            email: email || 'demo@request.com',
+            phone,
+            societyName: societyName || 'Prospect Society',
+            message: 'DEMO REQUEST: User requested a 1-on-1 walkthrough.',
+            type: 'Demo' // Added type differentiation if model supports it
+        });
 
-        res.json(formattedProjects);
+        await newDemoRequest.save();
+        res.status(200).json({ success: true, message: 'Demo request received! We will call you back.' });
     } catch (err) {
-        console.error('Projects Error:', err);
-        res.status(500).json({ error: 'Failed to fetch projects' });
+        res.status(500).json({ error: 'Failed to submit demo request' });
     }
 });
 
-// @desc    Get Testimonials
+// @desc    Get Testimonials (Society Leaders)
 // @route   GET /api/public/testimonials
-// @access  Public
 router.get('/testimonials', async (req, res) => {
     try {
-        let testimonials = await Testimonial.find({ status: 'Active' }).sort({ createdAt: -1 });
-
-        // Seed if empty (for demo purposes)
+        let testimonials = await Testimonial.find({ status: 'Active' }).limit(3);
         if (testimonials.length === 0) {
-            const seedData = [
+            testimonials = [
                 {
-                    name: 'Renu S.',
-                    role: 'Secretary, Gokuldham',
-                    quote: 'Guru Kripa has transformed our community management, making it secure, transparent, and absolutely seamless.',
-                    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80',
-                    rating: 5,
-                    status: 'Active'
+                    name: 'Rajesh Mehta',
+                    role: 'Secretary, Skyline Heights',
+                    quote: 'Guru Kripa changed how we collect maintenance. No more door-to-door collections!',
+                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+                    rating: 5
                 },
                 {
-                    name: 'Ankit Verma',
-                    role: 'Treasurer, Blue Ridge',
-                    quote: 'The automated billing saved us 40 hours of manual work every month. Best investment for our society.',
-                    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
-                    rating: 5,
-                    status: 'Active'
+                    name: 'Sneha Rao',
+                    role: 'Treasurer, Emerald Valley',
+                    quote: 'Gatekeeper security is a lifesaver. Every visitor is verified by residents instantly.',
+                    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+                    rating: 5
                 }
             ];
-            await Testimonial.insertMany(seedData);
-            testimonials = await Testimonial.find({ status: 'Active' });
         }
-
         res.json(testimonials);
     } catch (err) {
-        console.error('Testimonials Error:', err);
         res.status(500).json({ error: 'Failed to fetch testimonials' });
-    }
-});
-
-// @desc    Get Trusted Brands/Stats for Trust Section
-// @route   GET /api/public/trust
-// @access  Public
-router.get('/trust', async (req, res) => {
-    // Return mock brands for now, or fetch if we had a Partner model
-    res.json(['Gecina', 'Booking.com', 'Brookfield', 'Century 21', 'JLL']);
-});
-
-const Inquiry = require('../models/Inquiry');
-
-// @desc    Submit Contact Form
-// @route   POST /api/public/contact
-// @access  Public
-router.post('/contact', async (req, res) => {
-    try {
-        const { name, email, phone, societyName, message } = req.body;
-
-        // Validate
-        if (!name || !email || !message) {
-            return res.status(400).json({ error: 'Please enter all required fields' });
-        }
-
-        const newInquiry = new Inquiry({
-            name,
-            email,
-            phone: phone || 'N/A',
-            societyName: societyName || 'N/A',
-            message
-        });
-
-        await newInquiry.save();
-
-        // TODO: Add Nodemailer here for real-time email notifications
-        console.log(`[Contact Form Saved] From: ${name} (${email})`);
-
-        res.status(200).json({
-            success: true,
-            message: 'Your message has been received. We will contact you shortly.'
-        });
-    } catch (err) {
-        console.error('Contact Submit Error:', err);
-        res.status(500).json({ error: 'Failed to send message. Please try again.' });
     }
 });
 

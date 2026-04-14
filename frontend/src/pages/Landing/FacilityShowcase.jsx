@@ -1,25 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import {
-    Dribbble, Flame, Wind, Music, Coffee,
-    Calendar, Key, Wrench, Clock, ShieldCheck
-} from 'lucide-react';
-
-const FacilityCard = ({ title, icon: Icon, description, features }) => (
-    <motion.div
-        whileHover={{ y: -10 }}
-        className="group p-8 rounded-[3rem] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/5 transition-all duration-500 hover:shadow-2xl hover:shadow-orange-500/10"
-    >
-        <div className="w-16 h-16 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500 mb-8 group-hover:bg-orange-500 group-hover:text-white transition-all duration-500">
-            <Icon size={32} />
-        </div>
-        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 uppercase tracking-tighter">{title}</h3>
-        <p className="text-slate-500 dark:text-slate-400 text-sm font-bold mb-8 leading-relaxed">
-            {description}
-        </p>
-        <ul className="space-y-3 pt-6 border-t border-slate-200 dark:border-white/5">
-            {features.map((f, i) => (
 import { Palmtree, Dumbbell, Coffee, Car } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const FacilityShowcase = () => {
     const facilities = [
@@ -50,36 +31,34 @@ const FacilityShowcase = () => {
     ];
 
     return (
-                    <FacilityCard
-                        title="Fitness & Vitality"
-                        icon={Flame}
-                        description="Manage gym equipment audits, trainer schedules, and swimming pool maintenance logs in real-time."
-                        features={["Asset Audit Logs", "Staff Scheduling", "Usage Analytics"]}
-                    />
-                    <FacilityCard
-                        title="Utilities & Power"
-                        icon={Wind}
-                        description="Automated tracking of DG sets, water levels, and solar grid performance. Predictive maintenance at its core."
-                        features={["IoT Monitoring", "Vendor Tracking", "AMCs & Compliance"]}
-                    />
-                    <FacilityCard
-                        title="Service Marketplace"
-                        icon={Coffee}
-                        description="A unified corridor for on-demand services—electricians, plumbers, and home cleaning—vetted by the society."
-                        features={["Vendor Ratings", "Instant Invoicing", "Verified IDs"]}
-                    />
-                    <FacilityCard
-                        title="Asset Repository"
-                        icon={Wrench}
-                        description="Every lift, fire extinguisher, and water tank registered. Track warranty, AMC, and historical service data."
-                        features={["Lifetime tracking", "Document cloud", "Alert triggers"]}
-                    />
-                    <FacilityCard
-                        title="Resource Hub"
-                        icon={ShieldCheck}
-                        description="Manage housekeeping rosters and security shifts with integrated attendance and payroll logic."
-                        features={["Roster Generator", "Daily Logbook", "Instant Payroll"]}
-                    />
+        <section className="py-24 bg-white font-['Outfit']">
+            <div className="max-w-7xl mx-auto px-4">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-5xl font-black text-[#464646] mb-4">Manage Your <span className="text-[#009688]">Amenities</span></h2>
+                    <p className="text-slate-500 font-medium">Full control of common shared facilities in your palm.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {facilities.map((fac, i) => (
+                        <motion.div 
+                            key={i} 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            className="group relative rounded-3xl overflow-hidden aspect-[4/5] shadow-xl"
+                        >
+                            <img src={fac.img} alt={fac.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-6 flex flex-col justify-end">
+                                <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center text-white mb-4 group-hover:bg-[#FD3752] transition-colors">
+                                    <fac.icon size={20} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">{fac.name}</h3>
+                                <p className="text-xs text-white/80 font-medium leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {fac.desc}
+                                </p>
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>

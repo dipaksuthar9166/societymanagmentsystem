@@ -1,5 +1,23 @@
 {
-  "appId": "com.societymanagmentsystem.dps_society_hub",
-  "appName": "dps_society_hub",
-  "webDir": "dist"
+  "appId": "com.statussharan.app",
+  "appName": "Status Sharan",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 3000,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 1000,
+      "backgroundColor": "#1e5f9e",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": true,
+      "androidSpinnerStyle": "large",
+      "iosSpinnerStyle": "small",
+      "spinnerColor": "#ffffff",
+      "splashFullScreen": true,
+      "splashImmersive": true,
+      "layoutName": "launch_screen",
+      "useDialog": true
+    }
+  }
 }

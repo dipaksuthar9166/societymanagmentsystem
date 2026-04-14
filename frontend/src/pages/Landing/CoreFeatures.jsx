@@ -1,127 +1,75 @@
 import React from 'react';
+import { CreditCard, ShieldCheck, PieChart, Users, PhoneCall, History } from 'lucide-react';
 import { motion } from 'framer-motion';
-import {
-    CreditCard, ShieldCheck, Smartphone, Users,
-    BarChart3, Globe, Lock, Bell, MessageSquare,
-    Zap, CircleCheck, CheckCircle2
-} from 'lucide-react';
 
-const FeatureBlock = ({ title, subtitle, description, points, icon: Icon, imageSide = 'right', color = 'indigo' }) => {
+const CoreFeatures = () => {
+    const highlights = [
+        {
+            title: "Automated Maintenance Billing",
+            desc: "Setup billing cycles and let the system handle invoice generation and WhatsApp delivery.",
+            icon: CreditCard
+        },
+        {
+            title: "Visitor & Gate Management",
+            desc: "Resident-approved visitor entry. Real-time notifications for every person entering the gate.",
+            icon: ShieldCheck
+        },
+        {
+            title: "Accounting & Audit",
+            desc: "Complete financial transparency with audit-ready reports and automated expense tracking.",
+            icon: PieChart
+        },
+        {
+            title: "Resident Engagement App",
+            desc: "A powerful mobile app for residents to pay bills, book facilities, and raise complaints.",
+            icon: Users
+        },
+        {
+            title: "E-Intercom System",
+            desc: "Connect with the security gate from anywhere in the world using our digital intercom.",
+            icon: PhoneCall
+        },
+        {
+            title: "Audit & Logs History",
+            desc: "Keep track of every change. Maintain 10 years of logs for all society activities.",
+            icon: History
+        }
+    ];
+
     return (
-        <div className={`py-24 flex flex-col lg:flex-row items-center gap-16 ${imageSide === 'left' ? 'lg:flex-row-reverse' : ''}`}>
-            <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="w-full lg:w-1/2 space-y-8"
-            >
-                <div className={`w-16 h-16 rounded-[2rem] bg-${color}-500/10 flex items-center justify-center text-${color}-600 dark:text-${color}-400`}>
-                    <Icon size={32} />
-                </div>
-
-                <div className="space-y-4">
-                    <span className={`text-${color}-500 font-black uppercase tracking-[0.3em] text-[10px]`}>{subtitle}</span>
-                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white leading-tight">
-                        {title}
-                    </h2>
-                    <p className="text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                        {description}
+        <section className="py-24 bg-[#FCFCFD] font-['Outfit']">
+            <div className="max-w-7xl mx-auto px-4">
+                <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16">
+                    <div className="max-w-xl">
+                        <h2 className="text-3xl md:text-5xl font-black text-[#464646] mb-6 leading-tight">
+                            The Only App Your <br /> <span className="text-[#FD3752]">Society Needs.</span>
+                        </h2>
+                    </div>
+                    <p className="text-lg text-slate-500 font-medium max-w-sm text-right">
+                        Say goodbye to manual registers and scattered WhatsApp groups.
                     </p>
                 </div>
 
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {points.map((point, i) => (
-                        <li key={i} className="flex items-start gap-3 group">
-                            <div className={`mt-1 text-${color}-500`}>
-                                <CheckCircle2 size={18} />
-                            </div>
-                            <span className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-tight group-hover:text-orange-500 transition-colors">
-                                {point}
-                            </span>
-                        </li>
-                    ))}
-                </ul>
-            </motion.div>
-
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="w-full lg:w-1/2"
-            >
-                <div className="relative aspect-video bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-200 dark:border-white/5 shadow-2xl overflow-hidden group">
-                    <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none"></div>
-
-                    {/* Abstract Visual representation of the feature */}
-                    <div className={`absolute inset-0 bg-gradient-to-br from-${color}-500/5 via-transparent to-transparent flex items-center justify-center`}>
-                        <div className="w-4/5 h-3/5 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-white/10 shadow-inner flex flex-col p-6 gap-4 transform group-hover:-translate-y-2 transition-transform duration-500">
-                            {/* Animated Skeleton UI */}
-                            <div className="flex gap-4">
-                                <div className={`w-12 h-12 rounded-xl bg-${color}-500/20 animate-pulse`}></div>
-                                <div className="space-y-2 flex-1 pt-2">
-                                    <div className="h-2 w-1/3 bg-white/20 rounded-full"></div>
-                                    <div className="h-2 w-1/2 bg-white/10 rounded-full"></div>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                {[1, 2, 3].map(i => (
-                                    <div key={i} className="h-20 bg-white/5 rounded-xl border border-white/5 flex flex-col items-center justify-center gap-2">
-                                        <div className={`w-4 h-4 rounded-full bg-${color}-500/30`}></div>
-                                        <div className="h-1.5 w-10 bg-white/10 rounded-full"></div>
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex-1 bg-white/5 rounded-xl border border-white/5 p-4 flex flex-col justify-end gap-2">
-                                <div className="h-1.5 w-full bg-white/10 rounded-full animate-pulse"></div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {highlights.map((h, i) => (
-                        <div key={i} className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
-                            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-[#FD3752] mb-8 group-hover:bg-[#FD3752] group-hover:text-white transition-colors">
+                        <motion.div 
+                            key={i} 
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            viewport={{ once: true }}
+                            className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all group"
+                        >
+                            <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-[#FD3752] mb-8 group-hover:bg-[#FD3752] group-hover:text-white transition-colors">
                                 <h.icon size={28} strokeWidth={1.5} />
                             </div>
                             <h3 className="text-2xl font-bold text-[#464646] mb-4">{h.title}</h3>
                             <p className="text-[#464646] font-medium leading-relaxed">
                                 {h.desc}
                             </p>
-                        </div>
-                        "Automated Fine Triggers",
-                        "Real-time Spending Ledger",
-                        "Digital Audit Trail"
-                    ]}
-                />
-
-                <FeatureBlock
-                    title="Next-Gen Security Protocols"
-                    subtitle="Gate Management 2.0"
-                    description="Replace outdated registers with a unified gate system. Biometric facial recognition for staff, QR-based visitor entry, and instant resident approval loops."
-                    color="emerald"
-                    icon={ShieldCheck}
-                    imageSide="left"
-                    points={[
-                        "QR-Visitor Pre-Entry",
-                        "Staff Attendance (Biometric)",
-                        "Vehicle LPR Integration",
-                        "E-Parcels Tracker",
-                        "Crisis SOS Network",
-                        "Daily Worker Profiles"
-                    ]}
-                />
-
-                <FeatureBlock
-                    title="Community & Living Logic"
-                    subtitle="Collaboration"
-                    description="Fostering community through digital consensus. Polling modules, digital notice boards, and a specialized marketplace for your society."
-                    color="fuchsia"
-                    icon={Users}
-                    points={[
-                        "Consensus Polling",
-                        "Digital Notice Boards",
-                        "Resident Directory",
-                        "Asset & Facility Booking",
-                        "Classifieds Marketplace",
-                        "Discussion Forums"
-                    ]}
-                />
+                        </motion.div>
+                    ))}
+                </div>
             </div>
         </section>
     );
