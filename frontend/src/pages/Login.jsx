@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/ToastProvider';
 import { API_BASE_URL } from '../config';
-import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, Globe, Zap } from 'lucide-react';
+import { Mail, Lock, Loader2, ArrowRight, Eye, EyeOff, Globe, Zap, ShieldCheck, Users, Building2, Star, CheckCircle } from 'lucide-react';
 import { useEventTheme } from '../context/EventThemeContext';
+import SEO from '../components/SEO';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -118,7 +119,7 @@ const Login = () => {
 
             if (response.ok) {
                 showSuccess('Login Successful', `Welcome back, ${data.name}!`);
-                setTimeout(() => login(data), 500);
+                login(data);
             } else {
                 const errorMsg = data.message || 'Invalid credentials';
                 setError(errorMsg);
@@ -135,6 +136,7 @@ const Login = () => {
 
     return (
         <div className="min-h-screen bg-indigo-950 flex items-center justify-center p-4 relative overflow-hidden transition-colors duration-700">
+            <SEO title="Login - Guru Kripa" description="Sign in to your Guru Kripa Society Management Portal" />
             {/* 3D Particle Canvas Background */}
             <canvas
                 ref={canvasRef}
@@ -157,61 +159,81 @@ const Login = () => {
             <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1s' }}></div>
 
             <div className="w-full max-w-6xl relative z-10 flex items-center justify-center gap-12">
-                {/* 3D Globe Section */}
-                <div className="hidden lg:flex flex-col items-center justify-center flex-1">
-                    <div
-                        className="relative"
-                        style={{
-                            transform: `perspective(1000px) rotateY(${mousePosition.x}deg) rotateX(${-mousePosition.y}deg)`,
-                            transition: 'transform 0.1s ease-out'
-                        }}
-                    >
-                        {/* Rotating Globe */}
-                        <div className="relative w-80 h-80">
-                            {/* Globe Core */}
-                            <div className="absolute inset-0 rounded-full bg-[var(--theme-primary)] opacity-10 blur-3xl animate-pulse"></div>
+                {/* Features / Text Section (Nestgate Style) */}
+                <div className="hidden lg:flex flex-col justify-center flex-1 max-w-xl">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-indigo-500/30 bg-indigo-500/10 mb-8 w-fit shadow-xl shadow-black/20">
+                        <CheckCircle size={14} className="text-emerald-400" />
+                        <span className="text-xs font-semibold text-indigo-200">Trusted by 50K+ Residents</span>
+                        <Star size={14} className="text-blue-400" />
+                    </div>
 
-                            {/* Globe Wireframe */}
-                            <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20 animate-spin-slow"></div>
-                            <div className="absolute inset-4 rounded-full border-2 border-indigo-600/20 animate-spin-slow" style={{ animationDirection: 'reverse' }}></div>
-                            <div className="absolute inset-8 rounded-full border-2 border-indigo-400/20 animate-spin-slow"></div>
+                    <h1 className="text-5xl xl:text-6xl font-black text-white leading-tight tracking-tight mb-6">
+                        Welcome Back to <br />
+                        <span className="text-[#0066FF]">Guru Kripa</span>
+                    </h1>
 
-                            {/* Center Glow */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-indigo-500/30 to-indigo-600/30 blur-2xl animate-pulse"></div>
+                    <p className="text-slate-400 text-lg mb-12 leading-relaxed">
+                        Access your society dashboard instantly with secure login. No hassle, just quick and safe access to your community.
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-4 mb-16">
+                        {/* Box 1 */}
+                        <div className="bg-[#0b1221] border border-white/5 rounded-2xl p-5 flex items-center gap-4 hover:bg-[#0f172a] transition-all shadow-lg">
+                            <div className="w-10 h-10 flex items-center justify-center bg-[#0066FF]/20 rounded-xl shrink-0">
+                                <Zap size={18} className="text-[#0066FF]" fill="currentColor" />
                             </div>
-
-                            {/* Globe Icon */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="relative">
-                                    <div className="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 animate-pulse"></div>
-                                    <Globe size={80} className="text-white relative z-10 opacity-80" />
-                                </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-0.5">Instant Access</h4>
+                                <p className="text-[10px] text-slate-500 font-medium">Login in seconds</p>
                             </div>
-
-                            {/* Orbiting Particles */}
-                            {[...Array(8)].map((_, i) => (
-                                <div
-                                    key={i}
-                                    className="absolute w-3 h-3 bg-indigo-400 rounded-full"
-                                    style={{
-                                        top: '50%',
-                                        left: '50%',
-                                        animation: `orbit${i % 4} ${4 + i}s linear infinite`,
-                                        animationDelay: `${i * 0.5}s`
-                                    }}
-                                ></div>
-                            ))}
                         </div>
 
-                        {/* Floating Text */}
-                        <div className="mt-8 text-center">
-                            <h2 className="text-3xl font-bold text-white mb-2 animate-pulse">
-                                Society Connect
-                            </h2>
-                            <p className="text-indigo-300 text-lg">
-                                Next-Gen Management Platform
-                            </p>
+                        {/* Box 2 */}
+                        <div className="bg-[#0b1221] border border-white/5 rounded-2xl p-5 flex items-center gap-4 hover:bg-[#0f172a] transition-all shadow-lg">
+                            <div className="w-10 h-10 flex items-center justify-center bg-emerald-500/20 rounded-xl shrink-0">
+                                <ShieldCheck size={18} className="text-emerald-400" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-0.5">High Security</h4>
+                                <p className="text-[10px] text-slate-500 font-medium">Bank-level protection</p>
+                            </div>
+                        </div>
+
+                        {/* Box 3 */}
+                        <div className="bg-[#0b1221] border border-white/5 rounded-2xl p-5 flex items-center gap-4 hover:bg-[#0f172a] transition-all shadow-lg">
+                            <div className="w-10 h-10 flex items-center justify-center bg-purple-500/20 rounded-xl shrink-0">
+                                <Building2 size={18} className="text-purple-400" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-0.5">Society Dashboard</h4>
+                                <p className="text-[10px] text-slate-500 font-medium">Full access control</p>
+                            </div>
+                        </div>
+
+                        {/* Box 4 */}
+                        <div className="bg-[#0b1221] border border-white/5 rounded-2xl p-5 flex items-center gap-4 hover:bg-[#0f172a] transition-all shadow-lg">
+                            <div className="w-10 h-10 flex items-center justify-center bg-orange-500/20 rounded-xl shrink-0">
+                                <Users size={18} className="text-orange-400" fill="currentColor" />
+                            </div>
+                            <div>
+                                <h4 className="text-sm font-bold text-white mb-0.5">Community</h4>
+                                <p className="text-[10px] text-slate-500 font-medium">Stay connected</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-12">
+                        <div>
+                            <h3 className="text-2xl font-black text-[#0066FF] mb-1">99.9%</h3>
+                            <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">Uptime</p>
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-[#0066FF] mb-1">24/7</h3>
+                            <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">Support</p>
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-black text-[#0066FF] flex items-center gap-1 mb-1">5 <Star size={20} fill="currentColor" /></h3>
+                            <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">Rating</p>
                         </div>
                     </div>
                 </div>
@@ -229,16 +251,9 @@ const Login = () => {
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-indigo-600/5 pointer-events-none"></div>
 
                         {/* Header */}
-                        <div className="relative px-8 py-8 border-b border-indigo-500/10">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-                                    <Globe size={24} className="text-white" />
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-black text-white tracking-tight">Sign In</h1>
-                                    <p className="text-indigo-300/60 text-xs font-bold uppercase tracking-widest mt-0.5">Management Portal</p>
-                                </div>
-                            </div>
+                        <div className="relative pt-10 pb-6 text-center">
+                            <h1 className="text-[28px] font-black text-white tracking-tight mb-2">Welcome Back</h1>
+                            <p className="text-slate-400 text-sm font-medium">Enter your credentials to securely login</p>
                         </div>
 
                         {/* Form */}
@@ -253,45 +268,44 @@ const Login = () => {
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 {/* Email Field */}
                                 <div className="group">
-                                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                                    <label className="block text-xs font-medium text-slate-400 mb-2 pl-1">
                                         Email / User ID
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Mail size={18} className="text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
+                                            <Mail size={18} className="text-slate-500 group-focus-within:text-[#0066FF] transition-colors" />
                                         </div>
                                         <input
                                             type="text"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             required
-                                            className="w-full pl-12 pr-4 py-4 bg-black/30 border border-indigo-500/20 text-white rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all placeholder-white/30"
+                                            className="w-full pl-12 pr-4 py-4 bg-[#080d19] border border-[#1e293b] text-white rounded-[1rem] text-sm focus:outline-none focus:ring-1 focus:ring-[#0066FF] focus:border-[#0066FF] transition-all placeholder-slate-600"
                                             placeholder="Enter your email or user ID"
                                         />
                                     </div>
                                 </div>
 
-                                {/* Password Field */}
                                 <div className="group">
-                                    <label className="block text-xs font-black text-indigo-300 uppercase tracking-widest mb-2 pl-1">
+                                    <label className="block text-xs font-medium text-slate-400 mb-2 pl-1">
                                         Password
                                     </label>
                                     <div className="relative">
                                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                            <Lock size={18} className="text-indigo-400/50 group-focus-within:text-indigo-400 transition-colors" />
+                                            <Lock size={18} className="text-slate-500 group-focus-within:text-[#0066FF] transition-colors" />
                                         </div>
                                         <input
                                             type={showPassword ? 'text' : 'password'}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             required
-                                            className="w-full pl-12 pr-12 py-4 bg-black/30 border border-indigo-500/20 text-white rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all placeholder-white/30"
+                                            className="w-full pl-12 pr-12 py-4 bg-[#080d19] border border-[#1e293b] text-white rounded-[1rem] text-sm focus:outline-none focus:ring-1 focus:ring-[#0066FF] focus:border-[#0066FF] transition-all placeholder-slate-600"
                                             placeholder="Enter your password"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-indigo-400/50 hover:text-indigo-400 transition-colors"
+                                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-slate-300 transition-colors"
                                         >
                                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                         </button>
@@ -322,11 +336,8 @@ const Login = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="relative w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-600/20 flex items-center justify-center gap-2 transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group uppercase tracking-widest text-sm"
+                                    className="relative w-full bg-[#0066FF] hover:bg-blue-600 text-white font-bold py-4 rounded-[1rem] shadow-[0_0_20px_rgba(0,102,255,0.2)] flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none mt-2"
                                 >
-                                    {/* Button Shimmer */}
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-
                                     {isLoading ? (
                                         <>
                                             <Loader2 size={18} className="animate-spin" />
@@ -335,7 +346,7 @@ const Login = () => {
                                     ) : (
                                         <>
                                             <span>Sign In</span>
-                                            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight size={18} />
                                         </>
                                     )}
                                 </button>
@@ -367,34 +378,6 @@ const Login = () => {
 
             {/* Custom Animations */}
             <style>{`
-                @keyframes spin-slow {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                
-                .animate-spin-slow {
-                    animation: spin-slow 20s linear infinite;
-                }
-
-                @keyframes orbit0 {
-                    0% { transform: translate(-50%, -50%) rotate(0deg) translateX(170px) rotate(0deg); }
-                    100% { transform: translate(-50%, -50%) rotate(360deg) translateX(170px) rotate(-360deg); }
-                }
-                
-                @keyframes orbit1 {
-                    0% { transform: translate(-50%, -50%) rotate(90deg) translateX(170px) rotate(-90deg); }
-                    100% { transform: translate(-50%, -50%) rotate(450deg) translateX(170px) rotate(-450deg); }
-                }
-                
-                @keyframes orbit2 {
-                    0% { transform: translate(-50%, -50%) rotate(180deg) translateX(170px) rotate(-180deg); }
-                    100% { transform: translate(-50%, -50%) rotate(540deg) translateX(170px) rotate(-540deg); }
-                }
-                
-                @keyframes orbit3 {
-                    0% { transform: translate(-50%, -50%) rotate(270deg) translateX(170px) rotate(270deg); }
-                    100% { transform: translate(-50%, -50%) rotate(630deg) translateX(170px) rotate(-630deg); }
-                }
             `}</style>
         </div>
     );

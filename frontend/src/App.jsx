@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './components/ToastProvider';
 import { AlertProvider } from './context/AlertContext';
@@ -153,6 +153,7 @@ const AnimatedRoutes = () => {
 import { EventThemeProvider } from './context/EventThemeContext';
 import DynamicEventBackground from './components/DynamicEventBackground';
 import { App as CapApp } from '@capacitor/app'; // <--- Capacitor App Plugin
+import { SplashScreen } from '@capacitor/splash-screen'; // <--- Capacitor Splash Screen Plugin
 import JitsiCallHandler from './components/JitsiCallHandler';
 
 function App() {
@@ -183,6 +184,17 @@ function App() {
     };
 
     setupBackButton();
+
+    // Hide splash screen after successful mount
+    const hideSplash = async () => {
+      try {
+        await SplashScreen.hide();
+      } catch (e) {
+        // Ignore if not running in Capacitor
+      }
+    };
+    // Adding timeout to allow CSS/layout to settle completely
+    setTimeout(hideSplash, 500);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);

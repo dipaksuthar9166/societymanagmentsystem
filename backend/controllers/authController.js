@@ -49,9 +49,9 @@ const loginUser = async (req, res) => {
                 return res.status(403).json({ message: 'Account is deactivated. Please contact support.' });
             }
 
-            // ✅ LOG SUCCESSFUL LOGIN
+            // ✅ LOG SUCCESSFUL LOGIN - Removed await to speed up response
             if (user.company) {
-                await logActivity({
+                logActivity({
                     userId: user._id,
                     societyId: user.company._id,
                     action: 'LOGIN',
@@ -63,7 +63,7 @@ const loginUser = async (req, res) => {
                         email: user.email
                     },
                     req
-                });
+                }).catch(console.error); // Catch error silently
             }
 
             res.json({
@@ -79,9 +79,9 @@ const loginUser = async (req, res) => {
                 token: generateToken(user._id),
             });
         } else {
-            // ✅ LOG FAILED LOGIN ATTEMPT
+            // ✅ LOG FAILED LOGIN ATTEMPT - Removed await to speed up response
             if (user && user.company) {
-                await logActivity({
+                logActivity({
                     userId: user._id,
                     societyId: user.company._id,
                     action: 'LOGIN',
@@ -92,7 +92,7 @@ const loginUser = async (req, res) => {
                         reason: 'Invalid password'
                     },
                     req
-                });
+                }).catch(console.error);
             }
             res.status(401).json({ message: 'Invalid email or password' });
         }
