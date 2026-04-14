@@ -250,9 +250,9 @@ const LandingPage = () => {
     return (
         <div className="min-h-screen bg-white text-[#464646] transition-colors duration-500 font-['Outfit'] selection:bg-[#FD3752] selection:text-white">
             <SEO 
-                title="Guru Kripa - Flats, Houses, Apartments for Rent, Buy, Sale" 
-                description="Lookup for Residential properties for rent,buy,sell in India Without Brokerage.0% Brokerage,100% Genuine Owners." 
-                keywords="flats for rent, buy house, properties without broker, guru kripa real estate"
+                title="Guru Kripa - #1 Society Management System & Apartment Software" 
+                description="Best Society Management System for gated communities. Manage billing, security, helpdesk, and communication with Guru Kripa. The most trusted society management software." 
+                keywords="society management system, apartment management software, society billing software, gated community app, best society software, Guru Kripa"
                 url="https://societymanagementsystem.vercel.app"
                 schemaMarkup={schemaMarkup}
                 type="website" 
