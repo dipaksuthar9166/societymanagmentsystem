@@ -6,7 +6,7 @@ const Transaction = require('../models/Transaction');
 const Testimonial = require('../models/Testimonial');
 const Inquiry = require('../models/Inquiry');
 
-// @desc    Get Landing Page Stats (Real-time)
+// @desc    Get Landing Page Stats
 // @route   GET /api/public/stats
 router.get('/stats', async (req, res) => {
     try {
@@ -18,75 +18,66 @@ router.get('/stats', async (req, res) => {
                 { $group: { _id: null, total: { $sum: '$amount' } } }
             ])
         ]);
-
-        // Fallbacks for empty database to keep landing page attractive
-        const residents = userCount > 0 ? userCount : 15000;
-        const societies = societyCount > 0 ? societyCount : 500;
-        const revenue = totalRevenue[0]?.total || 5000000;
-
         res.json({
-            societies: societies,
-            residents: residents,
-            revenue: revenue,
-            uptime: "99.9%",
-            brands: ['Guru Kripa Bliss', 'Skyline Heritage', 'Emerald Valley', 'Global Heights']
+            societies: societyCount || 500,
+            residents: userCount || 15000,
+            revenue: totalRevenue[0]?.total || 5000000,
+            brands: ['Guru Kripa Bliss', 'Skyline Heritage', 'Emerald Valley']
         });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch stats' });
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
+// @desc    Real-time Search Societies
+// @route   GET /api/public/search
+router.get('/search', async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q) return res.json([]);
+
+        const societies = await Company.find({
+            name: { $regex: q, $options: 'i' },
+            status: 'Active'
+        }).select('name address logo _id').limit(5);
+
+        res.json(societies);
+    } catch (err) {
+        res.status(500).json({ error: 'Search failed' });
     }
 });
 
 // @desc    Submit Demo Request
-// @route   POST /api/public/demo
 router.post('/demo', async (req, res) => {
     try {
         const { name, email, phone, societyName } = req.body;
-        if (!phone || !name) {
-            return res.status(400).json({ error: 'Name and Phone are required' });
-        }
-
-        const newDemoRequest = new Inquiry({
-            name,
-            email: email || 'demo@request.com',
-            phone,
-            societyName: societyName || 'Prospect Society',
-            message: 'DEMO REQUEST: User requested a 1-on-1 walkthrough.',
-            type: 'Demo' // Added type differentiation if model supports it
-        });
-
-        await newDemoRequest.save();
-        res.status(200).json({ success: true, message: 'Demo request received! We will call you back.' });
+        const newInquiry = new Inquiry({ name, email, phone, societyName, type: 'Demo', message: 'Requested Demo' });
+        await newInquiry.save();
+        res.json({ success: true });
     } catch (err) {
-        res.status(500).json({ error: 'Failed to submit demo request' });
+        res.status(500).json({ error: 'Failed' });
     }
 });
 
-// @desc    Get Testimonials (Society Leaders)
-// @route   GET /api/public/testimonials
+// @desc    Submit Contact Form
+router.post('/contact', async (req, res) => {
+    try {
+        const { name, email, message } = req.body;
+        const newInquiry = new Inquiry({ name, email, message, type: 'Contact' });
+        await newInquiry.save();
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Failed' });
+    }
+});
+
+// @desc    Get Testimonials
 router.get('/testimonials', async (req, res) => {
     try {
-        let testimonials = await Testimonial.find({ status: 'Active' }).limit(3);
-        if (testimonials.length === 0) {
-            testimonials = [
-                {
-                    name: 'Rajesh Mehta',
-                    role: 'Secretary, Skyline Heights',
-                    quote: 'Guru Kripa changed how we collect maintenance. No more door-to-door collections!',
-                    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-                    rating: 5
-                },
-                {
-                    name: 'Sneha Rao',
-                    role: 'Treasurer, Emerald Valley',
-                    quote: 'Gatekeeper security is a lifesaver. Every visitor is verified by residents instantly.',
-                    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
-                    rating: 5
-                }
-            ];
-        }
+        const testimonials = await Testimonial.find({ status: 'Active' });
         res.json(testimonials);
     } catch (err) {
-        res.status(500).json({ error: 'Failed to fetch testimonials' });
+        res.status(500).json({ error: 'Failed' });
     }
 });
 
