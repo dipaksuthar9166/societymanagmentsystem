@@ -30,8 +30,8 @@ const HeroSection = () => {
                 <div className="w-full max-w-[1000px] mt-2 mb-12">
                     {/* Tabs */}
                     <div className="flex items-center justify-center gap-8 mb-4">
-                        {['Buy', 'Rent', 'Commercial'].map((tab) => {
-                            const tabKey = tab.toLowerCase();
+                        {['Manage', 'Pay Maintenance', 'Security'].map((tab) => {
+                            const tabKey = tab.toLowerCase().replace(' ', '-');
                             const isActive = searchTab === tabKey;
                             return (
                                 <button
@@ -67,7 +67,7 @@ const HeroSection = () => {
                             <div className="flex-1 w-full relative group">
                                 <input 
                                     type="text" 
-                                    placeholder="Search upto 3 localities or landmarks"
+                                    placeholder="Search for your Society or Apartment Name"
                                     className="w-full h-full px-4 py-3 sm:py-3.5 text-[15px] text-[#464646] bg-transparent focus:outline-none placeholder-slate-400 font-medium"
                                 />
                             </div>

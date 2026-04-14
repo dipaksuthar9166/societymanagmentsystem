@@ -19,12 +19,12 @@ const BannerFeature = () => (
 
 const ServicesRow = () => {
     const services = [
-        { icon: Building2, label: "Builder Projects", sub: "New" },
-        { icon: PenTool, label: "Sale Agreement", sub: "New" },
-        { icon: Landmark, label: "Home Loan" },
-        { icon: Scale, label: "Property Legal Services" },
-        { icon: Armchair, label: "Home Interiors", sub: "Sale is live!" },
-        { icon: Globe, label: "Guru Kripa For NRIs" }
+        { icon: Landmark, label: "Maintenance Billing", sub: "Auto" },
+        { icon: Scale, label: "Security & Visitor", sub: "Gatekeeper" },
+        { icon: FileText, label: "Complaint Helpdesk" },
+        { icon: Globe, label: "Notice Board" },
+        { icon: Armchair, label: "Clubhouse Booking", sub: "Live!" },
+        { icon: Building2, label: "Asset Management" }
     ];
 
     return (
@@ -34,7 +34,7 @@ const ServicesRow = () => {
                     <div key={i} className="flex flex-col items-center w-1/3 md:w-auto cursor-pointer group">
                         <div className="relative mb-3 flex items-center justify-center w-16 h-16">
                             {item.sub && (
-                                <span className={`absolute -top-3 px-2 py-0.5 rounded text-[10px] font-bold z-10 ${item.sub === 'Sale is live!' ? 'bg-orange-100 text-orange-600' : 'bg-orange-100 text-[#464646]'}`}>
+                                <span className={`absolute -top-3 px-2 py-0.5 rounded text-[10px] font-bold z-10 ${item.sub === 'Live!' ? 'bg-orange-100 text-orange-600' : 'bg-orange-100 text-[#464646]'}`}>
                                     {item.sub}
                                 </span>
                             )}
@@ -50,10 +50,10 @@ const ServicesRow = () => {
 
 const WhyUseNoBroker = () => {
     const reasons = [
-        { icon: UserMinus, title: "Avoid Brokers", desc: "We directly connect you to verified owners to save brokerage" },
-        { icon: FileSpreadsheet, title: "Free Listing", desc: "Easy listing process. Also using WhatsApp" },
-        { icon: Home, title: "Shortlist without Visit", desc: "Extensive Information makes it easy" },
-        { icon: FileText, title: "Rental Agreement", desc: "Assistance in creating Rental agreement & Paper work" }
+        { icon: Landmark, title: "Automated Billing", desc: "Generate monthly maintenance invoices & collect payments via UPI/Card" },
+        { icon: Scale, title: "Gatekeeper App", desc: "Real-time visitor tracking & verification with resident approval" },
+        { icon: FileSpreadsheet, title: "Smart Accounting", desc: "Detailed financial reports, Tally integration & vendor payouts" },
+        { icon: FileText, title: "Digital Notices", desc: "Broadcast urgent notices & poll results to all residents instantly" }
     ];
 
     return (
@@ -119,16 +119,16 @@ const WeMakeADifference = () => {
                 <div className="flex items-center justify-center gap-4 mb-16">
                     <div className="w-16 h-px bg-slate-200"></div>
                     <div className="w-3 h-3 rounded-full border border-[#FD3752]"></div>
-                    <h2 className="text-3xl font-semibold text-[#464646]">We Make A Difference</h2>
+                    <h2 className="text-3xl font-semibold text-[#464646]">We Empower Communities</h2>
                     <div className="w-3 h-3 rounded-full border border-[#FD3752]"></div>
                     <div className="w-16 h-px bg-slate-200"></div>
                 </div>
 
                 <div className="flex justify-center gap-10 md:gap-32 flex-wrap">
                     {[
-                        { val: "₹130 cr+", type: "Brokerage saved monthly" },
-                        { val: "30 Lakh+", type: "Customers Connected Monthly" },
-                        { val: "2 Lakh+", type: "New Listings Monthly" }
+                        { val: "5000+", type: "Societies Managed" },
+                        { val: "2 Lakh+", type: "Units Registered" },
+                        { val: "10 Cr+", type: "Maintenance Invoiced Monthly" }
                     ].map((stat, i) => (
                         <div key={i} className="flex flex-col items-center gap-6">
                             <div className="w-40 h-40 rounded-full border-[1.5px] border-[#FD3752] flex items-center justify-center text-[#FD3752] text-3xl font-bold">
@@ -175,9 +175,9 @@ const AppDownloadSection = () => {
 
 const ReviewsSection = () => {
     const reviews = [
-        { name: "Shubham Raibhandar", text: "The site really helps us to find good properties in the least amount of time without any headache of brokerage. I was so scared in Pune due to the issues of high deposit as well as brokerage." },
-        { name: "Lisa Das", text: "It was a nice experience with Guru Kripa. They helped me to find a new home to stay as it was difficult for me, as an individual to find a home with friendly roommates. I thankfully Guru Kripa helped me." },
-        { name: "Kishore", text: "Found Great Place to Stay via Guru Kripa provides a great place to stay with safe environment. If they show you something about property that is always same as it. No fake pictures." }
+        { name: "Dr. Arun Sharma", text: "Guru Kripa has transformed how we manage our society of 400 flats. Automated billing saved our committee 20 hours a week, and residents love the app's transparency." },
+        { name: "Meera Iyer", text: "The security feature is outstanding. I get real-time notifications on my phone whenever a visitor arrives at the gate. My community feels much safer now." },
+        { name: "Rajesh Khanna", text: "Finally an accounting system that works! No more manual entries or tracking lost cheques. The finance reports are audit-ready every single month." }
     ];
 
     return (

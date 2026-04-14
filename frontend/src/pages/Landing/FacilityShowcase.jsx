@@ -19,38 +19,37 @@ const FacilityCard = ({ title, icon: Icon, description, features }) => (
         </p>
         <ul className="space-y-3 pt-6 border-t border-slate-200 dark:border-white/5">
             {features.map((f, i) => (
-                <li key={i} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-slate-200 transition-colors">
-                    <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>
-                    {f}
-                </li>
-            ))}
-        </ul>
-    </motion.div>
-);
+import { Palmtree, Dumbbell, Coffee, Car } from 'lucide-react';
 
 const FacilityShowcase = () => {
-    return (
-        <section className="py-32 bg-slate-50 dark:bg-slate-950/50 px-6">
-            <div className="max-w-7xl mx-auto">
-                <div className="flex flex-col lg:flex-row justify-between items-end gap-12 mb-24">
-                    <div className="space-y-6 max-w-2xl">
-                        <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-xs">Infrastructure Control</span>
-                        <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1]">
-                            Manage Every <br /> <span className="text-slate-400">Amenity Dynamically.</span>
-                        </h2>
-                    </div>
-                    <p className="text-lg text-slate-500 font-bold max-w-sm">
-                        Optimizing asset lifespan and resident happiness through data-driven facility logistics.
-                    </p>
-                </div>
+    const facilities = [
+        {
+            name: "Clubhouse & Events",
+            desc: "Book society halls for birthdays or events directly from the app.",
+            icon: Coffee,
+            img: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2000&auto=format&fit=crop"
+        },
+        {
+            name: "Elite Gym & Spa",
+            desc: "Track gym occupancy and book personal training sessions.",
+            icon: Dumbbell,
+            img: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=2000&auto=format&fit=crop"
+        },
+        {
+            name: "Swimming Pool",
+            desc: "Check pool timings and status. Automated PH level monitoring logs.",
+            icon: Palmtree,
+            img: "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=2000&auto=format&fit=crop"
+        },
+        {
+            name: "Parking Management",
+            desc: "Smart parking stickers and real-time empty slot tracking for residents.",
+            icon: Car,
+            img: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?q=80&w=2000&auto=format&fit=crop"
+        }
+    ];
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <FacilityCard
-                        title="Clubhouse & Arenas"
-                        icon={Dribbble}
-                        description="From booking badminton courts to organizing grand gala events, manage your communal spaces with zero friction."
-                        features={["App-based Booking", "Member Access Control", "Event Management"]}
-                    />
+    return (
                     <FacilityCard
                         title="Fitness & Vitality"
                         icon={Flame}

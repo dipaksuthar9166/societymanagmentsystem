@@ -73,35 +73,17 @@ const FeatureBlock = ({ title, subtitle, description, points, icon: Icon, imageS
                             </div>
                             <div className="flex-1 bg-white/5 rounded-xl border border-white/5 p-4 flex flex-col justify-end gap-2">
                                 <div className="h-1.5 w-full bg-white/10 rounded-full animate-pulse"></div>
-                                <div className="h-1.5 w-3/4 bg-white/10 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {highlights.map((h, i) => (
+                        <div key={i} className="p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-[#FD3752] mb-8 group-hover:bg-[#FD3752] group-hover:text-white transition-colors">
+                                <h.icon size={28} strokeWidth={1.5} />
                             </div>
+                            <h3 className="text-2xl font-bold text-[#464646] mb-4">{h.title}</h3>
+                            <p className="text-[#464646] font-medium leading-relaxed">
+                                {h.desc}
+                            </p>
                         </div>
-                    </div>
-                </div>
-            </motion.div>
-        </div>
-    );
-};
-
-const CoreFeatures = () => {
-    return (
-        <section id="features" className="py-20 bg-white dark:bg-black overflow-hidden px-6">
-            <div className="max-w-7xl mx-auto">
-                <div className="text-center mb-20 space-y-4">
-                    <span className="text-orange-500 font-black uppercase tracking-[0.4em] text-xs">Standardized Excellence</span>
-                    <h2 className="text-4xl md:text-7xl font-black tracking-tight text-slate-900 dark:text-white">Guru Kripa <span className="text-slate-400">Suites.</span></h2>
-                </div>
-
-                <FeatureBlock
-                    title="Financial Intelligence & ERP"
-                    subtitle="Accounting & Billing"
-                    description="Automate M&R cycles with a GST-ready accounting engine. Eliminate physical cheque handling and provide 100% financial clarity to every resident."
-                    color="orange"
-                    icon={CreditCard}
-                    points={[
-                        "Auto-generated Invoices",
-                        "Online Payment Gateway",
-                        "GST-Ready Balance Sheets",
                         "Automated Fine Triggers",
                         "Real-time Spending Ledger",
                         "Digital Audit Trail"
