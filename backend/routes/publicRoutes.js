@@ -5,6 +5,24 @@ const Company = require('../models/Company');
 const Transaction = require('../models/Transaction');
 const Testimonial = require('../models/Testimonial');
 const Inquiry = require('../models/Inquiry');
+const FAQ = require('../models/FAQ');
+
+// @desc    Get FAQs
+router.get('/faqs', async (req, res) => {
+    try {
+        let faqs = await FAQ.find({ status: 'Active' }).sort({ order: 1 });
+        if (faqs.length === 0) {
+            faqs = [
+                { question: "Is our society's data secure?", answer: "Yes, we use bank-level AES-256 encryption. Your resident and financial data is highly secure." },
+                { question: "How long to get started?", answer: "A society can go live in less than 24 hours with our easy upload." },
+                { question: "Can residents pay via UPI?", answer: "Yes! Guru Kripa supports UPI, Credit Cards, and Net Banking." }
+            ];
+        }
+        res.json(faqs);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed' });
+    }
+});
 
 // @desc    Get Landing Page Stats
 // @route   GET /api/public/stats

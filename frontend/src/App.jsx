@@ -23,6 +23,7 @@ import OTPRegistration from './pages/OTPRegistration';
 import OTPLogin from './pages/OTPLogin';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SearchResults from './pages/Landing/SearchResults';
 import './App.css';
 
 // --- Page Transition Wrapper ---
@@ -107,6 +108,7 @@ const AnimatedRoutes = () => {
         <Route path="/contact" element={<PageWrapper><ContactUsPage /></PageWrapper>} />
         <Route path="/security" element={<PageWrapper><SecurityPage /></PageWrapper>} />
         <Route path="/demo" element={<PageWrapper><DemoPortal /></PageWrapper>} />
+        <Route path="/search" element={<PageWrapper><SearchResults /></PageWrapper>} />
         <Route path="/login" element={<PublicRoute><PageWrapper><Login /></PageWrapper></PublicRoute>} />
         <Route path="/login-otp" element={<PublicRoute><PageWrapper><OTPLogin /></PageWrapper></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><PageWrapper><OTPRegistration /></PageWrapper></PublicRoute>} />
